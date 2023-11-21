@@ -75,7 +75,17 @@ def get_movie_type(tmdb_id):
     try:
         movie_json = movie.details(tmdb_id)
         #print(movie_json)
-        chinese_name = movie_json.title
+        if "original_title" in movie_json:
+            chinese_name = movie_json.original_title
+        elif "original_name" in movie_json:
+            chinese_name = movie_json.original_name
+        elif "title" in movie_json:
+            chinese_name = movie_json.title
+        elif "name" in movie_json:
+            chinese_name = movie_json.name
+        else:
+            chinese_name = 'noname'
+
         genres = movie_json.genres
         item_type = "movie"
         child = 1 if any(genre['name'] in ['儿童','家庭'] for genre in genres) else 0
@@ -100,7 +110,16 @@ def get_tv_type(tmdb_id):
     tv = TV()
     try:
         tv_json = tv.details(tmdb_id)
-        chinese_name = tv_json.name
+        if "original_title" in tv_json:
+            chinese_name = tv_json.original_title
+        elif "original_name" in tv_json:
+            chinese_name = tv_json.original_name
+        elif "title" in tv_json:
+            chinese_name = tv_json.title
+        elif "name" in tv_json:
+            chinese_name = tv_json.name
+        else:
+            chinese_name = 'noname'
         genres = tv_json.genres
         item_type = "tv"
         #print(genres)
