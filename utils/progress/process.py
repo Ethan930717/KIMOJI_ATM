@@ -67,7 +67,6 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
          # 根据视频文件类型执行相应操作
         if action == "mediainfo":
             mediainfo_output_path = os.path.join(folder_path, "mediainfo.txt")
-            media_info = save_mediainfo_to_file(folder_path, mediainfo_output_path)
             resolution, video_format, audio_format ,largest_video_file, mediainfo_output = save_mediainfo_to_file(folder_path, mediainfo_output_path)
             if resolution and video_format and audio_format:
                 print(

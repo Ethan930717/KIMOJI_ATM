@@ -62,8 +62,6 @@ def save_mediainfo_to_file(folder_path, output_file_path):
             with open(output_file_path, 'w') as file:
                 file.write(mediainfo_output)
                 logger.info(f"MediaInfo 已保存至: {output_file_path}")
-                logger.info(f"解析到的分辨率为: {resolution}")
-                logger.info(f"视频格式: {video_format}, 音频格式: {audio_format}")
 
             return resolution, video_format, audio_format, largest_video_file, mediainfo_output
         except subprocess.CalledProcessError as e:
