@@ -112,11 +112,8 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
     video_file = os.path.basename(file_path)  # 获取视频文件名
     for i in range(1, pic_num + 1):
         screenshot_time = start_time + (i - 1) * intervals
-        logger.info(f"截图时间点 {i}: {screenshot_time}")  # 打印时间点以供检查
         screenshot_name = f"{i}.{image_format}"
         screenshot_path = os.path.join(file_dir,'log', screenshot_name)
-        print (f'screen_path{screenshot_path}')
-        print (f'output{file_dir}/log/{screenshot_name}')
         screenshot_keep = "00:00:01"
         command = [
             "docker", "run",
@@ -168,7 +165,7 @@ def compress_image(i,image_path, quality=85):
         logger.error(f"压缩图片时出错: {e}")
 
 # 示例调用
-directory = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'  # 视频文件路径
-file_dir = '/Users/Ethan/PycharmProjects/KIMOJI-ATM'
-pic_num = 3  # 截图数量
-screenshot_from_bd(directory,pic_num ,file_dir)
+#directory = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'  # 视频文件路径
+#file_dir = '/Users/Ethan/PycharmProjects/KIMOJI-ATM'
+#pic_num = 3  # 截图数量
+#screenshot_from_bd(directory,pic_num ,file_dir)

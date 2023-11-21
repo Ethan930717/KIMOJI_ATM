@@ -39,11 +39,12 @@ def parse_resolution(mediainfo_output):
     return "other"
 
 def parse_video_audio_format(mediainfo_output):
-    video_format_match = re.search(r'Video\n(?:.*\n)*?Format\s+:\s+(\w+)', mediainfo_output)
-    audio_format_match = re.search(r'Audio\n(?:.*\n)*?Format\s+:\s+(\w+)', mediainfo_output)
+    # 使用正则表达式匹配格式字符串，包括冒号之后的所有字符直到换行符
+    video_format_match = re.search(r'Video\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)
+    audio_format_match = re.search(r'Audio\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)
 
-    video_format = video_format_match.group(1) if video_format_match else 'Unknown'
-    audio_format = audio_format_match.group(1) if audio_format_match else 'Unknown'
+    video_format = video_format_match.group(1).strip() if video_format_match else 'Unknown'
+    audio_format = audio_format_match.group(1).strip() if audio_format_match else 'Unknown'
 
     return video_format, audio_format
 

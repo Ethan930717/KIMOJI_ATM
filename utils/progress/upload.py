@@ -179,6 +179,8 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                     'isPreviewEnabled': '0',
                 }
                 response = scraper.post(upload_url, files=files, data=form_data)
+                log_request_response_details(response, log_file_path)
+
                 if response.ok:
                     if response.history:
                         torrent_page_url = response.url
@@ -225,6 +227,21 @@ def download_torrent_file_with_scraper(scraper, torrent_url, save_path):
         logger.error(f"下载种子文件失败: {e}")
         return False
 
+def log_request_response_details(response, log_file_path):
+    with open(log_file_path, 'a', encoding='utf-8') as log_file:
+        log_file.write("请求URL:\n")
+        log_file.write(response.request.url + "\n\n")
+        log_file.write("请求头:\n")
+        for header, value in response.request.headers.items():
+            log_file.write(f"{header}: {value}\n")
+        log_file.write("\n请求体:\n")
+        log_file.write(str(response.request.body) + "\n\n")
+        log_file.write("响应头:\n")
+        for header, value in response.headers.items():
+            log_file.write(f"{header}: {value}\n")
+        log_file.write("\n响应体:\n")
+        log_file.write(response.text + "\n")
+        log_file.write("==================================================\n\n")
 
 
 
