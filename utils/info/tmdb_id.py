@@ -105,10 +105,10 @@ def get_movie_type(tmdb_id):
         item_type = determine_media_type(genres)
         child = determine_child_flag(genres)
         print (f"movie, {item_type}, {chinese_name}, {child}, {keywords}")
-        return item_type,"movie", chinese_name, child, keywords
+        return "movie", item_type,chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电影详情时发生错误: {e}")
-        return "movie", "other", None, None, None
+        return "movie", "movie", None, None, None
 
 def get_tv_type(tmdb_id):
     setup_tmdb()
@@ -121,8 +121,8 @@ def get_tv_type(tmdb_id):
         item_type = determine_media_type(genres)
         child = determine_child_flag(genres)
 
-        return item_type, "tv", chinese_name, child, keywords
+        return "tv", item_type, chinese_name, child, keywords
 
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
-        return "tv", "other", None, None, None
+        return "tv", "tv", None, None, None
