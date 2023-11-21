@@ -1,4 +1,4 @@
-basic:
+basic: 
   file_dir: '/media' #存放资源的主目录路径
   torrent_dir: '/torrent' #存放种子文件的路径
   username: 'user' #用户名
