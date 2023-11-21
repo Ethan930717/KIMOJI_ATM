@@ -113,6 +113,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     logger.info('已成功选择分辨率为' + resolution)
 
     if season:
+        season = int(season)
         logger.info(f'发布资源为第{season}季')
     else:
         season = "1"
