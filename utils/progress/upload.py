@@ -114,10 +114,14 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
 
     if season:
         logger.info(f'发布资源为第{season}季')
+    else:
+        season = "1"
     if child == 1:
         logger.info('识别到当前资源为儿童资源，已勾选PG-12标签')
     if keywords:
         logger.info(f'拉取关键词:\n{keywords}')
+    else:
+        keywords = ""
     if maker and not (personal == 1  or internal == 1):
         pic_urls = f'[img]https://mirror.kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
 
@@ -235,18 +239,27 @@ def log_request_response_details(response, log_directory):
     with open(log_file_path, 'a', encoding='utf-8') as log_file:
         log_file.write("请求URL:\n")
         log_file.write(response.request.url + "\n\n")
+
+        log_file.write("请求方法:\n")
+        log_file.write(response.request.method + "\n\n")
+
         log_file.write("请求头:\n")
         for header, value in response.request.headers.items():
             log_file.write(f"{header}: {value}\n")
-        log_file.write("\n请求体:\n")
-        log_file.write(str(response.request.body) + "\n\n")
+        log_file.write("\n")
+
+        # log_file.write("请求体:\n")
+        # log_file.write(str(response.request.body) + "\n\n")
+
         log_file.write("响应头:\n")
         for header, value in response.headers.items():
             log_file.write(f"{header}: {value}\n")
-        log_file.write("\n响应体:\n")
-        log_file.write(response.text + "\n")
-        log_file.write("==================================================\n\n")
+        log_file.write("\n")
 
+        log_file.write("响应体:\n")
+        log_file.write(response.text + "\n")
+
+        log_file.write("==================================================\n\n")
 
 
 
