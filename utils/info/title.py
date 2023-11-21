@@ -4,9 +4,9 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-def extract_title_info(media_name):
+def extract_title_info(url_name):
     # 提取路径中的最后一个文件夹名称
-    media_name = media_name.split('/')[-1]
+    media_name = url_name.split('/')[-1]
     logger.info(f'正在解析目录名称{media_name}')
     # 提取中文片名（从开始到第一个中文字符之后的第一个点）
     match_chinese = re.search(r'([\u4e00-\u9fff]+).*?\.', media_name)
@@ -37,7 +37,7 @@ def extract_title_info(media_name):
             chinese_title = english_title
             english_title = None
     # 提取媒介
-    match_media = re.search(r'(WEB-DL|BLU-RAY|UHD|HDTV|ENCODE|REMUX)', media_name.upper(), re.IGNORECASE)
+    match_media = re.search(r'(WEB-DL|UHD|BLURAY|BLU-RAY|HDTV|ENCODE|REMUX)', media_name.upper(), re.IGNORECASE)
     media = match_media.group(1) if match_media else None
 
     # 提取制作组
@@ -50,7 +50,7 @@ def extract_title_info(media_name):
     else:
         maker = None
     codec,audiocodec = extract_codec(media_name)
-    return analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, media_name,media_name)
+    return analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, media_name,url_name)
 
 def extract_codec(media_name):
     #分析视频编码
@@ -122,9 +122,9 @@ def extract_codec(media_name):
         audiocodec = None
     return codec,audiocodec
 
-def analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, file_name , media_name):
+def analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, file_name , url_name):
     missing_elements = []
-    upload_title = re.sub(r'\.(?!(5\.1|7\.1\b))', ' ', media_name)
+    upload_title = re.sub(r'\.(?!(5\.1|7\.1\b))', ' ', file_name)
     if not english_title:
         missing_elements.append("英文标题")
     if not year:
@@ -142,16 +142,16 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
                      '\n阿K将跳过当前文件并在文件中创建一个kimoji_error文件以避免再次读取，该文件不会影响您在其他网站的做种。'
                      '\n如需阿K重新读取该文件夹，您可以手动删除该kimoji_pass文件。'
                      '\n如果您认为阿K识别文件名有误，请在KIMOJI提交工单并写明当前文件夹名称。')
-        file_path = os.path.join(file_name, "kimoji_pass")
+        file_path = os.path.join(url_name, "kimoji_pass")
         open(file_path, 'w').close()
         logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
         sys.exit()
     if not maker:
-        maker_input = input(f'{media_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+        maker_input = input(f'{file_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
         maker = maker_input if maker_input.strip() != '' else None
     if not chinese_title:
-        combined_title = f"{chinese_title} {media_name}"
-        upload_title = re.sub(r'\.(?!(5\.1|7\.1\b))', ' ', combined_title)
+        combined_title = f"{chinese_title} {file_name}"
+        upload_title = re.sub(r'\.(?!(5\.1|7\.1)(\b|\s))', ' ', combined_title)
 
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
 
