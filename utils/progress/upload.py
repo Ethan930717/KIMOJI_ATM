@@ -227,7 +227,10 @@ def download_torrent_file_with_scraper(scraper, torrent_url, save_path):
         logger.error(f"下载种子文件失败: {e}")
         return False
 
-def log_request_response_details(response, log_file_path):
+def log_request_response_details(response, log_directory):
+    log_file_name = "requests_log.txt"  # 定义日志文件名
+    log_file_path = os.path.join(log_directory, log_file_name)  # 创建完整的文件路径
+
     with open(log_file_path, 'a', encoding='utf-8') as log_file:
         log_file.write("请求URL:\n")
         log_file.write(response.request.url + "\n\n")
@@ -242,7 +245,6 @@ def log_request_response_details(response, log_file_path):
         log_file.write("\n响应体:\n")
         log_file.write(response.text + "\n")
         log_file.write("==================================================\n\n")
-
 
 
 
