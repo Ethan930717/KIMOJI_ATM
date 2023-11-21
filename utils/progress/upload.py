@@ -182,6 +182,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                     'post': 'true',
                     'isPreviewEnabled': '0',
                 }
+                log_prepared_request(upload_url, form_data, files, log_file_path)
                 response = scraper.post(upload_url, files=files, data=form_data)
                 log_request_response_details(response, log_file_path)
 
@@ -262,6 +263,22 @@ def log_request_response_details(response, log_directory):
         log_file.write("==================================================\n\n")
 
 
+def log_prepared_request(url, form_data, files, log_directory):
+    log_file_name = "post_data.txt"  # 定义日志文件名
+    parent_directory = os.path.dirname(log_directory)  # 获取上一级目录
+    log_file_path = os.path.join(parent_directory, log_file_name)  # 创建完整的文件路径
+    with open(log_file_path, 'a', encoding='utf-8') as log_file:
+        log_file.write("准备发送的请求URL:\n")
+        log_file.write(url + "\n\n")
 
+        log_file.write("准备发送的表单数据:\n")
+        for key, value in form_data.items():
+            log_file.write(f"{key}: {value}\n")
+        log_file.write("\n")
+
+        log_file.write("准备发送的文件:\n")
+        for file_key, file_value in files.items():
+            log_file.write(f"{file_key}: {file_value[0]}\n")  # 只记录文件名
+        log_file.write("==================================================\n\n")
 
 
