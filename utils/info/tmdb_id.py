@@ -70,74 +70,59 @@ def search_tmdb(english_title):
     return None, None, None, None, None
 
 #判定类别
+def extract_name(json_data):
+    for key in ["original_title", "original_name", "title", "name"]:
+        if key in json_data:
+            return json_data[key]
+    return 'noname'
+
+def extract_genres(json_data):
+    return json_data.get('genres', [])
+
+def extract_keywords(json_data):
+    if "keywords" in json_data and "keywords" in json_data["keywords"]:
+        return [keyword['name'] for keyword in json_data["keywords"]["keywords"]]
+    return []
+
+def determine_media_type(genres):
+    if any(genre['name'] in ['动漫', '动画', 'anim'] for genre in genres):
+        return "anime"
+    elif any(genre['name'] in ['纪录', 'documentary', 'Documentary'] for genre in genres):
+        return "doc"
+    else:
+        return "other"
+
+def determine_child_flag(genres):
+    return 1 if any(genre['name'] in ['儿童', '家庭'] for genre in genres) else 0
 def get_movie_type(tmdb_id):
+    setup_tmdb()
     movie = Movie()
     try:
         movie_json = movie.details(tmdb_id)
-        #print(movie_json)
-        if "original_title" in movie_json:
-            chinese_name = movie_json.original_title
-        elif "original_name" in movie_json:
-            chinese_name = movie_json.original_name
-        elif "title" in movie_json:
-            chinese_name = movie_json.title
-        elif "name" in movie_json:
-            chinese_name = movie_json.name
-        else:
-            chinese_name = 'noname'
-
-        genres = movie_json.genres
-        item_type = "movie"
-        child = 1 if any(genre['name'] in ['儿童','家庭'] for genre in genres) else 0
-        # 获取电影关键词
-        if "keywords" in movie_json:
-            keywords_json = movie_json.keywords.keywords
-            keywords = [keyword['name'] for keyword in keywords_json['results']]
-        else:
-            keywords = ""
-
-        if any(genre['name'] in ['动漫', '动画', 'anim'] for genre in genres):
-            return item_type,"anime-movie", chinese_name, child, keywords
-        elif any(genre['name'] in ['纪录', 'documentary','Documentary'] for genre in genres):
-            return item_type,"doc", chinese_name, child, keywords
-        else:
-            return item_type,"movie", chinese_name, child, keywords
+        chinese_name = extract_name(movie_json)
+        genres = extract_genres(movie_json)
+        keywords = extract_keywords(movie_json)
+        item_type = determine_media_type(genres)
+        child = determine_child_flag(genres)
+        print (f"movie, {item_type}, {chinese_name}, {child}, {keywords}")
+        return item_type,"movie", chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电影详情时发生错误: {e}")
-        return item_type,"other", None, None, None
+        return "movie", "other", None, None, None
 
 def get_tv_type(tmdb_id):
+    setup_tmdb()
     tv = TV()
     try:
         tv_json = tv.details(tmdb_id)
-        if "original_title" in tv_json:
-            chinese_name = tv_json.original_title
-        elif "original_name" in tv_json:
-            chinese_name = tv_json.original_name
-        elif "title" in tv_json:
-            chinese_name = tv_json.title
-        elif "name" in tv_json:
-            chinese_name = tv_json.name
-        else:
-            chinese_name = 'noname'
-        genres = tv_json.genres
-        item_type = "tv"
-        #print(genres)
-        child = 1 if any(genre['name'] in ['儿童','家庭'] for genre in genres) else 0
-        # 获取电视剧关键词
-        if "keywords" in tv_json:
-            keywords_json = tv_json.keywords.keywords
-            keywords = [keyword['name'] for keyword in keywords_json['results']]
-        else:
-            keywords = ""
-        if any(genre['name'] in ['动漫', '动画', 'anim'] for genre in genres):
-            return item_type,"anime-tv", chinese_name, child, keywords
-        elif any(genre['name'] in ['reality', 'game-show', 'talk-show', '综艺', '真人秀'] for genre in genres):
-            return item_type,"show", chinese_name, child, keywords
-        elif any(genre['name'] in ['纪录', 'documentary', 'Documentary'] for genre in genres):
-            return item_type,"doc", chinese_name, child, keywords
-        else:
-            return item_type,"series", chinese_name, child, keywords
+        chinese_name = extract_name(tv_json)
+        genres = extract_genres(tv_json)
+        keywords = extract_keywords(tv_json)
+        item_type = determine_media_type(genres)
+        child = determine_child_flag(genres)
+
+        return item_type, "tv", chinese_name, child, keywords
+
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
-        return item_type,"other", None, None, None
+        return "tv", "other", None, None, None
