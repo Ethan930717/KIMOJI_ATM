@@ -4,13 +4,16 @@ import logging
 import os
 import re
 import sys
+import csv
+import datetime
 from utils.progress.qbittorrent import add_torrent_to_qbittorrent
-from utils.progress.process import log_to_csv
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
 os.makedirs(log_dir, exist_ok=True)
 log_file_path = os.path.join(log_dir, 'kimoji.html')
+log_csv_path = os.path.join(log_dir, 'record.csv')
+
 logger = logging.getLogger(__name__)
 
 # 获取登录页面的XSRF Token
@@ -196,7 +199,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             logger.info(f"种子下载URL: {torrent_download_url},正在尝试下载种子并添加到下载器")
                             temp_torrent_path = os.path.join('log', 'temp.torrent')
                             file_path = os.path.join(file_name, "kimoji_exclude")
-                            log_to_csv(file_name, "失败", log_file_path, torrent_page_url)
+                            log_to_csv(file_name, "失败", log_csv_path, torrent_page_url)
                             open(file_path, 'w').close()
                             if download_torrent_file_with_scraper(scraper, torrent_download_url, temp_torrent_path):
                                 add_torrent_to_qbittorrent(temp_torrent_path, project_root_dir)
@@ -283,4 +286,9 @@ def log_prepared_request(url, form_data, files, log_directory):
             log_file.write(f"{file_key}: {file_value[0]}\n")  # 只记录文件名
         log_file.write("==================================================\n\n")
 
+def log_to_csv(url_name, status, log_file_path,torrent_url):
+    with open(log_file_path, 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        writer.writerow([url_name, status, current_time, torrent_url])
 

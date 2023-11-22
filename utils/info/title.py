@@ -2,7 +2,8 @@ import re
 import os
 import sys
 import logging
-from utils.progress.process import log_to_csv
+import csv
+import datetime
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -167,6 +168,11 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
 
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
 
+def log_to_csv(url_name, status, log_file_path,torrent_url):
+    with open(log_file_path, 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        writer.writerow([url_name, status, current_time, torrent_url])
 
 #file_dir = "/Users/Ethan/Destop/media"
 #media_name = "IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue"
