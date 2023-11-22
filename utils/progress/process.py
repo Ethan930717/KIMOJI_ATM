@@ -40,7 +40,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
         tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords = handle_media(chinese_title, english_title, year, season, media, maker)
         if not media_type:
             logger.error('无法确认视频类型，已记录跳过本目录，请重新召唤阿K')
-            file_path = os.path.join(file_name, "kimoji_pass")
+            file_path = os.path.join(folder_path, "kimoji_pass")
             open(file_path, 'w').close()
             logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
             log_to_csv(folder_path, "失败", log_file_path , "")
