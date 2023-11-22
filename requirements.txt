@@ -4,7 +4,6 @@ android-backup==0.2.0
 appdirs==1.4.4
 async-timeout==4.0.2
 attrs==22.2.0
-bar==0.2.1
 beautifulsoup4==4.12.2
 bidict==0.22.1
 blinker==1.6.3
@@ -57,7 +56,6 @@ requests-toolbelt==1.0.0
 simple-websocket==1.0.0
 six==1.16.0
 soupsieve==2.5
-tmdbsimple==2.9.1
 torf==4.2.2
 tqdm==4.66.1
 typing==3.7.4.3
@@ -72,3 +70,4 @@ xlutils==2.0.0
 xlwt==1.3.0
 zeroconf==0.47.1
 zope.interface==6.1
+tmdbv3api==1.9.0

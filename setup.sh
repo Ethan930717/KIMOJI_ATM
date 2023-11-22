@@ -85,7 +85,7 @@ install_dependencies() {
 install_pip_dependencies() {
     if [ -f requirements.txt ]; then
         echo "安装 pip 依赖..."
-        pip3 install -r requirements.txt
+        pip install -r requirements.txt
     else
         echo "未找到 requirements.txt"
     fi
@@ -127,7 +127,7 @@ configure() {
     read_config "请输入qb保存路径" "save_path" "例：/download" || return
 
     # 重命名配置文件
-    mv config_example.yaml config.yaml
+    sudo mv config_example.yaml config.yaml
 }
 
 # 主函数
