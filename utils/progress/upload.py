@@ -5,6 +5,7 @@ import os
 import re
 import sys
 from utils.progress.qbittorrent import add_torrent_to_qbittorrent
+from utils.progress.process import log_to_csv
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
@@ -195,6 +196,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             logger.info(f"种子下载URL: {torrent_download_url},正在尝试下载种子并添加到下载器")
                             temp_torrent_path = os.path.join('log', 'temp.torrent')
                             file_path = os.path.join(file_name, "kimoji_exclude")
+                            log_to_csv(file_name, "失败", log_file_path, torrent_page_url)
                             open(file_path, 'w').close()
                             if download_torrent_file_with_scraper(scraper, torrent_download_url, temp_torrent_path):
                                 add_torrent_to_qbittorrent(temp_torrent_path, project_root_dir)

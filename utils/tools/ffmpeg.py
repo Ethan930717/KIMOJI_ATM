@@ -112,7 +112,7 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
     for i in range(1, pic_num + 1):
         screenshot_time = start_time + (i - 1) * intervals
         screenshot_name = f"{i}.{image_format}"
-        screenshot_path = os.path.join(file_dir,'log', screenshot_name)
+        screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
         command = [
             "docker", "run",

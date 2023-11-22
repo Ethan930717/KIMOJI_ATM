@@ -12,8 +12,13 @@ from utils.progress.upload import kimoji_upload
 import os
 import sys
 import logging
+import csv
+import datetime
 logger = logging.getLogger(__name__)
-
+current_file_path = os.path.abspath(__file__)
+project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
+log_dir = os.path.join(project_root_dir, 'log')
+log_file_path = os.path.join(log_dir, 'record.csv')
 #寻找同名种子
 def check_existing_torrent(torrent_dir, file_name):
     torrent_name = file_name + ".torrent"
@@ -35,6 +40,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
             file_path = os.path.join(file_name, "kimoji_pass")
             open(file_path, 'w').close()
             logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+            log_to_csv(folder_path, "失败", log_file_path , "")
             sys.exit()
         imdb_id = "0" if not imdb_id else imdb_id
         mal_id = "0" if not mal_id else mal_id
@@ -78,6 +84,7 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
                 file_path = os.path.join(file_name, "kimoji_pass")
                 open(file_path, 'w').close()
                 logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+                log_to_csv(folder_path, "失败", log_file_path, "")
                 sys.exit()
         elif action == "bdinfo":
             logger.info("检测到原盘，开始使用bdinfo解析")
@@ -94,6 +101,7 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
                 file_path = os.path.join(file_name, "kimoji_pass")
                 open(file_path, 'w').close()
                 logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+                log_to_csv(folder_path, "失败", log_file_path ,"")
                 sys.exit()
         else:
             logger.error("无法找到可解析的影片")
@@ -118,7 +126,11 @@ def handle_media(chinese_title, english_title, year, season, media, maker):
     print(f'最终结果:\nmedia_type:{media_type}\ntmdb:{tmdb_id}\nimdb:{imdb_id}\nmal:{mal_id}\ntvdb:{tvdb_id}')
     return tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords
 
-
+def log_to_csv(url_name, status, log_file_path,torrent_url):
+    with open(log_file_path, 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        writer.writerow([url_name, status, current_time, torrent_url])
 
 #def handle_found_media(tmdb_id, item_type, media_type, chinese_title, english_title, child, year, season, maker):
     #imdb_id, mal_id = get_additional_ids(tmdb_id, item_type, english_title)

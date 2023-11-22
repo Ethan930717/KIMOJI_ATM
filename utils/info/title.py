@@ -2,7 +2,12 @@ import re
 import os
 import sys
 import logging
-
+from utils.progress.process import log_to_csv
+logger = logging.getLogger(__name__)
+current_file_path = os.path.abspath(__file__)
+project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
+log_dir = os.path.join(project_root_dir, 'log')
+log_file_path = os.path.join(log_dir, 'record.csv')
 logger = logging.getLogger(__name__)
 def extract_title_info(url_name):
     # 提取路径中的最后一个文件夹名称
@@ -145,10 +150,12 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
                      '\n阿K将跳过当前文件并在文件中创建一个kimoji_error文件以避免再次读取，该文件不会影响您在其他网站的做种。'
                      '\n如需阿K重新读取该文件夹，您可以手动删除该kimoji_pass文件。'
                      '\n如果您认为阿K识别文件名有误，请在KIMOJI提交工单并写明当前文件夹名称。')
-        #file_path = os.path.join(url_name, "kimoji_pass")
-        #open(file_path, 'w').close()
-        #logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
-        #sys.exit()
+        file_path = os.path.join(url_name, "kimoji_pass")
+        open(file_path, 'w').close()
+        logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+        log_to_csv(url_name, "失败", log_file_path , '')
+
+        sys.exit()
     if not maker:
         maker_input = input(f'{file_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
         maker = maker_input if maker_input.strip() != '' else None
@@ -159,6 +166,7 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
         upload_title = re.sub(r'(?<=7) 1', '.1', upload_title)
 
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
+
 
 #file_dir = "/Users/Ethan/Destop/media"
 #media_name = "IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue"
