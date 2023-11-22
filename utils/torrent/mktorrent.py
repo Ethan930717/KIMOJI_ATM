@@ -1,11 +1,11 @@
+# utils/torrent/mktorrent.py
 import subprocess
 import os
 import logging
-from tqdm import tqdm
-
+import sys
 logger = logging.getLogger(__name__)
 
-def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
+def create_torrent(directory, torrent_name, torrent_dir,comment="KIMOJI PARK",tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
     torrent_path = os.path.join(torrent_dir, f"{torrent_name}.torrent")
     print(f'torrent_path:{torrent_path}')
@@ -24,30 +24,15 @@ def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", 
     max_attempts = 3
     while attempt_count < max_attempts:
         try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            # 使用 tqdm 显示进度条
-            with tqdm() as progress:
-                for line in process.stdout:
-                    progress.update()
-                    print(line, end='')
-            process.wait()
-            if process.returncode == 0:
-                logger.info(f"种子文件已创建: {torrent_path}")
-                return torrent_path
-            else:
-                raise subprocess.CalledProcessError(process.returncode, command)
+            subprocess.run(command, check=True)
+            logger.info(f"种子文件已创建: {torrent_path}")
+            return torrent_path
         except subprocess.CalledProcessError as e:
             logger.error(f"创建种子文件时出错: {e}")
             attempt_count += 1
             if attempt_count < max_attempts:
                 logger.warning(f"重试制作种子（第 {attempt_count} 次）")
             else:
-                logger.warning("达到最大重试次数，停止尝试，阿K走咯！")
-                break
+                logger.warning("达到最大重试次数，停止尝试，阿K走咯")
+                sys.exit()
     return None
-
-
-#directory="/Users/Ethan/Desktop/media/超级飞侠.Super.Wings.S10.2021.4K.WEB-DL.HEVC.AAC-CHDWEB"
-#torrent_name = "test111"
-#torrent_dir = '/Users/Ethan/Desktop/media/torrent'
-#create_torrent(directory, torrent_name, torrent_dir)
