@@ -22,7 +22,7 @@ def find_largest_video_file(folder_path):
 
 def parse_resolution(mediainfo_output):
     if "080 pixels" in mediainfo_output or "920 pixels" in mediainfo_output:
-        if "Progressive" in mediainfo_output:
+        if "Constant" in mediainfo_output:
             return "1080p"
         else:
             return "1080i"
