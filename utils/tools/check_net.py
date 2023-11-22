@@ -30,7 +30,7 @@ def check():
         "https://www.themoviedb.org",
         "https://www.imdb.com",
         "https://myanimelist.net",
-        "https://www.thetvdb.com",
+        "https://thetvdb.com",
         "https://kimoji.club"
     ]
     if not check_network(urls_to_check):
