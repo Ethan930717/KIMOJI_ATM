@@ -22,7 +22,7 @@ def find_largest_video_file(folder_path):
 
 def parse_resolution(mediainfo_output):
     match_resolution = re.search(r'Height\s*:\s*(\d{1,4})(?:\s*(\d{1,4}))?\s*pixels', mediainfo_output, re.IGNORECASE)
-    match_width = re.search(r'Width\s*:\s*(\d{1,4})(?:\s*(\d{1,4}))?\s*pixels', mediainfo_output, re.IGNORECASE)
+    match_width = re.search(r'Width\s*:\s*([\d\s]+)pixels', mediainfo_output, re.IGNORECASE)
     match_scan_type = re.search(r'Scan type\s+:\s+(\w+)', mediainfo_output)
     scan_type = match_scan_type.group(1) if match_scan_type else 'Progressive'
     if match_resolution:
@@ -38,7 +38,7 @@ def parse_resolution(mediainfo_output):
         elif height >= 4320:
             return "4320p"
     elif match_width:
-        width = int(match_width.group(1))
+        width = int(match_width.group(1).replace(" ", ""))
         if width < 1280:
             return "SD"
         elif width == 1280:

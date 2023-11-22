@@ -115,11 +115,10 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     if season:
         season = int(season)
         logger.info(f'发布资源为第{season}季')
-    else:
-        season = "1"
     if child == 1:
         logger.info('识别到当前资源为儿童资源，已勾选PG-12标签')
     if keywords:
+        keywords= ', '.join(keywords)
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
