@@ -152,7 +152,7 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
     if not chinese_title:
         combined_title = f"{chinese_title} {file_name}"
         upload_title = re.sub(r'\.(?!(5\.1|7\.1)(\b|\s))', ' ', combined_title)
-
+    logger.info(f'文件名分析结果\n中文标题:{chinese_title}\n英文标题:{english_title}\n年份:{year}\n季数:{season}\n媒介:{media}\n视频编码:{codec}\n音频编码:{audiocodec}\n制作组:{maker}\n组合上传文件名:{upload_title}')
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
 
 #file_dir = "/Users/Ethan/Destop/media"

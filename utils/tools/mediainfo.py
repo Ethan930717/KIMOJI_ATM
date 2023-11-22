@@ -25,27 +25,28 @@ def parse_resolution(mediainfo_output):
     match_scan_type = re.search(r'Scan type\s+:\s+(\w+)', mediainfo_output)
     scan_type = match_scan_type.group(1) if match_scan_type else 'Progressive'
     if match_resolution:
-        height_str = match_resolution.group(1)
-        height = int(height_str)
-        if height < 720:
-            return "SD"
-        elif height == 720:
+        height = int(match_resolution.group(1))
+        if 600 <= height < 900:
             return "720p"
-        elif height == 1080:
-            return "1080i" if 'Interlaced' in scan_type else "1080p"
-        elif height >= 2160:
+        elif 900 <= height < 1520:
+            return "1080p" if 'Interlaced' not in scan_type else "1080i"
+        elif 1520 <= height < 3240:
             return "2160p"
-        elif height >= 4320:
+        elif 3240 <= height < 4320:
             return "4320p"
     return "other"
 
 def parse_video_audio_format(mediainfo_output):
-    # 使用正则表达式匹配格式字符串，包括冒号之后的所有字符直到换行符
     video_format_match = re.search(r'Video\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)
     audio_format_match = re.search(r'Audio\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)
+    commercial_name_match = re.search(r'Commercial name\s+:\s+([^\n]+)', mediainfo_output)
 
     video_format = video_format_match.group(1).strip() if video_format_match else 'Unknown'
     audio_format = audio_format_match.group(1).strip() if audio_format_match else 'Unknown'
+    commercial_name = commercial_name_match.group(1).strip() if commercial_name_match else ''
+
+    if commercial_name:
+        audio_format = f"{audio_format} ({commercial_name})"
 
     return video_format, audio_format
 

@@ -79,33 +79,44 @@ def extract_name(json_data):
 def extract_genres(json_data):
     return json_data.get('genres', [])
 
+
 def extract_keywords(json_data):
+    # 检查是否存在 'keywords' 键，并且其下还有一个 'keywords' 键
     if "keywords" in json_data and "keywords" in json_data["keywords"]:
         return [keyword['name'] for keyword in json_data["keywords"]["keywords"]]
+
+    # 检查是否直接存在 'keywords' 键，且为列表类型
+    elif "keywords" in json_data and isinstance(json_data["keywords"], list):
+        return [keyword['name'] for keyword in json_data["keywords"]]
+
+    # 如果上述条件均不符合，则返回空列表
     return []
 
-def determine_media_type(genres):
+
+def determine_media_type(genres, caller_type):
     if any(genre['name'] in ['动漫', '动画', 'anim'] for genre in genres):
         return "anime"
     elif any(genre['name'] in ['纪录', 'documentary', 'Documentary'] for genre in genres):
         return "doc"
     else:
-        return "other"
+        return "movie" if caller_type == "movie" else "series"
 
 def determine_child_flag(genres):
     return 1 if any(genre['name'] in ['儿童', '家庭'] for genre in genres) else 0
 def get_movie_type(tmdb_id):
     setup_tmdb()
     movie = Movie()
+
     try:
         movie_json = movie.details(tmdb_id)
         chinese_name = extract_name(movie_json)
         genres = extract_genres(movie_json)
         keywords = extract_keywords(movie_json)
-        item_type = determine_media_type(genres)
+        item_type = determine_media_type(genres, "movie")
         child = determine_child_flag(genres)
-        print (f"movie, {item_type}, {chinese_name}, {child}, {keywords}")
-        return "movie", item_type,chinese_name, child, keywords
+        #print(movie_json)
+        #print(f'{item_type},{chinese_name},{child},{keywords}')
+        return item_type,"movie", chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电影详情时发生错误: {e}")
         return "movie", "movie", None, None, None
@@ -118,11 +129,11 @@ def get_tv_type(tmdb_id):
         chinese_name = extract_name(tv_json)
         genres = extract_genres(tv_json)
         keywords = extract_keywords(tv_json)
-        item_type = determine_media_type(genres)
+        item_type = determine_media_type(genres, "tv")
         child = determine_child_flag(genres)
 
-        return "tv", item_type, chinese_name, child, keywords
+        return item_type, "series", chinese_name, child, keywords
 
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
-        return "tv", "tv", None, None, None
+        return "tv", "seires", None, None, None

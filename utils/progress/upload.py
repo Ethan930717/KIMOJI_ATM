@@ -74,9 +74,9 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     elif media.upper() == 'UHD':
         medium_sel='1'
         logger.info('已成功选择媒介为UHD')
-    elif media.upper() == 'BLU-RAY':
+    elif media.upper() == 'BLU-RAY' or media.upper() == 'BLURAY' :
         medium_sel='2'
-        logger.info('已成功选择媒介为BLU-RAY')
+        logger.info('已成功选择媒介为BLURAY')
     elif media.upper() == 'ENCODE':
         medium_sel='5'
         logger.info('已成功选择媒介为ENCODE')
