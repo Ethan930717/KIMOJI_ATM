@@ -44,6 +44,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
         if not existing_torrent_path:
             logger.warning(f"未找到同名种子，开始制作种子")
             create_torrent(folder_path, file_name, torrent_dir)
+            print(folder_path, file_name, torrent_dir)
             torrent_path = os.path.join(torrent_dir, f"{file_name}.torrent")
             logger.info(f"种子文件已创建: {torrent_path}")
             return torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords, upload_title

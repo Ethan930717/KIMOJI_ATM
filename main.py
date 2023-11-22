@@ -23,7 +23,7 @@ def main():
         password = config['basic']['password']
         internal = config['basic']['internal']
         personal = config['basic']['personal']
-        print(f'torrent_dir:{torrent_dir}')
+        #print(f'torrent_dir:{torrent_dir}')
         torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id ,media_type, child, keywords, upload_title = create_torrent_if_needed(file_dir, torrent_dir)
 
         if torrent_path:

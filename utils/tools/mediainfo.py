@@ -21,36 +21,19 @@ def find_largest_video_file(folder_path):
     return largest_file
 
 def parse_resolution(mediainfo_output):
-    match_resolution = re.search(r'Height\s*:\s*(\d{1,4})(?:\s*(\d{1,4}))?\s*pixels', mediainfo_output, re.IGNORECASE)
-    match_width = re.search(r'Width\s*:\s*([\d\s]+)pixels', mediainfo_output, re.IGNORECASE)
-    match_scan_type = re.search(r'Scan type\s+:\s+(\w+)', mediainfo_output)
-    scan_type = match_scan_type.group(1) if match_scan_type else 'Progressive'
-    if match_resolution and match_width:
-        height = int(match_resolution.group(1))
-        width = int(match_width.group(1).replace(" ", ""))
-        if height < 720:
-            return "SD"
-        elif height == 720:
-            return "720p"
-        elif height == 1080:
-            return "1080i" if 'Interlaced' in scan_type else "1080p"
-        elif height >= 2160:
-            return "2160p"
-        elif height >= 4320:
-            return "4320p"
-        elif width < 1280:
-            return "SD"
-        elif width == 1280:
-            return "720p"
-        elif width == 1920:
+    if "080 pixels" in mediainfo_output or "920 pixels" in mediainfo_output:
+        if "Progressive" in mediainfo_output:
             return "1080p"
-        elif width >= 3840:
-            return "2160p"
-        elif width >= 7680:
-            return "4320p"
-        return "other"
-    return "other"
-
+        else:
+            return "1080i"
+    elif "720 pixels" in mediainfo_output or "280 pixels" in mediainfo_output:
+        return "720p"
+    elif "160 pixels" in mediainfo_output or "840 pixels" in mediainfo_output:
+        return "2160p"
+    elif "320 pixels" in mediainfo_output or "680 pixels" in mediainfo_output:
+        return "4320p"
+    else:
+        return "1080p"  # 默认分辨率
 def parse_video_audio_format(mediainfo_output):
     video_format_match = re.search(r'Video\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)
     audio_format_match = re.search(r'Audio\n(?:.*\n)*?Format\s+:\s+([^\n]+)', mediainfo_output)

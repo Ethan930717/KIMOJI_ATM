@@ -56,7 +56,7 @@ def search_tmdb(english_title):
                     else:
                         logger.info('正在搜索TMDb_tv元数据')
                         item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
-                    logger.info(f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 中文名: {chinese_name},child:{child}, 开始查找其他元数据ID")
+                    logger.info(f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
                     return item_type, tmdb_id, media_type, chinese_name, child, keywords
 
             logger.info("没有在TMDb中搜索到数据，尝试通过IMDb搜索")
