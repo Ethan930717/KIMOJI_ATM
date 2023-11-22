@@ -31,8 +31,11 @@ def check_existing_torrent(torrent_dir, file_name):
 def create_torrent_if_needed(file_dir, torrent_dir):
     result = find_media_folder(file_dir)
     if result:
+        #file_name是媒体目录路径
         file_name, action = result
+        file_name = file_name.split('/')[-1]
         folder_path = os.path.join(file_dir, file_name)
+
         chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title = extract_title_info(file_name)
         tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords = handle_media(chinese_title, english_title, year, season, media, maker)
         if not media_type:
@@ -50,7 +53,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
         if not existing_torrent_path:
             logger.warning(f"未找到同名种子，开始制作种子")
             create_torrent(folder_path, file_name, torrent_dir)
-            print(folder_path, file_name, torrent_dir)
+            #print(folder_path, file_name, torrent_dir)
             torrent_path = os.path.join(torrent_dir, f"{file_name}.torrent")
             logger.info(f"种子文件已创建: {torrent_path}")
             return torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords, upload_title

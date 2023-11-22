@@ -1,0 +1,14 @@
+basic: 
+  file_dir: '/media'
+  torrent_dir: '/torrent'
+  username: 'admin'
+  password: 'password'
+  pic_num: 3 #选择发种时的截图数量
+  internal: 0 #KIMOJI官组专用，请保持0
+  personal: 0 #是否为个人作品，即自己抓流、压制、剪辑的作品，不属于任何工作组
+qbittorrent:
+  url: '192.168.5.1'
+  port: '8080'
+  username: 'admin'
+  password: 'adminadmin'
+  save_path: '/download'

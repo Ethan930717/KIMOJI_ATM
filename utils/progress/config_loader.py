@@ -58,6 +58,7 @@ def find_media_folder(file_dir):
 # 示例调用
 #file_dir = "/Users/Ethan/Desktop/media"
 #result = find_media_folder(file_dir)
+#print(result)
 #if result:
  #   folder, media_type = result
   #  print(f"Found media in folder: {folder}, Type: {media_type}")
