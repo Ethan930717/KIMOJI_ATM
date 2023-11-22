@@ -4,12 +4,11 @@ import requests
 import logging
 import glob
 from PIL import Image
-
 from utils.tools.mount import  mount_iso
-logging.basicConfig(level=logging.INFO)
-
 logger = logging.getLogger(__name__)
-
+current_file_path = os.path.abspath(__file__)
+project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
+log_dir = os.path.join(project_root_dir, 'log')
 def get_largest_m2ts_file(directory):
     m2ts_files = glob.glob(f"{directory}/**/*.m2ts", recursive=True)
     largest_file = max(m2ts_files, key=os.path.getsize, default=None)
@@ -118,7 +117,7 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
         command = [
             "docker", "run",
             "-v", f"{video_dir}:/workspace",
-            "-v", f"{file_dir}/log:/output",  # 挂载输出目录
+            "-v", f"{log_dir}:/output",  # 挂载输出目录
             "jrottenberg/ffmpeg:ubuntu",
             "-y", "-ss", str(screenshot_time),
             "-i", f"/workspace/{video_file}",

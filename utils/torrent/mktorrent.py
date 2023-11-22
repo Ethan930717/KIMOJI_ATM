@@ -7,12 +7,15 @@ logger = logging.getLogger(__name__)
 def create_torrent(directory, torrent_name, torrent_dir,comment="KIMOJI PARK",tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
     torrent_path = os.path.join(torrent_dir, f"{torrent_name}.torrent")
+    print(f'torrent_path:{torrent_path}')
     logger.info(f'开始制作种子，种子保存路径{torrent_path}')
     command = [
         "mktorrent",
         "-a", tracker,  # 添加 tracker
+        "-d", #不添加时间
         "-o", torrent_path,
         "-c", comment,
+        "-l", "22",  # 设置区块大小为4MB
         "-p",  # 设置为私有种子
         content_path
     ]

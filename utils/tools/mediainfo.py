@@ -25,8 +25,9 @@ def parse_resolution(mediainfo_output):
     match_width = re.search(r'Width\s*:\s*([\d\s]+)pixels', mediainfo_output, re.IGNORECASE)
     match_scan_type = re.search(r'Scan type\s+:\s+(\w+)', mediainfo_output)
     scan_type = match_scan_type.group(1) if match_scan_type else 'Progressive'
-    if match_resolution:
+    if match_resolution and match_width:
         height = int(match_resolution.group(1))
+        width = int(match_width.group(1).replace(" ", ""))
         if height < 720:
             return "SD"
         elif height == 720:
@@ -37,9 +38,7 @@ def parse_resolution(mediainfo_output):
             return "2160p"
         elif height >= 4320:
             return "4320p"
-    elif match_width:
-        width = int(match_width.group(1).replace(" ", ""))
-        if width < 1280:
+        elif width < 1280:
             return "SD"
         elif width == 1280:
             return "720p"
@@ -49,6 +48,7 @@ def parse_resolution(mediainfo_output):
             return "2160p"
         elif width >= 7680:
             return "4320p"
+        return "other"
     return "other"
 
 def parse_video_audio_format(mediainfo_output):
