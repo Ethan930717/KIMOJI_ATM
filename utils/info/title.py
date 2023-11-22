@@ -124,7 +124,10 @@ def extract_codec(media_name):
 
 def analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, file_name , url_name):
     missing_elements = []
-    upload_title = re.sub(r'\.(?!(5\.1|7\.1\b))', ' ', file_name)
+    file_name_no_dots = file_name.replace('.', ' ')
+    upload_title = re.sub(r'(?<=5) 1', '.1', file_name_no_dots)
+    upload_title = re.sub(r'(?<=7) 1', '.1', upload_title)
+
     if not english_title:
         missing_elements.append("英文标题")
     if not year:
@@ -142,17 +145,19 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
                      '\n阿K将跳过当前文件并在文件中创建一个kimoji_error文件以避免再次读取，该文件不会影响您在其他网站的做种。'
                      '\n如需阿K重新读取该文件夹，您可以手动删除该kimoji_pass文件。'
                      '\n如果您认为阿K识别文件名有误，请在KIMOJI提交工单并写明当前文件夹名称。')
-        file_path = os.path.join(url_name, "kimoji_pass")
-        open(file_path, 'w').close()
-        logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
-        sys.exit()
+        #file_path = os.path.join(url_name, "kimoji_pass")
+        #open(file_path, 'w').close()
+        #logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+        #sys.exit()
     if not maker:
         maker_input = input(f'{file_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
         maker = maker_input if maker_input.strip() != '' else None
     if not chinese_title:
         combined_title = f"{chinese_title} {file_name}"
-        upload_title = re.sub(r'\.(?!(5\.1|7\.1)(\b|\s))', ' ', combined_title)
-    logger.info(f'文件名分析结果\n中文标题:{chinese_title}\n英文标题:{english_title}\n年份:{year}\n季数:{season}\n媒介:{media}\n视频编码:{codec}\n音频编码:{audiocodec}\n制作组:{maker}\n组合上传文件名:{upload_title}')
+        file_name_no_dots = combined_title.replace('.', ' ')
+        upload_title = re.sub(r'(?<=5) 1', '.1', file_name_no_dots)
+        upload_title = re.sub(r'(?<=7) 1', '.1', upload_title)
+
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
 
 #file_dir = "/Users/Ethan/Destop/media"
