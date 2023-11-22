@@ -238,7 +238,7 @@ def log_request_response_details(response, log_directory):
     parent_directory = os.path.dirname(log_directory)  # 获取上一级目录
     log_file_path = os.path.join(parent_directory, log_file_name)  # 创建完整的文件路径
 
-    with open(log_file_path, 'a', encoding='utf-8') as log_file:
+    with open(log_file_path, 'w', encoding='utf-8') as log_file:
         log_file.write("请求URL:\n")
         log_file.write(response.request.url + "\n\n")
 
@@ -268,7 +268,7 @@ def log_prepared_request(url, form_data, files, log_directory):
     log_file_name = "post_data.txt"  # 定义日志文件名
     parent_directory = os.path.dirname(log_directory)  # 获取上一级目录
     log_file_path = os.path.join(parent_directory, log_file_name)  # 创建完整的文件路径
-    with open(log_file_path, 'a', encoding='utf-8') as log_file:
+    with open(log_file_path, 'w', encoding='utf-8') as log_file:
         log_file.write("准备发送的请求URL:\n")
         log_file.write(url + "\n\n")
 

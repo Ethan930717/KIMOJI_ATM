@@ -22,17 +22,32 @@ def find_largest_video_file(folder_path):
 
 def parse_resolution(mediainfo_output):
     match_resolution = re.search(r'Height\s*:\s*(\d{1,4})(?:\s*(\d{1,4}))?\s*pixels', mediainfo_output, re.IGNORECASE)
+    match_width = re.search(r'Width\s*:\s*(\d{1,4})(?:\s*(\d{1,4}))?\s*pixels', mediainfo_output, re.IGNORECASE)
     match_scan_type = re.search(r'Scan type\s+:\s+(\w+)', mediainfo_output)
     scan_type = match_scan_type.group(1) if match_scan_type else 'Progressive'
     if match_resolution:
         height = int(match_resolution.group(1))
-        if 600 <= height < 900:
+        if height < 720:
+            return "SD"
+        elif height == 720:
             return "720p"
-        elif 900 <= height < 1520:
-            return "1080p" if 'Interlaced' not in scan_type else "1080i"
-        elif 1520 <= height < 3240:
+        elif height == 1080:
+            return "1080i" if 'Interlaced' in scan_type else "1080p"
+        elif height >= 2160:
             return "2160p"
-        elif 3240 <= height < 4320:
+        elif height >= 4320:
+            return "4320p"
+    elif match_width:
+        width = int(match_width.group(1))
+        if width < 1280:
+            return "SD"
+        elif width == 1280:
+            return "720p"
+        elif width == 1920:
+            return "1080p"
+        elif width >= 3840:
+            return "2160p"
+        elif width >= 7680:
             return "4320p"
     return "other"
 
