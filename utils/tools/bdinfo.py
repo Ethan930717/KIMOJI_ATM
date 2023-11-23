@@ -5,6 +5,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def check_and_extract_bdinfo_from_file(folder_path):
+    bdinfo_file_path = os.path.join(folder_path, "BDINFO.bd.txt")
+    if os.path.exists(bdinfo_file_path):
+        with open(bdinfo_file_path, "r", encoding="utf-8") as file:
+            file_content = file.read()
+            return extract_first_quick_summary(file_content)
+    return None
 def extract_first_quick_summary(file_content):
     pattern = re.compile(r"QUICK SUMMARY:\s*\n(.*?)\*{20}", re.DOTALL)
     match = pattern.search(file_content)
@@ -35,7 +42,7 @@ def process_quick_summary(quick_summary):
 
 def generate_and_parse_bdinfo(folder_path):
     try:
-        docker_command = ["docker", "run", "--rm", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo", "/mnt/bd"]
+        docker_command = ["docker", "run", "--rm", "-v", f"{folder_path}:/mnt/bd", "iniwex/kimoji-bdinfo", "/mnt/bd"]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:
