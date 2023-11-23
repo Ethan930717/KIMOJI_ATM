@@ -39,7 +39,7 @@ def login(login_url, username, password, scraper):
     return response.ok, scraper
 
 def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id,media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output):
-
+    episode = "0"
     if media_type == 'anime-tv':
         select_type='4'
     elif media_type == 'anime-movie':
@@ -59,6 +59,8 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     elif media_type == 'movie':
         select_type='1'
         mal_id = "0"
+        season = ""
+        episode = ""
         logger.info(f'当前资源非动漫类型，已将mal id设为0')
     else:
         select_type='1'
@@ -169,7 +171,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                     'distributor_id':'',
                     'region_id':'',
                     'season_number': season,
-                    'episode_number':'0',
+                    'episode_number': episode,
                     'tmdb': tmdb_id,
                     'imdb': imdb_id,
                     'tvdb': tvdb_id,
