@@ -49,7 +49,7 @@ def extract_title_info(url_name):
     # 提取制作组
     if "-" in media_name:
         maker_candidate = media_name.split('-')[-1]
-        if re.match(r'^[A-Za-z0-9]+$', maker_candidate):
+        if re.match(r'^[A-Za-z0-9@_]+$', maker_candidate):
             maker = maker_candidate
         else:
             maker = None
