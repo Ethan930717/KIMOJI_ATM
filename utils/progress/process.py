@@ -121,6 +121,7 @@ def handle_media(chinese_title, english_title, year, season, media, maker):
     if tmdb_id != 0:
         imdb_id, mal_id = get_additional_ids(tmdb_id, item_type, english_title)
         tvdb_id = search_tvdb(english_title) if english_title else 0
+        media_type = item_type
     else:
         imdb_search_id, media_type = search_imdb(english_title, media)
         if imdb_search_id:

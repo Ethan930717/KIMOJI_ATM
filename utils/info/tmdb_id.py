@@ -116,6 +116,8 @@ def determine_media_type(genres, caller_type):
         return "anime"
     elif any(genre['name'] in ['纪录', 'documentary', 'Documentary'] for genre in genres):
         return "doc"
+    elif any(genre['name'] in ['reality-tv', 'show'] for genre in genres):
+        return "show"
     else:
         return "movie" if caller_type == "movie" else "series"
 
@@ -132,6 +134,8 @@ def get_movie_type(tmdb_id):
         keywords = extract_keywords(movie_json)
         item_type = determine_media_type(genres, "movie")
         child = determine_child_flag(genres)
+        if item_type == 'anime':
+            item_type = "anime-movie"
         #print(movie_json)
         #print(f'{item_type},{chinese_name},{child},{keywords}')
         return item_type,"movie", chinese_name, child, keywords
@@ -149,7 +153,8 @@ def get_tv_type(tmdb_id):
         keywords = extract_keywords(tv_json)
         item_type = determine_media_type(genres, "tv")
         child = determine_child_flag(genres)
-
+        if item_type == 'anime':
+            item_type = "anime-tv"
         return item_type, "series", chinese_name, child, keywords
 
     except Exception as e:
