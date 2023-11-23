@@ -127,19 +127,19 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     else:
         keywords = ""
     if maker and not (personal == 1  or internal == 1):
-        pic_urls = f'[img]https://mirror.kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
+        pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
 
 
     scraper = cloudscraper.create_scraper()
     # 登录
-    login_url = 'https://mirror.kimoji.club/login'
+    login_url = 'https://kimoji.club/login'
     username = username
     password = password
     logged_in, scraper = login(login_url, username, password, scraper)
     if logged_in:
         logger.info("KIMOJI登陆页面打开成功")
         # 访问种子上传页面并获取新的XSRF Token
-        upload_url = 'https://mirror.kimoji.club/torrents'
+        upload_url = 'https://kimoji.club/torrents'
         xsrf_token = get_xsrf_token(upload_url, scraper)
         if not xsrf_token:
             logger.error("无法获取上传页面的XSRF Token")

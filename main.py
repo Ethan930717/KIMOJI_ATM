@@ -9,10 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
     print(intro)
-    user_input = input("您正在使用的是KIMOJI专用发种机，请确认您在KIMOJI有上传权限。\n确认开始请回车，否则请输入任意字符关闭KIMOJI-ATM: ")
-    if user_input:
-        print("KIMOJI-ATM已关闭")
-        return  # 结束程序
+    print("您正在使用的是KIMOJI专用发种机，使用前请确认您在KIMOJI有上传权限。")
     config = load_config()
     if config:
         logging.info("配置文件读取成功，正在寻找媒体目录")
