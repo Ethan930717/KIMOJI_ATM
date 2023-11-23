@@ -132,13 +132,15 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
-    if maker and not (personal == 1  or internal == 1):
-        pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
+    if pic_urls:
+        if maker and not (personal == 1  or internal == 1):
+            pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
+    else:
+        pic_urls = ""
     if not mediainfo_output:
         mediainfo_output = ""
     if not bd_info:
         bd_info = ""
-
     scraper = cloudscraper.create_scraper()
     # 登录
     login_url = 'https://kimoji.club/login'
