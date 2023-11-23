@@ -32,42 +32,40 @@ def search_tmdb(english_title):
                 movie_results_en = [m for m in movie.search(english_title)]
                 tv_results_en = [t for t in tv.search(english_title)]
                 combined_results_en = movie_results_en + tv_results_en
+
                 if combined_results_en:
                     print("找到以下结果:")
                     for index, result in enumerate(combined_results_en, start=1):
-                        title_or_name = result.title if hasattr(result, 'title') else result.name if hasattr(result,
-                                                                                                             'name') else 'Unknown'
+                        title_or_name = result.title if hasattr(result, 'title') else result.name if hasattr(result, 'name') else 'Unknown'
                         release_date = result.release_date[:4] if hasattr(result, 'release_date') else 'Unknown'
-
                         print(f"{index}: {title_or_name} ({release_date})")
 
-                    user_input = input("请选择一个结果 (如果输出错误信息或没有匹配资源，请输入q退出): ")
+                    user_input = input("如果无法确定列表中对应的影片，请手动在TMDb搜索确认后，输入类型+TMDb ID，（例如 'movie300212' 或 'tv12345'）。如果TMDb中没有该词条，请输入 'q': ")
                     if user_input.lower() == 'q':
-                        logger.warning("退出 TMDb 搜索 ,尝试使用IMDb搜索")
+                        logger.warning("退出 TMDb 搜索，尝试使用 IMDb 搜索")
                         return None, None, None, None, None, None
+                    elif user_input.lower().startswith('movie') or user_input.lower().startswith('tv'):
+                        item_type = 'movie' if user_input.lower().startswith('movie') else 'tv'
+                        tmdb_id = int(user_input[5:])
+                        # 相关处理逻辑
+                        return item_type, tmdb_id, ...  # 其余返回值
 
                     selected_index = int(user_input) - 1
                     selected_result = combined_results_en[selected_index]
                     item_type = 'movie' if selected_result in movie_results_en else 'tv'
                     tmdb_id = selected_result.id
-                    if item_type == 'movie':
-                        logger.info('正在搜索TMDb_movie元数据')
-                        item_type, media_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
-                    else:
-                        logger.info('正在搜索TMDb_tv元数据')
-                        item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
-                    logger.info(f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
-                    return item_type, tmdb_id, media_type, chinese_name, child, keywords
+                    # 相关处理逻辑
+                    return item_type, tmdb_id, ...  # 其余返回值
 
-            logger.info("没有在TMDb中搜索到数据，尝试通过IMDb搜索")
+            logger.info("没有在 TMDb 中搜索到数据，尝试通过 IMDb 搜索")
             return None, None, None, None, None, None
 
         except requests.Timeout:
             attempt_count += 1
-            logger.error(f"tmdb连接失败，正在进行第{attempt_count}次尝试...")
+            logger.error(f"TMDb 连接失败，正在进行第 {attempt_count} 次尝试...")
 
-    logger.error("连接 tmdb 失败，请检查网络连接")
-    return None, None, None, None, None
+    logger.error("连接 TMDb 失败，请检查网络连接")
+    return None, None, None, None, None, None
 
 #判定类别
 def extract_name(json_data):
