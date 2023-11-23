@@ -70,7 +70,8 @@ def create_torrent_if_needed(file_dir, torrent_dir):
 #mediainfo/bdinfo解析
 def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type,  child, internal, personal, keywords, upload_title):
     file_name, action = find_media_folder(file_dir)
-    media_info = ''
+    mediainfo_output = ''
+    pic_urls = ''
     bd_info = ''
     if file_name:
         folder_path = os.path.join(file_dir, file_name)
