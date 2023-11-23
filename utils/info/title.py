@@ -131,8 +131,16 @@ def extract_codec(media_name):
 def analyze_file(chinese_title, english_title, year, season, media, codec, audiocodec, maker, file_name , url_name):
     missing_elements = []
     file_name_no_dots = file_name.replace('.', ' ')
+    placeholder_map = {
+        "5 10": "PLACEHOLDER_5_10",
+        "7 10": "PLACEHOLDER_7_10"
+    }
+    for original, placeholder in placeholder_map.items():
+        file_name_no_dots = file_name_no_dots.replace(original, placeholder)
     upload_title = re.sub(r'(?<=5) 1', '.1', file_name_no_dots)
     upload_title = re.sub(r'(?<=7) 1', '.1', upload_title)
+    for original, placeholder in placeholder_map.items():
+        upload_title = upload_title.replace(placeholder, original)
 
     if not english_title:
         missing_elements.append("英文标题")
@@ -163,8 +171,16 @@ def analyze_file(chinese_title, english_title, year, season, media, codec, audio
     if not chinese_title:
         combined_title = f"{chinese_title} {file_name}"
         file_name_no_dots = combined_title.replace('.', ' ')
+        placeholder_map = {
+            "5 10": "PLACEHOLDER_5_10",
+            "7 10": "PLACEHOLDER_7_10"
+        }
+        for original, placeholder in placeholder_map.items():
+            file_name_no_dots = file_name_no_dots.replace(original, placeholder)
         upload_title = re.sub(r'(?<=5) 1', '.1', file_name_no_dots)
         upload_title = re.sub(r'(?<=7) 1', '.1', upload_title)
+        for original, placeholder in placeholder_map.items():
+            upload_title = upload_title.replace(placeholder, original)
 
     return chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title
 
