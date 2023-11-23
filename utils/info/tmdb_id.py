@@ -45,17 +45,37 @@ def search_tmdb(english_title):
                         logger.warning("退出 TMDb 搜索，尝试使用 IMDb 搜索")
                         return None, None, None, None, None, None
                     elif user_input.lower().startswith('movie') or user_input.lower().startswith('tv'):
-                        item_type = 'movie' if user_input.lower().startswith('movie') else 'tv'
-                        tmdb_id = int(user_input[5:])
-                        # 相关处理逻辑
-                        return item_type, tmdb_id, ...  # 其余返回值
+                        if user_input.lower().startswith('movie'):
+                            item_type = 'movie'
+                            tmdb_id_start_pos = 5
+                        else:
+                            item_type = 'tv'
+                            tmdb_id_start_pos = 2
+
+                        tmdb_id = int(user_input[tmdb_id_start_pos:])
+                        if item_type == 'movie':
+                            logger.info('正在搜索TMDb_movie元数据')
+                            item_type, media_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
+                        else:
+                            logger.info('正在搜索TMDb_tv元数据')
+                            item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
+                        logger.info(
+                            f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
+                        return item_type, tmdb_id, media_type, chinese_name, child, keywords
 
                     selected_index = int(user_input) - 1
                     selected_result = combined_results_en[selected_index]
                     item_type = 'movie' if selected_result in movie_results_en else 'tv'
                     tmdb_id = selected_result.id
-                    # 相关处理逻辑
-                    return item_type, tmdb_id, ...  # 其余返回值
+                    if item_type == 'movie':
+                        logger.info('正在搜索TMDb_movie元数据')
+                        item_type, media_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
+                    else:
+                        logger.info('正在搜索TMDb_tv元数据')
+                        item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
+                    logger.info(
+                        f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
+                    return item_type, tmdb_id, media_type, chinese_name, child, keywords
 
             logger.info("没有在 TMDb 中搜索到数据，尝试通过 IMDb 搜索")
             return None, None, None, None, None, None
