@@ -65,17 +65,17 @@ pull_docker_images() {
 install_dependencies() {
     case $OS in
         Linux)
-            echo "正在安装 mktorrent 和 mediainfo ..."
+            echo "正在安装mediainfo ..."
             sudo apt-get update
-            sudo apt-get install -y mktorrent mediainfo
+            sudo apt-get install -y mediainfo
             ;;
         Darwin)
-            echo "正在使用 Homebrew 安装 mktorrent 和 mediainfo ..."
-            brew install mktorrent mediainfo
+            echo "正在使用 Homebrew mediainfo ..."
+            brew install mediainfo
             ;;
         *)
             echo "不支持的操作系统: $OS"
-            echo "请手动安装 mktorrent 和 mediainfo"
+            echo "请手动安装 mediainfo"
             exit 1
             ;;
     esac
