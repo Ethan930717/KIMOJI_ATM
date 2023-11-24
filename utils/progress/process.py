@@ -96,7 +96,8 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
             quick_summary = check_and_extract_bdinfo_from_file(folder_path)
             if quick_summary:
                 bd_info, resolution, type = process_quick_summary(quick_summary)
-                logger.info("从文件中成功提取 BDInfo")
+                logger.info("从文件中成功提取 BDInfo，准备开始截图")
+                pic_urls = screenshot_from_bd(folder_path, pic_num, file_dir)
             else:
                 logger.info("未找到 BDInfo 文件，开始使用 bdinfo 工具解析")
                 bd_info, resolution, type = generate_and_parse_bdinfo(folder_path)
