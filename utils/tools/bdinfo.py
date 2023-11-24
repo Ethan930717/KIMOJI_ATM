@@ -43,7 +43,7 @@ def process_quick_summary(quick_summary):
 def generate_and_parse_bdinfo(folder_path):
 
     try:
-        docker_command = ["docker", "run", "--rm", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
+        docker_command = ["docker", "run", "--rm","--name","kimoji-bdinfo", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:

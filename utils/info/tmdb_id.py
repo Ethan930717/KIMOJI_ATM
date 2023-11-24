@@ -116,7 +116,7 @@ def determine_media_type(genres, caller_type):
         return "anime"
     elif any(genre['name'] in ['纪录', 'documentary', 'Documentary'] for genre in genres):
         return "doc"
-    elif any(genre['name'] in ['reality-tv', 'show'] for genre in genres):
+    elif any(genre['name'] in ['reality-tv', 'show' ,'综艺','真人秀'] for genre in genres):
         return "show"
     else:
         return "movie" if caller_type == "movie" else "series"
