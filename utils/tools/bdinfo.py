@@ -41,8 +41,9 @@ def process_quick_summary(quick_summary):
     return formatted_summary, resolution, type
 
 def generate_and_parse_bdinfo(folder_path):
+
     try:
-        docker_command = ["docker", "run", "--rm", "-v", f"{folder_path}:/mnt/bd", "iniwex/kimoji-bdinfo", "/mnt/bd"]
+        docker_command = ["docker", "run", "--rm", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:
@@ -70,10 +71,9 @@ def generate_and_parse_bdinfo(folder_path):
     formatted_summary, resolution, type = process_quick_summary(quick_summary)
     return formatted_summary, resolution, type
 
-
 # 示例调用
-#folder_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'
-#formatted_summary, resolution, type = generate_and_parse_bdinfo(folder_path)
-#print(formatted_summary)
-#print("Resolution:", resolution)
-#print("Type:", type)
+folder_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'
+formatted_summary, resolution, type = generate_and_parse_bdinfo(folder_path)
+print(formatted_summary)
+print("Resolution:", resolution)
+print("Type:", type)
