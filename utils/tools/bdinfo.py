@@ -72,8 +72,8 @@ def generate_and_parse_bdinfo(folder_path):
     return formatted_summary, resolution, type
 
 # 示例调用
-folder_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'
-formatted_summary, resolution, type = generate_and_parse_bdinfo(folder_path)
-print(formatted_summary)
-print("Resolution:", resolution)
-print("Type:", type)
+#folder_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'
+#formatted_summary, resolution, type = generate_and_parse_bdinfo(folder_path)
+#print(formatted_summary)
+#print("Resolution:", resolution)
+#print("Type:", type)
