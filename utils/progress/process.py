@@ -107,7 +107,6 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
                     print("输出快扫信息:")
                     print(bd_info)
                     pic_urls = screenshot_from_bd(folder_path,pic_num,file_dir)
-                    logger.info("由于您上传的是原盘资源，发种机无法截图，请您在种子上传后手动上传截图")
                 else:
                     logger.error("BDInfo 分析失败或未找到有效文件，请检查文件是否正常")
                     file_path = os.path.join(file_name, "kimoji_pass")
