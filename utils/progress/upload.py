@@ -71,7 +71,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         medium_sel='12'
 
         logger.info('已成功选择媒介为原盘')
-    elif media.upper() == 'REMUX':
+    elif 'REMUX' in file_name:
         medium_sel='3'
         logger.info('已成功选择媒介为REMUX')
     elif media.upper() == 'WEB-DL':
