@@ -37,7 +37,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
         file_name = file_name.split('/')[-1]
         folder_path = os.path.join(file_dir, file_name)
 
-        chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title = extract_title_info(file_name)
+        chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title = extract_title_info(folder_path)
         tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords = handle_media(chinese_title, english_title, year, season, media, maker)
         if not media_type:
             logger.error('无法确认视频类型，已记录跳过本目录，请重新召唤阿K')
@@ -71,7 +71,6 @@ def create_torrent_if_needed(file_dir, torrent_dir):
 def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type,  child, internal, personal, keywords, upload_title):
     file_name, action = find_media_folder(file_dir)
     mediainfo_output = ''
-    pic_urls = ''
     bd_info = ''
     if file_name:
         folder_path = os.path.join(file_dir, file_name)
