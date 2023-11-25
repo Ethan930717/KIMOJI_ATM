@@ -18,7 +18,7 @@
 
 `./setup.sh
 `
-### unraid请先在应用市场安装python，nerdtools插件，然后在nerdtools中找到mediainfo和mktorret进行安装
+### unraid请先在应用市场安装python，nerdtools插件，然后在nerdtools中找到mediainfo进行安装
 
 * `git clone https://github.com/Ethan930717/KIMOJI_ATM` 把仓库克隆到本地并进入文件夹
 
