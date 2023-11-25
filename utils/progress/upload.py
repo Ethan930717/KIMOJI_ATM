@@ -44,7 +44,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         select_type='4'
     elif media_type == 'anime-movie':
         select_type='3'
-        tvdb_id=""
+        tvdb_id="0"
         season = ""
         episode = ""
     elif media_type == 'doc':
@@ -61,7 +61,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'当前资源非动漫类型，已将mal id设为0')
     elif media_type == 'movie':
         select_type='1'
-        tvdb_id=""
+        tvdb_id="0"
         mal_id = "0"
         season = ""
         episode = ""
