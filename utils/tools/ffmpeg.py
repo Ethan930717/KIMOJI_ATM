@@ -16,7 +16,7 @@ def get_largest_m2ts_file(directory):
 
 def find_iso_in_directory(directory):
     # 在指定目录及其子目录中搜索 ISO 文件
-    iso_files = glob.glob(f"{directory}/**/*.iso", recursive=True)
+    iso_files = glob.glob(f"{directory}/*.iso", recursive=True)
     return iso_files[0] if iso_files else None
 def screenshot_from_bd(directory, pic_num, file_dir):
     logger.info('开始处理原盘')
