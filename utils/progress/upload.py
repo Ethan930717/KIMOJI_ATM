@@ -71,11 +71,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     logger.info(f'已成功选择类型为{media_type}')
 
     #选择规格
-    if media.upper() == 'DISC':
-        medium_sel='12'
-
-        logger.info('已成功选择媒介为原盘')
-    elif 'REMUX' in file_name:
+    if 'REMUX' in file_name:
         medium_sel='3'
         logger.info('已成功选择媒介为REMUX')
     elif media.upper() == 'WEB-DL':
@@ -99,6 +95,9 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     elif media.upper() == 'ALAC':
         medium_sel='8'
         logger.info('已成功选择媒介为FLAC')
+    elif media.upper() == 'DVD':
+        medium_sel='9'
+        logger.info('已成功选择媒介为DVD')
     elif media.upper() == 'MP3':
         medium_sel='11'
         logger.info('已成功选择媒介为MP3')

@@ -101,7 +101,6 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
                 logger.info("未找到 BDInfo 文件，开始使用 bdinfo 工具解析")
                 bd_info, resolution, type = generate_and_parse_bdinfo(folder_path)
                 if bd_info:
-                    media = "disc"
                     logger.info("BDInfo 分析完成")
                     print("输出快扫信息:")
                     print(bd_info)
