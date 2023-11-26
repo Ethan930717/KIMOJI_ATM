@@ -40,6 +40,8 @@ def login(login_url, username, password, scraper):
 
 def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id,media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output):
     episode = "0"
+    if not season and (not media_type =='anime-movie' or not media_type =='movie'):
+        season = "0"
     if media_type == 'anime-tv':
         select_type='4'
     elif media_type == 'anime-movie':
