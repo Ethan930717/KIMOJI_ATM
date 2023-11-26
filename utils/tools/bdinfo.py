@@ -43,13 +43,29 @@ def process_quick_summary(quick_summary):
 
 def mount_iso(iso_file):
     mount_point = '/mnt/iso_mount'  # 挂载点路径
+
+    # 确保挂载点目录存在
+    if not os.path.exists(mount_point):
+        logger.info(f"创建挂载点目录：{mount_point}")
+        os.makedirs(mount_point)
+
+    # 检查挂载点是否已被挂载
+    if os.path.ismount(mount_point):
+        logger.info(f"挂载点已被占用，正在卸载：{mount_point}")
+        try:
+            subprocess.run(['umount', mount_point], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"卸载挂载点时出错: {e}")
+            return None
+
+    # 执行挂载操作
     try:
         subprocess.run(['mount', '-o', 'loop', iso_file, mount_point], check=True)
+        logger.info(f"ISO 文件已挂载到：{mount_point}")
         return mount_point
     except subprocess.CalledProcessError as e:
         logger.error(f"挂载 ISO 文件时出错: {e}")
         return None
-
 def find_iso_in_directory(directory):
     iso_files = glob.glob(f"{directory}/**/*.iso", recursive=True)
     return iso_files[0] if iso_files else None
