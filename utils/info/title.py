@@ -14,9 +14,11 @@ def extract_title_info(url_name):
     # 提取路径中的最后一个文件夹名称
     media_name = url_name.split('/')[-1]
     logger.info(f'正在解析目录名称:{media_name}')
-    # 提取中文片名（从开始到第一个中文字符之后的第一个点）
-    match_chinese = re.search(r'([\u4e00-\u9fff]+).*?\.', media_name)
+    # 提取最后一个中文之前的所有内容
+    match_chinese = re.search(r'([\u4e00-\u9fff].*?)[\u4e00-\u9fff]\.', media_name)
     chinese_title = match_chinese.group(1) if match_chinese else None
+
+    chinese_title
 
     # 提取季数
     match_season = re.search(r'S(\d{2})\.', media_name)
@@ -124,6 +126,8 @@ def extract_codec(media_name):
         audiocodec = 'OPUS'
     elif 'AAC' in media_name.upper():
         audiocodec = 'AAC'
+    elif 'Audio' in media_name.upper():
+        audiocodec = 'special'
     else:
         audiocodec = None
     return codec,audiocodec
