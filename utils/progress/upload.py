@@ -73,19 +73,19 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     logger.info(f'已成功选择类型为{media_type}')
 
     #选择规格
-    if 'REMUX' in file_name:
+    if 'REMUX' in file_name.upper():
         medium_sel='3'
         logger.info('已成功选择媒介为REMUX')
-    elif media.upper() == 'WEB-DL':
+    elif 'WEB-DL' in file_name.upper():
         medium_sel='4'
         logger.info('已成功选择媒介为WEB-DL')
-    elif media.upper() == 'UHD' and ('x264' in file_name or 'x265' in file_name):
+    elif media.upper() == 'UHD' and ('x264' in file_name.lower() or 'x265' in file_name.lower()):
         medium_sel='5'
         logger.info('已成功选择媒介为ENCODE')
-    elif media.upper() == 'BLURAY' and ('x264' in file_name or 'x265' in file_name):
+    elif media.upper() == 'BLURAY' and ('x264' in file_name.lower() or 'x265' in file_name.lower()):
         medium_sel='5'
         logger.info('已成功选择媒介为ENCODE')
-    elif media.upper() == 'BLU-RAY' and ('x264' in file_name or 'x265' in file_name):
+    elif media.upper() == 'BLU-RAY' and ('x264' in file_name.lower() or 'x265' in file_name.lower()):
         medium_sel='3'
         logger.info('已成功选择媒介为ENCODE')
     elif media.upper() == 'UHD':
