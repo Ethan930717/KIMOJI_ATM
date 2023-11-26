@@ -15,6 +15,7 @@ import sys
 import logging
 import csv
 import datetime
+import glob
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -23,10 +24,13 @@ log_file_path = os.path.join(log_dir, 'record.csv')
 #寻找同名种子
 def check_existing_torrent(torrent_dir, file_name):
     torrent_name = file_name + ".torrent"
-    torrent_path = os.path.join(torrent_dir, torrent_name)
-    if os.path.exists(torrent_path):
-        return torrent_path  # 返回找到的种子文件路径
-    return None  # 如果没有找到文件，则返回 None
+    search_pattern = os.path.join(torrent_dir, '*' + torrent_name)
+    matching_files = glob.glob(search_pattern)
+
+    if matching_files:
+        return matching_files[0]  # 返回找到的第一个匹配文件的路径
+
+    return None  # 如果没有找到匹配的文件，则返回 None
 
 #制作种子
 def create_torrent_if_needed(file_dir, torrent_dir):
