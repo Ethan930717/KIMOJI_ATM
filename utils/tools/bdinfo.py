@@ -2,6 +2,7 @@ import re
 import subprocess
 import os
 import logging
+import glob
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,29 @@ def process_quick_summary(quick_summary):
 
     return formatted_summary, resolution, type
 
+def mount_iso(iso_file):
+    mount_point = '/mnt/iso_mount'  # 挂载点路径
+    try:
+        subprocess.run(['mount', '-o', 'loop', iso_file, mount_point], check=True)
+        return mount_point
+    except subprocess.CalledProcessError as e:
+        logger.error(f"挂载 ISO 文件时出错: {e}")
+        return None
+
+def find_iso_in_directory(directory):
+    iso_files = glob.glob(f"{directory}/**/*.iso", recursive=True)
+    return iso_files[0] if iso_files else None
+
 def generate_and_parse_bdinfo(folder_path):
+    # 检查并挂载 ISO 文件（如果存在）
+    iso_file = find_iso_in_directory(folder_path)
+    if iso_file:
+        logger.info(f"检测到 ISO 文件：{iso_file}，正在挂载...")
+        mount_point = mount_iso(iso_file)
+        if not mount_point:
+            logger.error("无法挂载 ISO 文件")
+            return None, None, None
+        folder_path = mount_point
 
     try:
         docker_command = ["docker", "run", "--rm","--name","kimoji-bdinfo", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]

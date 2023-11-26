@@ -14,22 +14,8 @@ def get_largest_m2ts_file(directory):
     largest_file = max(m2ts_files, key=os.path.getsize, default=None)
     return largest_file
 
-def find_iso_in_directory(directory):
-    # 在指定目录及其子目录中搜索 ISO 文件
-    iso_files = glob.glob(f"{directory}/*.iso", recursive=True)
-    return iso_files[0] if iso_files else None
 def screenshot_from_bd(directory, pic_num, file_dir):
     logger.info('开始处理原盘')
-    # 在目录中查找 ISO 文件
-    iso_file = find_iso_in_directory(directory)
-    if iso_file:
-        logger.info(f"检测到 ISO 文件：{iso_file}，正在挂载...")
-        mount_point = mount_iso(iso_file)
-        if not mount_point:
-            logger.error("无法挂载 ISO 文件")
-            return
-        directory = mount_point
-
     # 查找最大的 .m2ts 文件
     largest_file = get_largest_m2ts_file(directory)
     if not largest_file:
