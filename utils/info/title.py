@@ -126,7 +126,7 @@ def extract_codec(media_name):
         audiocodec = 'OPUS'
     elif 'AAC' in media_name.upper():
         audiocodec = 'AAC'
-    elif 'Audio' in media_name.upper():
+    elif 'AUDIO' in media_name.upper():
         audiocodec = 'special'
     else:
         audiocodec = None
