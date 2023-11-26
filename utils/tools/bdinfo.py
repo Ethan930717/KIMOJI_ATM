@@ -69,7 +69,11 @@ def mount_iso(iso_file):
 def find_iso_in_directory(directory):
     iso_files = glob.glob(f"{directory}/**/*.iso", recursive=True)
     return iso_files[0] if iso_files else None
-
+def find_bdmv_parent_directory(folder_path):
+    for root, dirs, files in os.walk(folder_path):
+        if 'BDMV' in dirs:
+            return root
+    return None
 def generate_and_parse_bdinfo(folder_path):
     # 检查并挂载 ISO 文件（如果存在）
     iso_file = find_iso_in_directory(folder_path)
@@ -80,9 +84,15 @@ def generate_and_parse_bdinfo(folder_path):
             logger.error("无法挂载 ISO 文件")
             return None, None, None
         folder_path = mount_point
-
+    bdmv_path = find_bdmv_parent_directory(folder_path)
+    if bdmv_path:
+        logger.info(f"找到 BDMV 文件夹在路径：{bdmv_path}")
+        folder_path = bdmv_path
+    else:
+        logger.error("未找到 BDMV 文件夹")
+        return None, None, None
     try:
-        docker_command = ["docker", "run", "--rm","--name","kimoji-bdinfo", "-v", f"{folder_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
+        docker_command = ["docker", "run", "--rm","--name","kimoji-bdinfo", "-v", f"{bdmv_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:
