@@ -6,6 +6,7 @@ import glob
 import argparse
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
@@ -163,12 +164,14 @@ def main():
     parser = argparse.ArgumentParser(description='截图并上传到图床')
     parser.add_argument('-v', '--video-path', required=True, help='视频文件或目录的路径')
     parser.add_argument('-n', '--number-of-pics', type=int, default=3, help='截图数量，默认为3')
-    parser.add_argument('-d', '--output-dir', default='log', help='输出目录，默认为当前目录下的 log 文件夹')
+    parser.add_argument('-d', '--output-dir', help='输出目录，默认为当前目录下的 log 文件夹')
+    parser.add_argument('-p', '--png-format', action='store_true', help='将截图格式设置为 PNG（默认为 JPG）')
     args = parser.parse_args()
 
     video_path = args.video_path
     pic_num = args.number_of_pics
     output_dir = args.output_dir if args.output_dir else log_dir
+    image_format = 'png' if args.png_format else 'jpg'
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -176,10 +179,10 @@ def main():
     # 检查输入路径是文件还是目录
     if os.path.isfile(video_path):
         # 如果是文件，直接进行截图
-        pic_urls = screenshot_from_video(video_path, pic_num, output_dir, image_format='jpg')
+        pic_urls = screenshot_from_video(video_path, pic_num, output_dir, image_format=image_format)
     elif os.path.isdir(video_path):
         # 如果是目录，按原有流程处理
-        pic_urls = screenshot_from_bd(video_path, pic_num, output_dir)
+        pic_urls = screenshot_from_bd(video_path, pic_num, output_dir, image_format=image_format)
     else:
         logger.error("输入的路径既不是文件也不是目录")
         return
