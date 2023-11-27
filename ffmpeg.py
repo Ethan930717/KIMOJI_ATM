@@ -17,7 +17,7 @@ def get_largest_m2ts_file(directory):
     largest_file = max(m2ts_files, key=os.path.getsize, default=None)
     return largest_file
 
-def screenshot_from_bd(directory, pic_num, file_dir):
+def screenshot_from_bd(directory, pic_num, file_dir ,image_format='png'):
     logger.info('开始处理原盘')
     # 检查是否有 ISO 文件
     iso_file = find_iso_in_directory(directory)
