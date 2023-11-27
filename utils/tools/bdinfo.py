@@ -99,7 +99,7 @@ def generate_and_parse_bdinfo(folder_path):
             "docker", "run", "--rm", "--name", "kimoji-bdinfo",
             "-v", f"{bdmv_path}:/mnt/bd",
             "-v", f"{log_dir}:/mnt/report",  # 挂载额外的输出目录
-            "hudan717/kimoji-bdinfo", "-w", "/mnt/report"
+            "hudan717/kimoji-bdinfo", "-w", "mnt/bd", "/mnt/report"
         ]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 

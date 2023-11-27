@@ -140,6 +140,8 @@ main() {
     configure
     echo "全部配置已完成。"
     sudo chmod a+x k
+    sudo chmod a+x update
+
     ./k
 }
 
