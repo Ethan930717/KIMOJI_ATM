@@ -153,7 +153,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
 
     if not chinese_title and chinese_name:
         upload_title = upload_title.replace("None", chinese_name)
-        
+
     scraper = cloudscraper.create_scraper()
     # 登录
     login_url = 'https://kimoji.club/login'

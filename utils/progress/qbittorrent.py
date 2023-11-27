@@ -6,7 +6,8 @@ import sys
 import os
 import subprocess
 logger = logging.getLogger(__name__)
-
+current_file_path = os.path.abspath(__file__)
+project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 
 def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
@@ -36,7 +37,7 @@ def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max
 
             # 重新启动 main.py 脚本
             python_executable = sys.executable
-            main_script_path = os.path.join(os.path.dirname(__file__), 'main.py')
+            main_script_path = os.path.join(project_root_dir, 'main.py')
             subprocess.Popen([python_executable, main_script_path])
             sys.exit(0)
 
