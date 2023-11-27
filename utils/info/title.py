@@ -34,12 +34,12 @@ def load_csv_data():
 
 
 def extract_title_info(url_name):
-    # 从CSV文件加载数据
-    existing_titles = load_csv_data()
-    # 提取路径中的最后一个文件夹名称
     media_name = url_name.split('/')[-1]
     logger.info(f'正在解析目录名称:{media_name}')
+    # 从CSV文件加载数据
     logger.info('正在从KIMOJI种子库中匹配查重...')
+    existing_titles = load_csv_data()
+    # 提取路径中的最后一个文件夹名称
     if media_name in existing_titles:
         logger.info("已存在相同种子，跳过本资源")
         file_path = os.path.join(url_name, "kimoji_pass")
