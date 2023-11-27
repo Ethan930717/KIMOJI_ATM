@@ -36,15 +36,15 @@ def search_tmdb(english_title):
                 if combined_results_en:
                     print("找到以下结果:")
                     for index, result in enumerate(combined_results_en, start=1):
-                        if hasattr(result, 'title') or hasattr(result, 'name'):
-                            title_or_name = result.title if hasattr(result, 'title') else result.name
-                            release_date = 'Unknown'
-                            if hasattr(result, 'release_date') and result.release_date:
-                                release_date = result.release_date[:4]
-                            elif hasattr(result, 'first_air_date') and result.first_air_date:
-                                release_date = result.first_air_date[:4]
+                        title_or_name = result.title if hasattr(result, 'title') else result.name if hasattr(result,
+                                                                                                             'name') else 'Unknown'
+                        release_date = result.release_date[:4] if hasattr(result,
+                                                                          'release_date') else result.first_air_date[
+                                                                                               :4] if hasattr(result,
+                                                                                                              'first_air_date') else 'Unknown'
+                        resource_type = '电影' if result in movie_results_en else '电视剧'
 
-                            print(f"{index}: {title_or_name} ({release_date})")
+                        print(f"{index}: {title_or_name} ({release_date}) [{resource_type}]")
 
                     user_input = input("如果无法确定列表中对应的影片，请手动在TMDb搜索确认后，输入类型+TMDb ID，（例如 'movie300212' 或 'tv12345'）。如果TMDb中没有该词条，请输入 'q': ")
                     if user_input.lower() == 'q':
