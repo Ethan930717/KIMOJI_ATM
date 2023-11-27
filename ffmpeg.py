@@ -167,13 +167,23 @@ def main():
     args = parser.parse_args()
 
     video_path = args.video_path
-    pic_num = 6
-    output_dir = log_dir
+    pic_num = args.number_of_pics
+    output_dir = args.output_dir if args.output_dir else log_dir
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    pic_urls = screenshot_from_bd(video_path, pic_num, output_dir)
+    # 检查输入路径是文件还是目录
+    if os.path.isfile(video_path):
+        # 如果是文件，直接进行截图
+        pic_urls = screenshot_from_video(video_path, pic_num, output_dir, image_format='jpg')
+    elif os.path.isdir(video_path):
+        # 如果是目录，按原有流程处理
+        pic_urls = screenshot_from_bd(video_path, pic_num, output_dir)
+    else:
+        logger.error("输入的路径既不是文件也不是目录")
+        return
+
     if pic_urls:
         logger.info(f'截图上传成功，BBCode链接:\n{pic_urls}')
     else:
@@ -181,4 +191,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 #python3 ffmpeg.py -v "/path/to/video_or_directory" -n 3 -d "/path/to/output_dir"
