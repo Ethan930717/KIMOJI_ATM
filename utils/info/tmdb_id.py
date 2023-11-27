@@ -122,7 +122,7 @@ def determine_media_type(genres, caller_type):
         return "movie" if caller_type == "movie" else "series"
 
 def determine_child_flag(genres):
-    return 1 if any(genre['name'] in ['儿童', '家庭'] for genre in genres) else 0
+    return 1 if any(genre['name'] in ['儿童'] for genre in genres) else 0
 def get_movie_type(tmdb_id):
     setup_tmdb()
     movie = Movie()

@@ -19,7 +19,7 @@ def screenshot_from_bd(directory, pic_num, file_dir):
     # 检查是否有 ISO 文件
     iso_file = find_iso_in_directory(directory)
     if iso_file:
-        logger.info(f"找到 ISO 文件：{iso_file}，正在挂载...")
+        logger.info(f"找到 ISO 文件：{iso_file}")
         mount_point = '/mnt/iso_mount'  # 指定挂载点
         largest_file = get_largest_m2ts_file(mount_point)
     else:
