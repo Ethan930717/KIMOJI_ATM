@@ -96,26 +96,19 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
                 sys.exit()
         elif action == "bdinfo":
             logger.info("检测到原盘，开始使用bdinfo解析")
-            quick_summary = check_and_extract_bdinfo_from_file(folder_path)
-            if quick_summary:
-                bd_info, resolution, type = process_quick_summary(quick_summary)
-                logger.info("从文件中成功提取 BDInfo，准备开始截图")
-                pic_urls = screenshot_from_bd(folder_path, pic_num, file_dir)
+            bd_info, resolution, type = generate_and_parse_bdinfo(folder_path)
+            if bd_info:
+                logger.info("BDInfo 分析完成")
+                print("输出快扫信息:")
+                print(bd_info)
+                pic_urls = screenshot_from_bd(folder_path,pic_num,file_dir)
             else:
-                logger.info("未找到 BDInfo 文件，开始使用 bdinfo 工具解析")
-                bd_info, resolution, type = generate_and_parse_bdinfo(folder_path)
-                if bd_info:
-                    logger.info("BDInfo 分析完成")
-                    print("输出快扫信息:")
-                    print(bd_info)
-                    pic_urls = screenshot_from_bd(folder_path,pic_num,file_dir)
-                else:
-                    logger.error("BDInfo 分析失败或未找到有效文件，请检查文件是否正常")
-                    file_path = os.path.join(file_name, "kimoji_pass")
-                    open(file_path, 'w').close()
-                    logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
-                    log_to_csv(folder_path, "失败", log_file_path ,"")
-                    sys.exit()
+                logger.error("BDInfo 分析失败或未找到有效文件，请检查文件是否正常")
+                file_path = os.path.join(file_name, "kimoji_pass")
+                open(file_path, 'w').close()
+                logger.info('pass文件创建成功，删除该文件前将不会再次扫描该目录，请重新启动阿K')
+                log_to_csv(folder_path, "失败", log_file_path ,"")
+                sys.exit()
         else:
             logger.error("无法找到可解析的影片")
             sys.exit()

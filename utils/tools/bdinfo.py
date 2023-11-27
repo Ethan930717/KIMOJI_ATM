@@ -78,10 +78,6 @@ def find_bdmv_parent_directory(folder_path):
             return root
     return None
 def generate_and_parse_bdinfo(folder_path):
-    # 检查并删除旧的 BDInfo 报告
-    bdinfo_file_path = os.path.join(log_dir, 'BDINFO.bd.txt')
-    if os.path.exists(bdinfo_file_path):
-        os.remove(bdinfo_file_path)
 
     # 检查并挂载 ISO 文件（如果存在）
     iso_file = find_iso_in_directory(folder_path)
