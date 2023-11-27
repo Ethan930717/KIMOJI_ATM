@@ -3,8 +3,10 @@ import subprocess
 import requests
 import logging
 import glob
+import argparse
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -30,6 +32,7 @@ def screenshot_from_bd(directory, pic_num, file_dir):
         return
     logger.info(f"找到最大的 .m2ts 文件: {largest_file}")
     return screenshot_from_video(largest_file, pic_num, file_dir, image_format='png')
+
 def get_video_duration(file_path):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
@@ -133,6 +136,7 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
     pic_urls = upload_images_and_get_links(image_paths)
     logger.info(f'获取bbcode代码:\n{pic_urls}')
     return pic_urls
+
 def upload_images_and_get_links(image_paths):
     pic_urls = []
     for i, image_path in enumerate(image_paths, start=1):
@@ -154,8 +158,27 @@ def compress_image(i,image_path, quality=85):
     except Exception as e:
         logger.error(f"压缩图片时出错: {e}")
 
-# 示例调用
-#directory = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'  # 视频文件路径
-#file_dir = '/Users/Ethan/PycharmProjects/KIMOJI-ATM'
-#pic_num = 3  # 截图数量
-#screenshot_from_bd(directory,pic_num ,file_dir)
+
+def main():
+    parser = argparse.ArgumentParser(description='截图并上传到图床')
+    parser.add_argument('-v', '--video-path', required=True, help='视频文件或目录的路径')
+    parser.add_argument('-n', '--number-of-pics', type=int, default=3, help='截图数量，默认为3')
+    parser.add_argument('-d', '--output-dir', default='log', help='输出目录，默认为当前目录下的 log 文件夹')
+    args = parser.parse_args()
+
+    video_path = args.video_path
+    pic_num = 6
+    output_dir = log_dir
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    pic_urls = screenshot_from_bd(video_path, pic_num, output_dir)
+    if pic_urls:
+        logger.info(f'截图上传成功，BBCode链接:\n{pic_urls}')
+    else:
+        logger.error('截图上传失败')
+
+if __name__ == '__main__':
+    main()
+#python3 ffmpeg.py -v "/path/to/video_or_directory" -n 3 -d "/path/to/output_dir"
