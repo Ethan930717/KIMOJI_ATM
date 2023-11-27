@@ -47,7 +47,7 @@ def process_quick_summary(quick_summary):
 
 def mount_iso(iso_file):
     mount_point = '/mnt/iso_mount'  # 挂载点路径
-
+    print (log_dir)
     # 确保挂载点目录存在
     if not os.path.exists(mount_point):
         logger.info(f"创建挂载点目录：{mount_point}")
