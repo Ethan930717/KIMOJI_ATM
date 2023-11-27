@@ -44,7 +44,6 @@ def get_video_duration(file_path):
             "-v", f"{video_dir}:/workspace",
             "jrottenberg/ffmpeg:ubuntu",
             "-i", f"/workspace/{video_file}",
-            "2>&1"
         ]
 
         # 使用 shell 命令执行 Docker 命令，并通过管道传递到 grep
