@@ -11,7 +11,7 @@ log_dir = os.path.join(project_root_dir, 'log')
 logger = logging.getLogger(__name__)
 
 def check_and_extract_bdinfo_from_file(folder_path):
-    bdinfo_file_path = os.path.join(folder_path, "BDINFO.bd.txt")
+    bdinfo_file_path = os.path.join(log_dir, "BDINFO.bd.txt")
     if os.path.exists(bdinfo_file_path):
         with open(bdinfo_file_path, "r", encoding="utf-8") as file:
             file_content = file.read()

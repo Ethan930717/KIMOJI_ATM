@@ -229,6 +229,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             with open(log_file_path, 'w', encoding='utf-8') as log_file:
                                 log_file.write(response.text)
                             return False
+                        os.remove(os.path.join(log_dir, 'BDINFO.bd.txt'))
                     else:
                         logger.error("发种请求未发生重定向，请查看日志")
                         with open(log_file_path, 'w', encoding='utf-8') as log_file:
