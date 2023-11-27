@@ -15,8 +15,19 @@ logger = logging.getLogger(__name__)
 import requests
 import csv
 from io import StringIO
-def load_csv_data(csv_url, log_dir, timeout=10):
+def test_github_connection(url, timeout=5):
+    try:
+        response = requests.head(url, timeout=timeout)
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        logger.error(f"连接到 GitHub 失败: {e}")
+        return False
+def load_csv_data():
     cache_file = os.path.join(log_dir, "torrents_cache.csv")
+    if not test_github_connection(csv_url):
+        logger.error("无法连接到 GitHub，无法更新种子库。请检查网络连接,小K走喽")
+        sys.exit(1)
     try:
         logger.info('正常从本地缓存中查重')
         with open(cache_file, 'r') as file:
@@ -24,7 +35,7 @@ def load_csv_data(csv_url, log_dir, timeout=10):
 
     except FileNotFoundError:
         logger.info('缓存查重失败，正在更新最终种子库')
-        response = requests.get(csv_url, timeout=timeout)
+        response = requests.get(csv_url)
         response.raise_for_status()
         csv_file = StringIO(response.text)
 
