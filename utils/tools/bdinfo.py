@@ -92,6 +92,8 @@ def generate_and_parse_bdinfo(folder_path):
         # 卸载之前可能遗留的挂载
         subprocess.run(['umount', '/mnt/iso_mount'], check=False)
     bdmv_path = find_bdmv_parent_directory(folder_path)
+    bdmv_path = bdmv_path.replace("'", "'\\''")
+
     if bdmv_path:
         logger.info(f"找到 BDMV 文件夹在路径：{bdmv_path}")
     else:

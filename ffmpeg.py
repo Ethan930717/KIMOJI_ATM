@@ -37,6 +37,7 @@ def screenshot_from_bd(directory, pic_num, file_dir ,image_format='png'):
 def get_video_duration(file_path):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
+    video_dir = video_dir.replace("'", "'\\''")
     try:
         command = [
             "docker", "run",
@@ -104,6 +105,7 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
 
     intervals = (end_time - start_time) / pic_num  # 计算时间间隔
     image_paths = []
+    video_dir = video_dir.replace("'", "'\\''")
     for i in range(1, pic_num + 1):
         screenshot_time = start_time + (i - 1) * intervals
         screenshot_name = f"{i}.{image_format}"
