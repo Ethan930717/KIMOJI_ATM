@@ -3,7 +3,11 @@ import subprocess
 import os
 import logging
 import glob
+import shutil
 
+current_file_path = os.path.abspath(__file__)
+project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
+log_dir = os.path.join(project_root_dir, 'log')
 logger = logging.getLogger(__name__)
 
 def check_and_extract_bdinfo_from_file(folder_path):
@@ -87,12 +91,16 @@ def generate_and_parse_bdinfo(folder_path):
     bdmv_path = find_bdmv_parent_directory(folder_path)
     if bdmv_path:
         logger.info(f"找到 BDMV 文件夹在路径：{bdmv_path}")
-        folder_path = bdmv_path
     else:
         logger.error("未找到 BDMV 文件夹")
         return None, None, None
     try:
-        docker_command = ["docker", "run", "--rm","--name","kimoji-bdinfo", "-v", f"{bdmv_path}:/mnt/bd", "hudan717/kimoji-bdinfo","-w", "/mnt/bd"]
+        docker_command = [
+            "docker", "run", "--rm", "--name", "kimoji-bdinfo",
+            "-v", f"{bdmv_path}:/mnt/bd",
+            "-v", f"{log_dir}:/mnt/report",  # 挂载额外的输出目录
+            "hudan717/kimoji-bdinfo", "-w", "/mnt/report"
+        ]
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:
@@ -107,7 +115,7 @@ def generate_and_parse_bdinfo(folder_path):
         logger.error(f"运行 BDInfo 时出错: {e}")
         return None
 
-    bdinfo_file_path = os.path.join(folder_path, 'BDINFO.bd.txt')
+    bdinfo_file_path = os.path.join(log_dir, 'BDINFO.bd.txt')
     if not os.path.exists(bdinfo_file_path):
         logger.warning("未找到 BDInfo 扫描文件")
         return None
