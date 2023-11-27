@@ -5,17 +5,55 @@ import logging
 import csv
 import subprocess
 import datetime
+from io import StringIO
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
 log_file_path = os.path.join(log_dir, 'record.csv')
 logger = logging.getLogger(__name__)
+import requests
+import csv
+from io import StringIO
+def load_csv_data():
+    # 使用 requests 获取 CSV 文件内容
+    response = requests.get("https://raw.githubusercontent.com/KIMOJI-PT/data/main/torrents.csv")
+    response.raise_for_status()  # 确保请求成功
+
+    # 使用 StringIO 来模拟一个文件
+    csv_file = StringIO(response.text)
+
+    # 读取和解析 CSV 文件内容
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    torrent_titles = [row[0] for row in csv_reader]
+
+    # 关闭 StringIO 对象
+    csv_file.close()
+
+    return torrent_titles
+
+
 def extract_title_info(url_name):
+    # 从CSV文件加载数据
+    existing_titles = load_csv_data()
     # 提取路径中的最后一个文件夹名称
     media_name = url_name.split('/')[-1]
     logger.info(f'正在解析目录名称:{media_name}')
-    # 提取最后一个中文之前的所有内容
+    logger.info('正在从KIMOJI种子库中匹配查重...')
+    if media_name in existing_titles:
+        logger.info("已存在相同种子，跳过本资源")
+        file_path = os.path.join(url_name, "kimoji_pass")
+        open(file_path, 'w').close()
+        logger.info('已发标记创建成功')
+        log_to_csv(url_name, "成功", log_file_path , '已发')
+        try:
+            k_script_path = os.path.join(project_root_dir, 'k')
+            subprocess.run([k_script_path], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"运行 '{k_script_path}' 命令时出错: {e}")
+        finally:
+            sys.exit(0)    # 提取最后一个中文之前的所有内容
+    logger.info('未发现相同资源，开始发种')
     match_chinese = re.search(r'([\u4e00-\u9fff].*?)[\u4e00-\u9fff]\.', media_name)
     chinese_title = match_chinese.group(1) if match_chinese else None
 
