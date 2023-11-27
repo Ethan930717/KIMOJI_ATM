@@ -4,6 +4,7 @@ import logging
 import time
 import sys
 import os
+import subprocess
 logger = logging.getLogger(__name__)
 
 
@@ -32,12 +33,19 @@ def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max
                     skip_checking=skip_checking
                 )
             logger.info("种子添加成功,小K收工啦")
+
+            # 重新启动 main.py 脚本
+            python_executable = sys.executable
+            main_script_path = os.path.join(os.path.dirname(__file__), 'main.py')
+            subprocess.Popen([python_executable, main_script_path])
             sys.exit(0)
+
         except Exception as e:
             retries += 1
             logger.warning(f"添加种子时发生错误: {e}")
             if retries >= max_retries:
-                logger.error("达到最大重试次数，停止尝试，请手动添加种子")
-                sys.exit(1)
+                logger.error("达到最大重试次数，停止尝试")
+                logger.error(f"种子添加失败，种子路径 {torrent_path}，请尝试手动添加。")
+                break
             logger.warning(f"正在尝试第 {retries} 次重试")
             time.sleep(5)
