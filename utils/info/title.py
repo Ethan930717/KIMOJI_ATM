@@ -18,8 +18,6 @@ def extract_title_info(url_name):
     match_chinese = re.search(r'([\u4e00-\u9fff].*?)[\u4e00-\u9fff]\.', media_name)
     chinese_title = match_chinese.group(1) if match_chinese else None
 
-    chinese_title
-
     # 提取季数
     match_season = re.search(r'S(\d{2})\.', media_name)
     season = match_season.group(1) if match_season else None

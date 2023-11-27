@@ -1,6 +1,7 @@
 from tmdbv3api import TMDb, Movie, TV
 import requests
 import logging
+import re
 logger = logging.getLogger(__name__)
 
 def setup_tmdb():
@@ -25,6 +26,8 @@ def search_tmdb(english_title):
     movie = Movie()
     tv = TV()
     attempt_count = 0
+    def contains_chinese(text):
+        return bool(re.search(r'[\u4e00-\u9fff]', text))
     while attempt_count < 3:
         try:
             if english_title:
@@ -79,6 +82,9 @@ def search_tmdb(english_title):
                     else:
                         logger.info('正在搜索TMDb_tv元数据')
                         item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
+                    # 检查中文名称是否包含中文字符
+                    if not contains_chinese(chinese_name):
+                        chinese_name = None
                     logger.info(
                         f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
                     return item_type, tmdb_id, media_type, chinese_name, child, keywords
