@@ -36,9 +36,10 @@ def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max
             logger.info("种子添加成功,小K收工啦")
 
             try:
-                subprocess.run(["./k"], check=True)
+                k_script_path = os.path.join(project_root_dir, 'k')
+                subprocess.run([k_script_path], check=True)
             except subprocess.CalledProcessError as e:
-                logger.error(f"运行 './k' 命令时出错: {e}")
+                logger.error(f"运行 '{k_script_path}' 命令时出错: {e}")
             finally:
                 sys.exit(0)
 
