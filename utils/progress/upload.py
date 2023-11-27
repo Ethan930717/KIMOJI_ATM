@@ -146,7 +146,9 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
-    if maker and not (personal == 1  or internal == 1):
+    if not maker or maker.upper() == "NONAME" or maker.upper() == "ANONYMOUS":
+        pic_urls = pic_urls
+    elif maker and not (personal == 1  or internal == 1):
         pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
     scraper = cloudscraper.create_scraper()
     # 登录
