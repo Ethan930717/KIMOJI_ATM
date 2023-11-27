@@ -2,7 +2,6 @@ import re
 import os
 import sys
 import logging
-import csv
 import subprocess
 import datetime
 from io import StringIO
@@ -10,34 +9,38 @@ logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
+csv_url = "https://raw.githubusercontent.com/KIMOJI-PT/data/main/torrents.csv"
 log_file_path = os.path.join(log_dir, 'record.csv')
 logger = logging.getLogger(__name__)
 import requests
 import csv
 from io import StringIO
-def load_csv_data():
-    # 使用 requests 获取 CSV 文件内容
-    response = requests.get("https://raw.githubusercontent.com/KIMOJI-PT/data/main/torrents.csv")
-    response.raise_for_status()  # 确保请求成功
+def load_csv_data(csv_url, log_dir, timeout=10):
+    cache_file = os.path.join(log_dir, "torrents_cache.csv")
+    try:
+        logger.info('正常从本地缓存中查重')
+        with open(cache_file, 'r') as file:
+            return [row[0] for row in csv.reader(file)]
 
-    # 使用 StringIO 来模拟一个文件
-    csv_file = StringIO(response.text)
+    except FileNotFoundError:
+        logger.info('缓存查重失败，正在更新最终种子库')
+        response = requests.get(csv_url, timeout=timeout)
+        response.raise_for_status()
+        csv_file = StringIO(response.text)
 
-    # 读取和解析 CSV 文件内容
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    torrent_titles = [row[0] for row in csv_reader]
+        # 写入缓存文件
+        with open(cache_file, 'w') as file:
+            file.write(response.text)
 
-    # 关闭 StringIO 对象
-    csv_file.close()
-
-    return torrent_titles
-
-
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        torrent_titles = [row[0] for row in csv_reader]
+        csv_file.close()
+        return torrent_titles
 def extract_title_info(url_name):
     media_name = url_name.split('/')[-1]
     logger.info(f'正在解析目录名称:{media_name}')
     # 从CSV文件加载数据
-    logger.info('正在从KIMOJI种子库中匹配查重...')
+    logger.info('正在从KIMOJI种子库中匹配查重，首次缓存较慢，请耐心等待...')
     existing_titles = load_csv_data()
     # 提取路径中的最后一个文件夹名称
     if media_name in existing_titles:
