@@ -35,11 +35,12 @@ def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max
                 )
             logger.info("种子添加成功,小K收工啦")
 
-            # 重新启动 main.py 脚本
-            python_executable = sys.executable
-            main_script_path = os.path.join(project_root_dir, 'main.py')
-            subprocess.Popen([python_executable, main_script_path])
-            sys.exit(0)
+            try:
+                subprocess.run(["./k"], check=True)
+            except subprocess.CalledProcessError as e:
+                logger.error(f"运行 './k' 命令时出错: {e}")
+            finally:
+                sys.exit(0)
 
         except Exception as e:
             retries += 1
