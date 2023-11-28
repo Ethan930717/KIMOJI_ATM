@@ -35,8 +35,8 @@ def search_tmdb(english_title):
         try:
             if english_title:
                 logger.info(f"正在搜索 TMDb: {english_title}")
-                movie_results_en = [m for m in movie.search(english_title)]
-                tv_results_en = [t for t in tv.search(english_title)]
+                movie_results_en = [m for m in movie(english_title)]
+                tv_results_en = [t for t in tv(english_title)]
                 combined_results_en = movie_results_en + tv_results_en
 
                 if combined_results_en:
