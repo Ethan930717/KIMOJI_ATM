@@ -104,10 +104,6 @@ def search_tmdb(english_title):
 
 #判定类别
 def extract_name(json_data):
-    if 'translations' in json_data and 'translations' in json_data['translations']:
-        for translation in json_data['translations']['translations']:
-            if translation['iso_3166_1'] == 'CN' and translation['iso_639_1'] == 'zh':
-                return translation['data']['title']
     if 'titles' in json_data:
         for title in json_data['titles']:
             if title.get('iso_3166_1') == 'CN':  # 检查国家代码
@@ -116,12 +112,13 @@ def extract_name(json_data):
         for title in json_data['titles']:
             if title.get('iso_639_1') == 'zh':  # 检查语言代码
                 return title['title']
-
-    # 如果都没有找到中文标题，尝试其他关键字
+    if 'translations' in json_data and 'translations' in json_data['translations']:
+        for translation in json_data['translations']['translations']:
+            if translation['iso_3166_1'] == 'CN' and translation['iso_639_1'] == 'zh':
+                return translation['data']['title']
     for key in ["original_title", "original_name", "title", "name"]:
         if key in json_data:
             return json_data[key]
-
     return 'noname'
 
 
@@ -184,7 +181,6 @@ def get_tv_type(tmdb_id):
         if item_type == 'anime':
             item_type = "anime-tv"
         return item_type, "series", chinese_name, child, keywords
-
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
         return "tv", "seires", None, None, None
