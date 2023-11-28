@@ -83,8 +83,8 @@ def search_tmdb(english_title):
                         logger.info('正在搜索TMDb_tv元数据')
                         item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
                     # 检查中文名称是否包含中文字符
-                    if not contains_chinese(chinese_name):
-                        chinese_name = None
+                    if contains_chinese(title_or_name):
+                        chinese_name = title_or_name
                     logger.info(
                         f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
                     return item_type, tmdb_id, media_type, chinese_name, child, keywords
