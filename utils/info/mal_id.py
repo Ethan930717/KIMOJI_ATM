@@ -7,7 +7,8 @@ def get_mal_id(title):
         data = response.json()
         if 'data' in data and len(data['data']) > 0:
             # 获取第一个搜索结果的 MAL ID
-            logger.info(f"MAL ID匹配成功{data['data'][0]['mal_id']}")
+            logger.info('mal id将在种子发布后由站点异步获取')
+            #logger.info(f"MAL ID匹配成功{data['data'][0]['mal_id']}")
             #return data['data'][0]['mal_id']
             return None
     return None

@@ -35,8 +35,8 @@ def search_tmdb(english_title):
         try:
             if english_title:
                 logger.info(f"正在搜索 TMDb: {english_title}")
-                movie_results_en = [m for m in movie(english_title)]
-                tv_results_en = [t for t in tv(english_title)]
+                movie_results_en = [m for m in movie.search(english_title)]
+                tv_results_en = [t for t in tv.search(english_title)]
                 combined_results_en = movie_results_en + tv_results_en
 
                 if combined_results_en:
@@ -67,13 +67,13 @@ def search_tmdb(english_title):
                         tmdb_id = int(user_input[tmdb_id_start_pos:])
                         if item_type == 'movie':
                             logger.info('正在搜索TMDb_movie元数据')
-                            item_type, media_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
+                            media_type, item_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
                         else:
                             logger.info('正在搜索TMDb_tv元数据')
-                            item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
+                            media_type, item_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
                         logger.info(
                             f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {item_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
-                        return item_type, tmdb_id, media_type, chinese_name, child, keywords
+                        return media_type, tmdb_id, item_type, chinese_name, child, keywords
 
                     selected_index = int(user_input) - 1
                     selected_result = combined_results_en[selected_index]
@@ -81,16 +81,16 @@ def search_tmdb(english_title):
                     tmdb_id = selected_result.id
                     if item_type == 'movie':
                         logger.info('正在搜索TMDb_movie元数据')
-                        item_type, media_type, chinese_name, child, keywords = get_movie_type(tmdb_id)
+                        media_type,item_type,chinese_name, child, keywords = get_movie_type(tmdb_id)
                     else:
                         logger.info('正在搜索TMDb_tv元数据')
-                        item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
+                        media_type, item_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
                     # 检查中文名称是否包含中文字符
                     if contains_chinese(title_or_name):
                         chinese_name = title_or_name
                     logger.info(
                         f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
-                    return item_type, tmdb_id, media_type, chinese_name, child, keywords
+                    return media_type, tmdb_id, media_type, chinese_name, child, keywords
 
             logger.info("没有在 TMDb 中搜索到数据，尝试通过 IMDb 搜索")
             return None, None, None, None, None, None
@@ -104,21 +104,24 @@ def search_tmdb(english_title):
 
 #判定类别
 def extract_name(json_data):
-    if 'titles' in json_data:
-        for title in json_data['titles']:
-            if title.get('iso_3166_1') == 'CN':  # 检查国家代码
-                return title['title']
-    if 'titles' in json_data:
-        for title in json_data['titles']:
-            if title.get('iso_639_1') == 'zh':  # 检查语言代码
-                return title['title']
-    if 'translations' in json_data and 'translations' in json_data['translations']:
-        for translation in json_data['translations']['translations']:
-            if translation['iso_3166_1'] == 'CN' and translation['iso_639_1'] == 'zh':
-                return translation['data']['title']
-    for key in ["original_title", "original_name", "title", "name"]:
-        if key in json_data:
-            return json_data[key]
+    try:
+        if 'titles' in json_data:
+            for title in json_data['titles']:
+                if title.get('iso_3166_1') == 'CN':  # 检查国家代码
+                    return title.get('title')
+        if 'titles' in json_data:
+            for title in json_data['titles']:
+                if title.get('iso_639_1') == 'zh':  # 检查语言代码
+                    return title.get('title')
+        if 'translations' in json_data and 'translations' in json_data['translations']:
+            for translation in json_data['translations']['translations']:
+                if translation['iso_3166_1'] == 'CN' and translation['iso_639_1'] == 'zh':
+                    return translation['data'].get('title')
+        for key in ["original_title", "original_name", "title", "name"]:
+            if key in json_data:
+                return json_data[key]
+    except Exception as e:
+        logger.error(f"Error extracting name: {e}")
     return 'noname'
 
 
@@ -158,13 +161,13 @@ def get_movie_type(tmdb_id):
         chinese_name = extract_name(movie_json)
         genres = extract_genres(movie_json)
         keywords = extract_keywords(movie_json)
-        item_type = determine_media_type(genres, "movie")
+        media_type = determine_media_type(genres, "movie")
         child = determine_child_flag(genres)
-        if item_type == 'anime':
-            item_type = "anime-movie"
+        if media_type == 'anime':
+            media_type = "anime-movie"
         #print(movie_json)
         #print(f'{item_type},{chinese_name},{child},{keywords}')
-        return item_type,"movie", chinese_name, child, keywords
+        return media_type, "movie", chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电影详情时发生错误: {e}")
         return "movie", "movie", None, None, None
@@ -176,11 +179,11 @@ def get_tv_type(tmdb_id):
         chinese_name = extract_name(tv_json)
         genres = extract_genres(tv_json)
         keywords = extract_keywords(tv_json)
-        item_type = determine_media_type(genres, "tv")
+        media_type = determine_media_type(genres, "tv")
         child = determine_child_flag(genres)
-        if item_type == 'anime':
-            item_type = "anime-tv"
-        return item_type, "series", chinese_name, child, keywords
+        if media_type == 'anime':
+            media_type = "anime-tv"
+        return media_type, "series", chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
-        return "tv", "seires", None, None, None
+        return "seires", "seires", None, None, None
