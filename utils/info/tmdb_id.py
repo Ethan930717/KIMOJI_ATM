@@ -9,6 +9,8 @@ def setup_tmdb():
     tmdb.api_key = '107492d808d58cb5f5fae5005c7d764d'
     tmdb.language = 'zh-CN'
 
+setup_tmdb()
+
 #筛选所有结果
 def search_and_select(results, movie_results_en):
     if not results:
@@ -22,11 +24,9 @@ def search_and_select(results, movie_results_en):
     return selected_result, item_type
 #确定TMDBID
 def search_tmdb(english_title):
-    setup_tmdb()
     movie = Movie()
     tv = TV()
     attempt_count = 0
-
     def contains_chinese(text):
         if isinstance(text, str):
             return bool(re.search(r'[\u4e00-\u9fff]', text))
@@ -139,9 +139,7 @@ def determine_media_type(genres, caller_type):
 def determine_child_flag(genres):
     return 1 if any(genre['name'] in ['儿童'] for genre in genres) else 0
 def get_movie_type(tmdb_id):
-    setup_tmdb()
     movie = Movie()
-
     try:
         movie_json = movie.details(tmdb_id)
         chinese_name = extract_name(movie_json)
@@ -159,7 +157,6 @@ def get_movie_type(tmdb_id):
         return "movie", "movie", None, None, None
 
 def get_tv_type(tmdb_id):
-    setup_tmdb()
     tv = TV()
     try:
         tv_json = tv.details(tmdb_id)
