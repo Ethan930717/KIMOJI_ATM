@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
-csv_url = "https://raw.githubusercontent.com/KIMOJI-PT/data/main/torrents.csv"
+csv_url = "https://kimoji.club/kimojidata/torrents.csv"
 log_file_path = os.path.join(log_dir, 'record.csv')
 logger = logging.getLogger(__name__)
 import requests
