@@ -72,7 +72,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
 
 
 #mediainfo/bdinfo解析
-def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type,  child, internal, personal, keywords, upload_title, chinese_name):
+def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, item_type,  child, internal, personal, keywords, upload_title, chinese_name):
     file_name, action = find_media_folder(file_dir)
     mediainfo_output = ''
     bd_info = ''
@@ -112,7 +112,7 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
         else:
             logger.error("无法找到可解析的影片")
             sys.exit()
-        kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker ,pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, resolution, bd_info, internal,personal,keywords,upload_title, mediainfo_output,chinese_name)
+        kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker ,pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id, item_type, child, resolution, bd_info, internal,personal,keywords,upload_title, mediainfo_output,chinese_name)
     else:
         logger.warning("没有找到合适的媒体文件夹")
 
