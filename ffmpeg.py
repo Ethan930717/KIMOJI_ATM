@@ -112,7 +112,7 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
         screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
         command = [
-            "docker", "run","--rm","--name","kimoji-bdinfo",
+            "docker", "run","--rm","--name","kimoji-ffmpeg",
             "-v", f"{video_dir}:/workspace",
             "-v", f"{log_dir}:/output",  # 挂载输出目录
             "jrottenberg/ffmpeg:ubuntu",
