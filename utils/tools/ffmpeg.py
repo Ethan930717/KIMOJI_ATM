@@ -31,32 +31,27 @@ def screenshot_from_bd(directory, pic_num, file_dir):
     logger.info(f"找到最大的 .m2ts 文件: {largest_file}")
     return screenshot_from_video(largest_file, pic_num, file_dir, image_format='png')
 def get_video_duration(file_path):
-    # 获取文件所在的目录
-    video_dir = os.path.dirname(file_path)
-    # 获取目录下的所有视频文件
-    video_files = glob.glob(f"{video_dir}/*.*", recursive=True)
+    video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
+    video_file = os.path.basename(file_path)  # 获取视频文件名
+    video_dir = video_dir.replace("'", "'\\''")
+    try:
+        command = [
+            "docker", "run",
+            "-v", f"{video_dir}:/workspace",
+            "jrottenberg/ffmpeg:ubuntu",
+            "-i", f"/workspace/{video_file}",
+            "2>&1"
+        ]
 
-    for video_file in video_files:
-        try:
-            video_file = video_file.replace("'", "'\\''")
-            command = [
-                "docker", "run",
-                "-v", f"{video_dir}:/workspace",
-                "jrottenberg/ffmpeg:ubuntu",
-                "-i", f"/workspace/{os.path.basename(video_file)}",
-                "2>&1"
-            ]
+        # 使用 shell 命令执行 Docker 命令，并通过管道传递到 grep
+        result = subprocess.check_output(' '.join(command) + " | grep 'Duration'", shell=True, text=True)
+        duration_str = result.split('Duration: ')[1].split(',')[0].strip()
+        h, m, s = map(float, duration_str.split(':'))
+        return int(h * 3600 + m * 60 + s)
+    except subprocess.CalledProcessError:
+        logger.error("获取视频时长失败")
+        return None
 
-            # 使用 shell 命令执行 Docker 命令，并通过管道传递到 grep
-            result = subprocess.check_output(' '.join(command) + " | grep 'Duration'", shell=True, text=True)
-            duration_str = result.split('Duration: ')[1].split(',')[0].strip()
-            h, m, s = map(float, duration_str.split(':'))
-            return int(h * 3600 + m * 60 + s)
-        except subprocess.CalledProcessError:
-            continue
-
-    logger.error("获取所有视频时长失败，请检查视频文件，小K走喽")
-    return None
 def upload_to_chevereto(image_path,i):
     url = 'https://img.kimoji.club'
     api_key = 'chv_Qv3_df17c2e80aa516206778a352b3eff8b98bb80779924fa9d63acfd077c05d31fb6b0d443b7768550efc9be2cd02dcfe02ed4b0c72a0a1d32de328ae5aa8ac81c4'
@@ -88,31 +83,7 @@ def upload_to_chevereto(image_path,i):
     logger.error(f"第{i}张图片连续三次上传失败")
     return None
 
-def find_all_video_files(dir_path):
-    video_formats = ['*.mp4', '*.mkv', '*.avi', '*.mov', '*.m2ts']  # 添加您需要支持的视频格式
-    video_files = []
-    for video_format in video_formats:
-        video_files.extend(glob.glob(os.path.join(dir_path, video_format)))
-    return video_files
-
-def screenshot_from_videos_in_dir(dir_path, pic_num, image_format='jpg'):
-    video_files = find_all_video_files(dir_path)
-    pic_urls_total = []
-
-    for video_file in video_files:
-        pic_urls = screenshot_from_video(video_file, pic_num, dir_path, image_format)
-
-        if pic_urls:
-            pic_urls_total.extend(pic_urls)
-            if len(pic_urls_total) >= pic_num:
-                break  # 如果已经获得足够的截图，则停止
-
-    if not pic_urls_total:
-        logger.error("所有视频文件截图均失败")
-        return None
-
-    return pic_urls_total
-def screenshot_from_video(file_path, pic_num, image_format='jpg'):
+def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
     logger.info('开始截图')
