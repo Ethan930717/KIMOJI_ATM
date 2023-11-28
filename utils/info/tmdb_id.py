@@ -72,7 +72,7 @@ def search_tmdb(english_title):
                             logger.info('正在搜索TMDb_tv元数据')
                             item_type, media_type, chinese_name, child, keywords = get_tv_type(tmdb_id)
                         logger.info(
-                            f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {media_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
+                            f"找到匹配的 TMDb ID: {tmdb_id}, 类型: {item_type}, 片名: {chinese_name},child:{child}, 开始查找其他元数据ID")
                         return item_type, tmdb_id, media_type, chinese_name, child, keywords
 
                     selected_index = int(user_input) - 1
