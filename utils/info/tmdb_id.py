@@ -26,8 +26,11 @@ def search_tmdb(english_title):
     movie = Movie()
     tv = TV()
     attempt_count = 0
+
     def contains_chinese(text):
-        return bool(re.search(r'[\u4e00-\u9fff]', text))
+        if isinstance(text, str):
+            return bool(re.search(r'[\u4e00-\u9fff]', text))
+        return False
     while attempt_count < 3:
         try:
             if english_title:
