@@ -88,7 +88,31 @@ def upload_to_chevereto(image_path,i):
     logger.error(f"第{i}张图片连续三次上传失败")
     return None
 
-def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
+def find_all_video_files(dir_path):
+    video_formats = ['*.mp4', '*.mkv', '*.avi', '*.mov', '*.m2ts']  # 添加您需要支持的视频格式
+    video_files = []
+    for video_format in video_formats:
+        video_files.extend(glob.glob(os.path.join(dir_path, video_format)))
+    return video_files
+
+def screenshot_from_videos_in_dir(dir_path, pic_num, image_format='jpg'):
+    video_files = find_all_video_files(dir_path)
+    pic_urls_total = []
+
+    for video_file in video_files:
+        pic_urls = screenshot_from_video(video_file, pic_num, dir_path, image_format)
+
+        if pic_urls:
+            pic_urls_total.extend(pic_urls)
+            if len(pic_urls_total) >= pic_num:
+                break  # 如果已经获得足够的截图，则停止
+
+    if not pic_urls_total:
+        logger.error("所有视频文件截图均失败")
+        return None
+
+    return pic_urls_total
+def screenshot_from_video(file_path, pic_num, image_format='jpg'):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
     logger.info('开始截图')

@@ -7,7 +7,7 @@ from utils.info.title import extract_title_info
 from utils.info.tvdb_id import search_tvdb
 from utils.tools.mediainfo import save_mediainfo_to_file
 from utils.tools.bdinfo import generate_and_parse_bdinfo
-from utils.tools.ffmpeg import screenshot_from_video,screenshot_from_bd
+from utils.tools.ffmpeg import screenshot_from_videos_in_dir,screenshot_from_bd
 from utils.tools.bdinfo import check_and_extract_bdinfo_from_file,process_quick_summary
 from utils.progress.upload import kimoji_upload
 import os
@@ -86,7 +86,7 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
             if resolution and video_format and audio_format:
                 print(
                     f"分析结果: \n分辨率: {resolution}, 视频格式: {video_format}, 音频格式: {audio_format}")
-                pic_urls = screenshot_from_video(largest_video_file,pic_num,file_dir)
+                pic_urls = screenshot_from_videos_in_dir(largest_video_file,pic_num,file_dir)
             else:
                 logger.error("无法获取 Mediainfo 分析结果，请检查视频文件是否损坏")
                 file_path = os.path.join(file_name, "kimoji_pass")

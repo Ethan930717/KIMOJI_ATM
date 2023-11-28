@@ -228,21 +228,24 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             if download_torrent_file_with_scraper(scraper, torrent_download_url, temp_torrent_path):
                                 add_torrent_to_qbittorrent(temp_torrent_path, project_root_dir)
                             else:
-                                logger.error("下载种子文件失败")
+                                logger.error("下载种子文件失败，请手动做种")
+                                file_path = os.path.join(file_name, "kimoji_pass")
+                                open(file_path, 'w').close()
                                 return False
                         else:
-                            logger.error("发种未成功，未找到期望的重定向URL，请查看日志")
-                            temp_torrent_path = os.path.join('log', 'temp.torrent')
+                            logger.error("发种未成功，未找到期望的重定向URL，请查看日志，已跳过本资源")
                             file_path = os.path.join(file_name, "kimoji_pass")
+                            open(file_path, 'w').close()
                             log_to_csv(file_name, "失败", log_csv_path, "")
                             with open(log_file_path, 'w', encoding='utf-8') as log_file:
                                 log_file.write(response.text)
                             return False
                         os.remove(os.path.join(log_dir, 'BDINFO.bd.txt'))
                     else:
-                        logger.error("发种请求未发生重定向，请查看日志")
-                        temp_torrent_path = os.path.join('log', 'temp.torrent')
+                        logger.error("发种请求未发生重定向，请查看日志，已跳过本资源")
                         file_path = os.path.join(file_name, "kimoji_pass")
+                        open(file_path, 'w').close()
+
                         log_to_csv(file_name, "失败", log_csv_path, "")
                         with open(log_file_path, 'w', encoding='utf-8') as log_file:
                             log_file.write(response.text)
