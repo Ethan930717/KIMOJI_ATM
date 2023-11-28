@@ -104,13 +104,14 @@ def search_tmdb(english_title):
 
 #判定类别
 def extract_name(json_data):
-    # 首先检查是否有中文标题（基于国家代码）
+    if 'translations' in json_data and 'translations' in json_data['translations']:
+        for translation in json_data['translations']['translations']:
+            if translation['iso_3166_1'] == 'CN' and translation['iso_639_1'] == 'zh':
+                return translation['data']['title']
     if 'titles' in json_data:
         for title in json_data['titles']:
             if title.get('iso_3166_1') == 'CN':  # 检查国家代码
                 return title['title']
-
-    # 如果没有基于国家代码的中文标题，检查是否有基于语言代码的中文标题
     if 'titles' in json_data:
         for title in json_data['titles']:
             if title.get('iso_639_1') == 'zh':  # 检查语言代码
