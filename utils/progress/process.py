@@ -51,8 +51,8 @@ def create_torrent_if_needed(file_dir, torrent_dir):
             log_to_csv(folder_path, "失败", log_file_path , "")
             sys.exit()
         imdb_id = "0" if not imdb_id else imdb_id
-        mal_id = "0" if not mal_id else mal_id
-        tvdb_id = "0" if not tvdb_id else tvdb_id
+        mal_id = "0"
+        tvdb_id = "0"
         tmdb_id = "0" if not tmdb_id else tmdb_id
         existing_torrent_path = check_existing_torrent(torrent_dir, file_name)
         if not existing_torrent_path:

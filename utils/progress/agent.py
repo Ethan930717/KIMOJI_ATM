@@ -6,6 +6,7 @@ import time
 import sys
 import os
 import subprocess
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -13,7 +14,7 @@ project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_
 def add_torrent_based_on_agent(torrent_path, config_url, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
     agent = config['basic']['agent']
-
+    logger.info(f'检测到当前选择的下载器为{agent}')
     if agent == 'qb':
         add_torrent_to_qbittorrent(torrent_path, config_url, max_retries=max_retries)
         logger.info('正在尝试将种子添加到qbittorrent')
@@ -68,10 +69,7 @@ def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max
             time.sleep(5)
 
 def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
-    # 加载配置文件
     config = load_config(os.path.join(config_url, 'config.yaml'))
-
-    # 创建Transmission客户端
     tc = transmission_rpc.Client(
         host=config['transmission']['address'],
         port=config['transmission']['port'],
@@ -85,7 +83,7 @@ def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
             # 添加种子
             with open(torrent_path, 'rb') as torrent_file:
                 torrent_data = torrent_file.read()
-                tc.add_torrent(torrent_data, download_dir=config['transmission']['download_dir'])
+                tc.add_torrent(torrent_data, download_dir=config['transmission']['save_path'])
 
             logger.info("种子成功添加到Transmission")
             break
@@ -101,7 +99,7 @@ def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
             logger.warning(f"正在尝试第 {retries} 次重试")
             time.sleep(5)
 
-#if __name__ == "__main__":
-   # torrent_path = '/Users/Ethan/Downloads/[KIMOJI]情迷黑森林.The.Gateau.Affairs.2005.S01.1080p.MyTVS.WEB-DL.H265.AAC-YingWEB.torrent'  # 更改为您的种子文件路径
-  #  config_url = '/Users/Ethan/Documents/GitHub/KIMOJI_ATM'  # 更改为您的配置文件目录
-  #  add_torrent_to_transmission(torrent_path, config_url)
+if __name__ == "__main__":
+    torrent_path = '/Users/Ethan/Downloads/temp.torrent'  # 更改为您的种子文件路径
+    config_url = '/Users/Ethan/Documents/GitHub/KIMOJI_ATM'  # 更改为您的配置文件目录
+    add_torrent_based_on_agent(torrent_path, config_url)
