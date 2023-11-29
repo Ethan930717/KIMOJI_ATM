@@ -231,7 +231,14 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             with open(log_file_path, 'w', encoding='utf-8') as log_file:
                                 log_file.write(response.text)
                             return False
-                        os.remove(os.path.join(log_dir, 'BDINFO.bd.txt'))
+                        bdinfo_file_path = os.path.join(log_dir, 'BDINFO.bd.txt')
+                        if os.path.exists(bdinfo_file_path):
+                            try:
+                                os.remove(bdinfo_file_path)
+                            except Exception as e:
+                                logger.error(f"删除文件时发生错误: {e}")
+                        else:
+                            logger.warning(f"文件不存在，无法删除: {bdinfo_file_path}")
                     else:
                         logger.error("发种请求未发生重定向，请查看日志，已跳过本资源")
                         file_path = os.path.join(file_name, "kimoji_pass")

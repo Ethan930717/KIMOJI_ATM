@@ -7,6 +7,8 @@ basic:
   pic_num: 6 #选择发种时的截图数量
   internal: 0 #KIMOJI官组专用，请保持0
   personal: 0 #是否为个人作品，即自己抓流、压制、剪辑的作品，不属于任何工作组
+
+####qb和tr选择性配置一个即可，记得在agent做好指定###
 qbittorrent:
   url: '192.168.5.1' #qb路径
   port: '8080'      #qb端口
@@ -18,4 +20,4 @@ transmission:
   port: '9091'      #tr端口
   username: 'admin' #登陆账号
   password: 'password'   #密码
-  save_path: '/downlaod'   #tr保存路径
+  save_path: '/download'   #tr保存路径
