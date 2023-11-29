@@ -12,15 +12,17 @@ project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_
 
 def add_torrent_based_on_agent(torrent_path, config_url, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
-    agent = config.get('agent')
+    agent = config['agent']
 
     if agent == 'qb':
         add_torrent_to_qbittorrent(torrent_path, config_url, max_retries=max_retries)
+        logger.info('正在尝试将种子添加到qbittorrent')
     elif agent == 'tr':
         add_torrent_to_transmission(torrent_path, config_url, max_retries=max_retries)
+        logger.info('正在尝试将种子添加到transmission')
     else:
         logger.error("未正确指定做种下载器，请手动做种")
-        logger.error(f"种子路径: {torrent_path}")
+        logger.error(f"临时种子保存在kimoji-atm主目录/{torrent_path}")
 def add_torrent_to_qbittorrent(torrent_path, config_url, skip_checking=True, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
     qbt_client = qbittorrentapi.Client(

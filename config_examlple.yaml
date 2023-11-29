@@ -3,10 +3,10 @@ basic:
   torrent_dir: '/torrent' #指定一个存放种子的路径，需保证路径存在该文件夹
   username: 'admin' #kimoji账号
   password: 'password' #kimoji密码
+  agent: 'qb' #选择做种下载器，qb或tr，只能选择一个
   pic_num: 6 #选择发种时的截图数量
   internal: 0 #KIMOJI官组专用，请保持0
   personal: 0 #是否为个人作品，即自己抓流、压制、剪辑的作品，不属于任何工作组
-
 qbittorrent:
   url: '192.168.5.1' #qb路径
   port: '8080'      #qb端口
