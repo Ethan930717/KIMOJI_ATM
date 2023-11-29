@@ -12,7 +12,7 @@ project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_
 
 def add_torrent_based_on_agent(torrent_path, config_url, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
-    agent = config['agent']
+    agent = config['basic']['agent']
 
     if agent == 'qb':
         add_torrent_to_qbittorrent(torrent_path, config_url, max_retries=max_retries)
