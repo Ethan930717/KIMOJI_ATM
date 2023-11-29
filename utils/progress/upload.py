@@ -38,7 +38,7 @@ def login(login_url, username, password, scraper):
     response = scraper.post(login_url, data=login_data)
     return response.ok, scraper
 
-def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id,media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name):
+def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name):
     episode = "0"
     logger.info(f'已选择类型为{media_type}')
     if not season and (not media_type =='anime-movie' or not media_type =='movie'):
@@ -47,28 +47,18 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         select_type='4'
     elif media_type == 'anime-movie':
         select_type='3'
-        tvdb_id="0"
         season = ""
         episode = ""
     elif media_type == 'doc':
-        mal_id = "0"
         select_type='6'
-        logger.info(f'当前资源非动漫类型，已将mal id设为0')
     elif media_type == 'show':
         select_type='5'
-        mal_id = "0"
-        logger.info(f'当前资源非动漫类型，已将mal id设为0')
     elif media_type == 'series':
         select_type='2'
-        mal_id = "0"
-        logger.info(f'当前资源非动漫类型，已将mal id设为0')
     elif media_type == 'movie':
         select_type='1'
-        tvdb_id="0"
-        mal_id = "0"
         season = ""
         episode = ""
-        logger.info(f'当前资源非动漫类型，已将mal id设为0')
     else:
         select_type='1'
     logger.info(f'已成功选择类型为{media_type}')
@@ -193,8 +183,8 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                     'episode_number': episode,
                     'tmdb': tmdb_id,
                     'imdb': imdb_id,
-                    'tvdb': tvdb_id,
-                    'mal': mal_id,
+                    'tvdb': "0",
+                    'mal': "0",
                     'igdb': '0',
                     'keywords': keywords,
                     'description': pic_urls,

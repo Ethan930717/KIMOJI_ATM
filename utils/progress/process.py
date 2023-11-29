@@ -4,7 +4,6 @@ from utils.info.additional_ids import get_additional_ids,search_ids_from_imdb
 from utils.progress.config_loader import find_media_folder
 from utils.torrent.mktorrent import create_torrent
 from utils.info.title import extract_title_info
-from utils.info.tvdb_id import search_tvdb
 from utils.tools.mediainfo import save_mediainfo_to_file
 from utils.tools.bdinfo import generate_and_parse_bdinfo
 from utils.tools.ffmpeg import screenshot_from_video,screenshot_from_bd
@@ -42,7 +41,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
         folder_path = os.path.join(file_dir, file_name)
 
         chinese_title, english_title, year, season, media, codec, audiocodec, maker, upload_title = extract_title_info(folder_path)
-        tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords ,chinese_name = handle_media(chinese_title, english_title, year, season, media, maker)
+        tmdb_id, imdb_id, media_type, child, keywords ,chinese_name = handle_media(chinese_title, english_title, year, season, media, maker)
         if not media_type:
             logger.error('无法确认视频类型，已记录跳过本目录，请重新召唤阿K')
             file_path = os.path.join(folder_path, "kimoji_pass")
@@ -51,8 +50,6 @@ def create_torrent_if_needed(file_dir, torrent_dir):
             log_to_csv(folder_path, "失败", log_file_path , "")
             sys.exit()
         imdb_id = "0" if not imdb_id else imdb_id
-        mal_id = "0"
-        tvdb_id = "0"
         tmdb_id = "0" if not tmdb_id else tmdb_id
         existing_torrent_path = check_existing_torrent(torrent_dir, file_name)
         if not existing_torrent_path:
@@ -61,10 +58,10 @@ def create_torrent_if_needed(file_dir, torrent_dir):
             #print(folder_path, file_name, torrent_dir)
             torrent_path = os.path.join(torrent_dir, f"{file_name}.torrent")
             logger.info(f"种子文件已创建: {torrent_path}")
-            return torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords, upload_title ,chinese_name
+            return torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, media_type, child, keywords, upload_title ,chinese_name
         else:
             logger.info(f"找到同名种子：{existing_torrent_path}，跳过制种")
-            return existing_torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords, upload_title ,chinese_name
+            return existing_torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, media_type, child, keywords, upload_title ,chinese_name
     else:
         logging.error("未找到可用的媒体文件夹，找不到可以发布的资源,请检查配置文件")
         sys.exit()
@@ -72,7 +69,7 @@ def create_torrent_if_needed(file_dir, torrent_dir):
 
 
 #mediainfo/bdinfo解析
-def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, mal_id, tvdb_id, media_type,  child, internal, personal, keywords, upload_title, chinese_name):
+def process_media_directory(torrent_path, file_dir, pic_num, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, media_type,  child, internal, personal, keywords, upload_title, chinese_name):
     file_name, action = find_media_folder(file_dir)
     mediainfo_output = ''
     bd_info = ''
@@ -112,7 +109,7 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
         else:
             logger.error("无法找到可解析的影片")
             sys.exit()
-        kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker ,pic_urls, tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, resolution, bd_info, internal,personal,keywords,upload_title, mediainfo_output,chinese_name)
+        kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker ,pic_urls, tmdb_id, imdb_id, media_type, child, resolution, bd_info, internal,personal,keywords,upload_title, mediainfo_output,chinese_name)
     else:
         logger.warning("没有找到合适的媒体文件夹")
 
@@ -120,17 +117,15 @@ def process_media_directory(torrent_path, file_dir, pic_num, username, password,
 
 def handle_media(chinese_title, english_title, year, season, media, maker):
     media_type, tmdb_id, item_type, chinese_name, child, keywords = search_tmdb(english_title)
-    imdb_id, mal_id, tvdb_id = None, None, None
+    imdb_id = None
     if tmdb_id != 0:
-        imdb_id, mal_id = get_additional_ids(tmdb_id, item_type, english_title)
-        tvdb_id = search_tvdb(english_title) if english_title else 0
+        imdb_id = get_additional_ids(tmdb_id, item_type)
     else:
         imdb_search_id, media_type = search_imdb(english_title, media)
         if imdb_search_id:
-            tmdb_id, imdb_id, mal_id = search_ids_from_imdb(imdb_search_id, english_title, item_type)
-            tvdb_id = search_tvdb(english_title) if english_title else 0
-    print(f'最终结果:\nmedia_type:{media_type}\ntmdb:{tmdb_id}\nimdb:{imdb_id}\nmal:{mal_id}\ntvdb:{tvdb_id}')
-    return tmdb_id, imdb_id, mal_id, tvdb_id, media_type, child, keywords ,chinese_name
+            tmdb_id, imdb_id = search_ids_from_imdb(imdb_search_id, english_title, item_type)
+    print(f'最终结果:\nmedia_type:{media_type}\ntmdb:{tmdb_id}\nimdb:{imdb_id}')
+    return tmdb_id, imdb_id, media_type, child, keywords ,chinese_name
 
 def log_to_csv(url_name, status, log_file_path,torrent_url):
     with open(log_file_path, 'a', newline='', encoding='utf-8') as file:
@@ -139,9 +134,9 @@ def log_to_csv(url_name, status, log_file_path,torrent_url):
         writer.writerow([url_name, status, current_time, torrent_url])
 
 #def handle_found_media(tmdb_id, item_type, media_type, chinese_title, english_title, child, year, season, maker):
-    #imdb_id, mal_id = get_additional_ids(tmdb_id, item_type, english_title)
+    #imdb_id = get_additional_ids(tmdb_id, item_type, english_title)
     #tvdb_id = search_tvdb(english_title) if english_title else 0
-    #logger.info(f'最终结果:\nmedia_type:{media_type}\ntmdb:{tmdb_id}\nimdb:{imdb_id}\nmal:{mal_id}\ntvdb:{tvdb_id}')
+    #logger.info(f'最终结果:\nmedia_type:{media_type}\ntmdb:{tmdb_id}\nimdb:{imdb_id}')
 
 
 
