@@ -1,7 +1,7 @@
 from utils.info.imdb_id import get_imdb_id,get_tmdb_id_from_imdb
 import logging
 logger = logging.getLogger(__name__)
-def get_additional_ids(tmdb_id, item_type):
+def get_additional_ids(tmdb_id, item_type ,title):
     imdb_id = get_imdb_id(tmdb_id, item_type)
     return imdb_id ,"0"
 
