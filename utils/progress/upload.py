@@ -6,7 +6,7 @@ import re
 import sys
 import csv
 import datetime
-from utils.progress.qbittorrent import add_torrent_to_qbittorrent
+from utils.progress.agent import add_torrent_based_on_agent
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 log_dir = os.path.join(project_root_dir, 'log')
@@ -147,7 +147,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
-    if not maker or maker.upper() == "NONAME" or maker.upper() == "ANONYMOUS" or maker.upper() == "NOGROUP":
+    if not maker or maker.upper() == "NONAME" or maker.upper() == "ANONYMOUS" or maker.upper() == "NOGROUP" or maker.upper() == "NOGRP":
         pic_urls = pic_urls
     elif maker and not (personal == 1  or internal == 1):
         pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
@@ -227,7 +227,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                             log_to_csv(file_name, "成功", log_csv_path, torrent_page_url)
                             open(file_path, 'w').close()
                             if download_torrent_file_with_scraper(scraper, torrent_download_url, temp_torrent_path):
-                                add_torrent_to_qbittorrent(temp_torrent_path, project_root_dir)
+                                add_torrent_based_on_agent(temp_torrent_path, project_root_dir)
                             else:
                                 logger.error("下载种子文件失败，请手动做种")
                                 file_path = os.path.join(file_name, "kimoji_pass")

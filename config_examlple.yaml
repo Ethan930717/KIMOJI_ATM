@@ -1,14 +1,21 @@
 basic: 
-  file_dir: '/media'
-  torrent_dir: '/torrent'
-  username: 'admin'
-  password: 'password'
-  pic_num: 3 #选择发种时的截图数量
+  file_dir: '/media' #本地存放资源的路径
+  torrent_dir: '/torrent' #指定一个存放种子的路径，需保证路径存在该文件夹
+  username: 'admin' #kimoji账号
+  password: 'password' #kimoji密码
+  pic_num: 6 #选择发种时的截图数量
   internal: 0 #KIMOJI官组专用，请保持0
   personal: 0 #是否为个人作品，即自己抓流、压制、剪辑的作品，不属于任何工作组
+
 qbittorrent:
-  url: '192.168.5.1'
-  port: '8080'
-  username: 'admin'
-  password: 'adminadmin'
-  save_path: '/download'
+  url: '192.168.5.1' #qb路径
+  port: '8080'      #qb端口
+  username: 'admin'   #登陆账号
+  password: 'adminadmin'  #登陆密码
+  save_path: '/download'  #qb保存路径
+transmission:
+  address: '192.168.5.1' #tr路径
+  port: '9091'      #tr端口
+  username: 'admin' #登陆账号
+  password: 'password'   #密码
+  save_path: '/downlaod'   #tr保存路径

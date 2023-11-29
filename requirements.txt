@@ -9,3 +9,4 @@ PyYAML
 torf
 progress
 qbittorrent-api
+transmission-rpc
