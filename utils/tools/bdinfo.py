@@ -118,20 +118,23 @@ def generate_and_parse_bdinfo(folder_path):
         process.wait()
     except subprocess.CalledProcessError as e:
         logger.error(f"运行 BDInfo 时出错: {e}")
-        return None
+        return None, None, None
 
     bdinfo_file_path = os.path.join(log_dir, 'BDINFO.bd.txt')
     if not os.path.exists(bdinfo_file_path):
         logger.warning("未找到 BDInfo 扫描文件")
-        return None
+        return None, None, None
 
     with open(bdinfo_file_path, 'r') as file:
         bdinfo_content = file.read()
 
     # 解析 BDInfo 报告
     quick_summary = extract_first_quick_summary(bdinfo_content)
-    formatted_summary, resolution, type = process_quick_summary(quick_summary)
-    return formatted_summary, resolution, type
+    if quick_summary:
+        formatted_summary, resolution, type = process_quick_summary(quick_summary)
+        return formatted_summary, resolution, type
+    else:
+        return None, None, None
 
 # 示例调用
 #folder_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'

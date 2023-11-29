@@ -16,11 +16,11 @@ def add_torrent_based_on_agent(torrent_path, config_url, max_retries=3):
     agent = config['basic']['agent']
     logger.info(f'检测到当前选择的下载器为{agent}')
     if agent == 'qb':
-        add_torrent_to_qbittorrent(torrent_path, config_url, max_retries=max_retries)
         logger.info('正在尝试将种子添加到qbittorrent')
+        add_torrent_to_qbittorrent(torrent_path, config_url, max_retries=max_retries)
     elif agent == 'tr':
-        add_torrent_to_transmission(torrent_path, config_url, max_retries=max_retries)
         logger.info('正在尝试将种子添加到transmission')
+        add_torrent_to_transmission(torrent_path, config_url, max_retries=max_retries)
     else:
         logger.error("未正确指定做种下载器，请手动做种")
         logger.error(f"临时种子保存在kimoji-atm主目录/{torrent_path}")
@@ -99,7 +99,7 @@ def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
             logger.warning(f"正在尝试第 {retries} 次重试")
             time.sleep(5)
 
-if __name__ == "__main__":
-    torrent_path = '/Users/Ethan/Downloads/temp.torrent'  # 更改为您的种子文件路径
-    config_url = '/Users/Ethan/Documents/GitHub/KIMOJI_ATM'  # 更改为您的配置文件目录
-    add_torrent_based_on_agent(torrent_path, config_url)
+#if __name__ == "__main__":
+    #torrent_path = '/Users/Ethan/Downloads/temp.torrent'  # 更改为您的种子文件路径
+    #config_url = '/Users/Ethan/Documents/GitHub/KIMOJI_ATM'  # 更改为您的配置文件目录
+    #add_torrent_based_on_agent(torrent_path, config_url)
