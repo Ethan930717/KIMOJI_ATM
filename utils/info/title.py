@@ -21,15 +21,15 @@ def test_github_connection(url, timeout=5):
         response.raise_for_status()
         return True
     except requests.RequestException as e:
-        logger.error(f"连接到 GitHub 失败: {e}")
+        logger.error(f"连接到种子库: {e}")
         return False
 def load_csv_data():
     cache_file = os.path.join(log_dir, "torrents_cache.csv")
     if not test_github_connection(csv_url):
-        logger.error("无法连接到 GitHub，无法更新种子库。请检查网络连接,小K走喽")
+        logger.error("无法连接到种子库。请检查网络连接,小K走喽")
         sys.exit(1)
     try:
-        logger.info('正常从本地缓存中查重')
+        logger.info('正在从本地缓存中查重')
         with open(cache_file, 'r') as file:
             return [row[0] for row in csv.reader(file)]
 

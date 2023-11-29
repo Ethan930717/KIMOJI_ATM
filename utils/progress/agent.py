@@ -85,9 +85,14 @@ def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
                 torrent_data = torrent_file.read()
                 tc.add_torrent(torrent_data, download_dir=config['transmission']['save_path'])
 
-            logger.info("种子成功添加到Transmission")
-            break
-
+            logger.info("种子成功添加到Transmission，小K收工啦")
+            try:
+                k_script_path = os.path.join(project_root_dir, 'k')
+                subprocess.run([k_script_path], check=True)
+            except subprocess.CalledProcessError as e:
+                logger.error(f"运行 '{k_script_path}' 命令时出错: {e}")
+            finally:
+                sys.exit(0)
         except Exception as e:
             retries += 1
             logger.warning(f"添加种子时发生错误: {e}")
