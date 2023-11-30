@@ -137,9 +137,8 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
-    if not maker or maker.upper() == "NONAME" or maker.upper() == "ANONYMOUS" or maker.upper() == "NOGROUP" or maker.upper() == "NOGRP":
-        pic_urls = pic_urls
-    elif maker and not (personal == 1  or internal == 1):
+
+    if maker and not (personal == 1  or internal == 1):
         pic_urls = f'[img]https://kimoji.club/img/friendsite/{maker}.png[/img]\n{pic_urls}'
 
     if not chinese_title and chinese_name:

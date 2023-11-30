@@ -104,7 +104,7 @@ def add_torrent_to_transmission(torrent_path, config_url, max_retries=3):
             logger.warning(f"正在尝试第 {retries} 次重试")
             time.sleep(5)
 
-#if __name__ == "__main__":
-#    torrent_path = '/Users/Ethan/Downloads/temp.torrent'  # 更改为您的种子文件路径
-#    config_url = '../'  # 更改为您的配置文件目录
-#    add_torrent_based_on_agent(torrent_path, config_url)
+if __name__ == "__main__":
+    torrent_path = 'test.torrent'  # 更改为您的种子文件路径
+    config_url = '../'  # 更改为您的配置文件目录
+    add_torrent_based_on_agent(torrent_path, config_url)
