@@ -1,15 +1,26 @@
 import qbittorrentapi
 import transmission_rpc
-from utils.progress.config_loader import load_config
 import logging
 import time
 import sys
 import os
 import subprocess
+import yaml
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
+
+def load_config(filename='config.yaml'):
+    try:
+        with open(filename, 'r') as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        print("配置文件未找到")
+        return None
+    except yaml.YAMLError as exc:
+        print("解析配置文件时发生错误:", exc)
+        return None
 
 def add_torrent_based_on_agent(torrent_path, config_url, max_retries=3):
     config = load_config(os.path.join(config_url, 'config.yaml'))
