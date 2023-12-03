@@ -3,13 +3,22 @@ from utils.progress.process import process_media_directory, create_torrent_if_ne
 import logging
 from utils.progress.intro import intro
 import sys
+import subprocess
 
 
 logging.basicConfig(level=logging.INFO)
-
+def remove_ffmpeg_containers():
+    try:
+        logging.info("开始清除冗余ffmpeg容器")
+        cmd = "docker ps -a | grep 'ffmpeg' | awk '{print $1}' | xargs -I {} docker rm {}"
+        subprocess.run(cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"删除 Docker 容器时出错: {e}")
+        sys.exit(1)
 def main():
     print(intro)
     print("您正在使用的是KIMOJI专用发种机，使用前请确认您在KIMOJI有上传权限。")
+    remove_ffmpeg_containers()
     config = load_config()
     if config:
         logging.info("配置文件读取成功，正在寻找媒体目录")

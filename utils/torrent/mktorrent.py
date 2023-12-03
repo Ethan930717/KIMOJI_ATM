@@ -1,4 +1,3 @@
-import subprocess
 import os
 import logging
 import sys
@@ -21,9 +20,15 @@ def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", 
     path = Path(content_path)
     torrent = Torrent(path=str(path.absolute()), trackers=[tracker], piece_size=piece_size, private=True,
                       created_by="KIMOJI PARK", source="KIMOJI PARK")
-    bar = IncrementalBar('阿K正在努力制种', max=torrent.pieces ,suffix="%(index)d/%(max)d [%(eta_td)s]")
+
+    # 设置创建时间为当前时间
+    torrent.created = int(time.time())
+
+    bar = IncrementalBar('阿K正在努力制种', max=torrent.pieces, suffix="%(index)d/%(max)d [%(eta_td)s]")
+
     def cb(__torrent: Torrent, path: str, hashed_pieces: int, total_pieces: int):
         bar.next()
+
     for attempt_count in range(max_attempts):
         if Path(torrent_path).exists():
             try:
@@ -48,7 +53,8 @@ def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", 
     bar.finish()
     return None
 
-#content_path = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'
-#torrent_name = '11123'
-#torrent_dir = '/Users/Ethan/Desktop/media/'
-#create_torrent(content_path, torrent_name, torrent_dir)
+# 示例用法
+# content_path = '/path/to/content'
+# torrent_name = 'example_torrent'
+# torrent_dir = '/path/to/torrent/dir'
+# create_torrent(content_path, torrent_name, torrent_dir)
