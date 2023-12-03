@@ -38,7 +38,7 @@ def login(login_url, username, password, scraper):
     response = scraper.post(login_url, data=login_data)
     return response.ok, scraper
 
-def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name,media_type):
+def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name,item_type):
     episode = "0"
     logger.info(f'已选择类型为{media_type}')
     if not season and (not media_type =='anime-movie' or not media_type =='movie'):
