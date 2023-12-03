@@ -38,30 +38,30 @@ def login(login_url, username, password, scraper):
     response = scraper.post(login_url, data=login_data)
     return response.ok, scraper
 
-def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name):
+def kimoji_upload(torrent_path, file_name, username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, pic_urls, tmdb_id, imdb_id, media_type, child, resolution , bd_info, internal,personal,keywords,upload_title, mediainfo_output ,chinese_name,item_type):
     episode = "0"
-    logger.info(f'已选择类型为{media_type}')
-    if not season and (not media_type =='anime-movie' or not media_type =='movie'):
+    logger.info(f'已选择类型为{item_type}')
+    if not season and (not item_type =='anime-movie' or not item_type =='movie'):
         season = "0"
-    if media_type == 'anime-tv':
+    if item_type == 'anime-tv':
         select_type='4'
-    elif media_type == 'anime-movie':
+    elif item_type == 'anime-movie':
         select_type='3'
         season = ""
         episode = ""
-    elif media_type == 'doc':
+    elif item_type == 'doc':
         select_type='6'
-    elif media_type == 'show':
+    elif item_type == 'show':
         select_type='5'
-    elif media_type == 'series':
+    elif item_type == 'series':
         select_type='2'
-    elif media_type == 'movie':
+    elif item_type == 'movie':
         select_type='1'
         season = ""
         episode = ""
     else:
         select_type='1'
-    logger.info(f'已成功选择类型为{media_type}')
+    logger.info(f'已成功选择类型为{item_type}')
 
     #选择规格
     if 'REMUX' in file_name.upper():

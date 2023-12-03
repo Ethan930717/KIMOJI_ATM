@@ -30,10 +30,10 @@ def main():
         internal = config['basic']['internal']
         personal = config['basic']['personal']
         #print(f'torrent_dir:{torrent_dir}')
-        torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, keywords, upload_title ,chinese_name = create_torrent_if_needed(file_dir, torrent_dir)
+        torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, keywords, upload_title ,chinese_name,item_type = create_torrent_if_needed(file_dir, torrent_dir)
 
         if torrent_path:
-            process_media_directory(torrent_path, file_dir,pic_num,username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, internal, personal, keywords, upload_title, chinese_name)
+            process_media_directory(torrent_path, file_dir,pic_num,username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, internal, personal, keywords, upload_title, chinese_name, item_type)
         else:
             logging.error('未配置种子存放目录，请检查config.yaml')
             sys.exit()

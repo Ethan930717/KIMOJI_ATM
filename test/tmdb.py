@@ -85,10 +85,10 @@ def get_tv_type(tmdb_id):
         child = determine_child_flag(genres)
         print(tv_json)
         #print(genres,item_type)
-        return item_type, "series", chinese_name, child, keywords
+        return item_type, "tv", chinese_name, child, keywords
     except Exception as e:
         logger.error(f"获取电视详情时发生错误: {e}")
-        return "tv", "seires", None, None, None
+        return "series", "tv", None, None, None
 
 tmdb_id="7131"
 get_tv_type(tmdb_id)
