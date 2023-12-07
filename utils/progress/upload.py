@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import sys
+import random
 import csv
 import datetime
 from utils.progress.agent import add_torrent_based_on_agent
@@ -137,8 +138,15 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
         logger.info(f'拉取关键词:\n{keywords}')
     else:
         keywords = ""
-
-    if maker and not (personal == 1  or internal == 1):
+        
+    if internal == 1:
+        n = random.randint(1, 9)  # 生成一个 1 到 9 之间的随机数
+        pic_urls = f"""
+        [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
+        [color=#bbff88][size=24][b][spoiler=截图赏析]
+        {pic_urls}[/spoiler][/b][/size][/color][/center]
+        """
+    elif maker and not (personal == 1  or internal == 1):
         pic_urls = f"""
         [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
         [color=#bbff88][size=24][b][spoiler=截图赏析]

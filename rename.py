@@ -13,6 +13,17 @@ def find_largest_video_file(folder_path):
                 video_file = file_path
     return video_file
 
+def format_resolution(width, height, scan_type):
+    if height == 1080:
+        return '1080p' if scan_type == 'P' else '1080i'
+    elif height == 720:
+        return '720p'
+    elif height == 2160:
+        return '2160p'
+    else:
+        return f"{width}x{height}"
+
+
 def get_media_info(file_path):
     media_info = MediaInfo.parse(file_path)
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
@@ -25,8 +36,14 @@ def get_media_info(file_path):
     audio_track = audio_tracks[0] if audio_tracks else None
 
     video_codec = video_track.format
+    if video_codec == 'AVC':
+        video_codec = 'H264'
+    elif video_codec == 'HEVC':
+        video_codec = 'H265'
+
     audio_codec = audio_track.format if audio_track else None
-    resolution = f"{video_track.width}x{video_track.height}"
+    scan_type = 'P' if video_track.scan_type == 'Progressive' else 'I'
+    resolution = format_resolution(video_track.width, video_track.height,scan_type)
 
     # Additional attributes like HDR, Dolby Vision, 10bit, etc.
     additional_attrs = []
@@ -50,9 +67,10 @@ def rename_folders(directory):
                 info = get_media_info(largest_video_file)
                 if info:
                     video_codec, audio_codec, resolution, additional = info
-                    new_folder_name = f"{folder}.{resolution}.WEB-DL.{video_codec}.{audio_codec}-{additional}-KIMOJI"
+                    new_folder_name = f"{folder}.{resolution}.WEB-DL.{video_codec}.{audio_codec}-{additional}KIMOJI"
                     new_folder_path = os.path.join(directory, new_folder_name)
                     os.rename(folder_path, new_folder_path)
+
 
 # Replace 'your_directory_path' with the path of your directory
 directory_path = '/mnt/user/unraid/yt/media'
