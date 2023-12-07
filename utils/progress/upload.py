@@ -140,7 +140,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
 
     if maker and not (personal == 1  or internal == 1):
         pic_urls = f"""
-        [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.png[/img][/spoiler][/b][/size][/color]
+        [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
         [color=#bbff88][size=24][b][spoiler=截图赏析]
         {pic_urls}[/spoiler][/b][/size][/color][/center]
         """

@@ -57,7 +57,7 @@ check_and_install_docker() {
 # 拉取 Docker 镜像
 pull_docker_images() {
     echo "正在拉取 Docker 镜像..."
-    docker pull iniwex/kimoji-bdinfo
+    docker pull hudan717/kimoji-bdinfo
     docker pull jrottenberg/ffmpeg:ubuntu
 }
 
