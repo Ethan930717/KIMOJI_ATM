@@ -53,7 +53,23 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
             print("错误输出：", e.output.decode())
         if e.stderr:
             print("标准错误输出：", e.stderr.decode())
+        error_output = e.stderr.decode() if e.stderr else ''
         print(" ".join(e.cmd))
+        # 检查是否是地理位置限制错误
+        if "geo restriction" in error_output():
+            print("检测到地理位置限制，尝试使用代理重新下载...")
+            proxy = "socks5://dahu.fun:20190"
+            try:
+                download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
+                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                                    "--proxy", proxy, video_url]
+                subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                return True
+            except subprocess.CalledProcessError as e_proxy:
+                print("使用代理下载也失败了。")
+                return False
+        else:
+            return False
         choice = input("是否查看可用格式并手动选择下载？(y/n): ")
         if choice.lower() == 'y':
             try:
@@ -80,8 +96,25 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                     print("错误输出：", e.output.decode())
                 if e.stderr:
                     print("标准错误输出：", e.stderr.decode())
+                error_output = e.stderr.decode() if e.stderr else ''
                 print("完整命令：")
                 print(" ".join(e.cmd))
+                if "geo restriction" in error_output():
+                    print("检测到地理位置限制，尝试使用代理重新下载...")
+                    proxy = "socks5://dahu.fun:20190"
+                    try:
+                        download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio",
+                                            "--ignore-errors", "-o",
+                                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies",
+                                            cookies_path,
+                                            "--proxy", proxy, video_url]
+                        subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        return True
+                    except subprocess.CalledProcessError as e_proxy:
+                        print("使用代理下载也失败了。")
+                        return False
+                else:
+                    return False
                 print("脚本结束。")
                 return False
     except Exception as e:
