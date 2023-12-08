@@ -3,6 +3,7 @@ import urllib.parse
 import os
 import re
 import requests
+import traceback
 
 # URL 编码函数
 def urlencode(str):
@@ -32,8 +33,9 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         os.makedirs(output_folder, exist_ok=True)
 
         # 下载视频
-        download_command = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
+        download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
+                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                            video_url]
         if proxy:
             download_command.extend(["--proxy", proxy])
         subprocess.run(download_command, check=True)
@@ -46,7 +48,11 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         os.rename(output_folder, encoded_folder)
 
     except subprocess.CalledProcessError as e:
-        print(f"下载错误: {e}")
+        print(f"下载错误: {e.returncode}")
+        print("错误输出：")
+        print(e.output.decode())
+        print("完整命令：")
+        print(" ".join(e.cmd))
         choice = input("是否查看可用格式并手动选择下载？(y/n): ")
         if choice.lower() == 'y':
             try:
@@ -66,11 +72,15 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 send_notification(video_title)
                 os.rename(output_folder, encoded_folder)
             except subprocess.CalledProcessError as e:
-                print(f"下载失败: {e}")
+                print(f"下载错误: {e.returncode}")
+                print("错误输出：")
+                print(e.output.decode())
+                print("完整命令：")
+                print(" ".join(e.cmd))
                 print("脚本结束。")
     except Exception as e:
         print(f"发生未知错误: {e}")
-
+        traceback.print_exc()  # 打印完整的堆栈跟踪
 def list_formats(video_url, cookies_path, proxy=None):
     yt_dlp_command = ["yt-dlp", "--list-formats", "--cookies", cookies_path, video_url]
     if proxy:
