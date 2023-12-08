@@ -16,33 +16,52 @@ def send_notification(video_title):
 
 # 用于下载视频并移动文件夹的函数
 def download_and_move(video_url, platform, cookies_path, proxy=None):
-    # 获取视频标题
-    yt_dlp_command = ["yt-dlp", "--get-title", "--cookies", cookies_path, video_url]
-    if proxy:
-        yt_dlp_command.extend(["--proxy", proxy])
-    video_title = subprocess.check_output(yt_dlp_command).decode().strip()
+    try:
+        # 获取视频标题
+        yt_dlp_command = ["yt-dlp", "--get-title", "--cookies", cookies_path, video_url]
+        if proxy:
+            yt_dlp_command.extend(["--proxy", proxy])
+        video_title = subprocess.check_output(yt_dlp_command).decode().strip()
 
-    # 尝试提取书名号中的内容
-    book_title_search = re.search(r'《([^《》]*)》', video_title)
-    book_title = book_title_search.group(1) if book_title_search else None
+        # 尝试提取书名号中的内容
+        book_title_search = re.search(r'《([^《》]*)》', video_title)
+        book_title = book_title_search.group(1) if book_title_search else None
 
-    # 确定输出文件夹
-    output_folder = "/home/media/" + (book_title or platform)
-    os.makedirs(output_folder, exist_ok=True)
+        # 确定输出文件夹
+        output_folder = "/home/media/" + (book_title or platform)
+        os.makedirs(output_folder, exist_ok=True)
 
-    # 下载视频
-    download_command = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                        f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
-    if proxy:
-        download_command.extend(["--proxy", proxy])
-    subprocess.run(download_command)
+        # 下载视频
+        download_command = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
+                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
+        if proxy:
+            download_command.extend(["--proxy", proxy])
+        subprocess.run(download_command, check=True)
 
-    # 发送下载完成通知
-    send_notification(video_title)
+        # 发送下载完成通知
+        send_notification(video_title)
 
-    # 移动文件夹
-    encoded_folder = "/home/encoded/" + (book_title or platform)
-    os.rename(output_folder, encoded_folder)
+        # 移动文件夹
+        encoded_folder = "/home/encoded/" + (book_title or platform)
+        os.rename(output_folder, encoded_folder)
+
+    except subprocess.CalledProcessError as e:
+        print(f"下载错误: {e}")
+        choice = input("是否查看可用格式并手动选择下载？(y/n): ")
+        if choice.lower() == 'y':
+            try:
+                list_formats(video_url, cookies_path, proxy)
+                format_id = input("请输入要下载的视频格式编码: ")
+                download_command = ["yt-dlp", "-f", f"{format_id}+bestaudio", "-o",
+                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
+                if proxy:
+                    download_command.extend(["--proxy", proxy])
+                subprocess.run(download_command, check=True)
+                send_notification(video_title)
+                os.rename(output_folder, encoded_folder)
+            except subprocess.CalledProcessError as e:
+                print(f"下载失败: {e}")
+                print("脚本结束。")
 
 def list_formats(video_url, cookies_path, proxy=None):
     yt_dlp_command = ["yt-dlp", "--list-formats", "--cookies", cookies_path, video_url]
