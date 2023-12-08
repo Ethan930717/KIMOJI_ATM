@@ -38,7 +38,7 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                             video_url]
         if proxy:
             download_command.extend(["--proxy", proxy])
-        subprocess.run(download_command, check=True)
+        subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # 发送下载完成通知
         send_notification(video_title)
@@ -49,9 +49,10 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         return True
     except subprocess.CalledProcessError as e:
         print(f"下载错误: {e.returncode}")
-        print("错误输出：")
-        print(e.output.decode())
-        print("完整命令：")
+        if e.output:
+            print("错误输出：", e.output.decode())
+        if e.stderr:
+            print("标准错误输出：", e.stderr.decode())
         print(" ".join(e.cmd))
         choice = input("是否查看可用格式并手动选择下载？(y/n): ")
         if choice.lower() == 'y':
@@ -75,8 +76,10 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
 
             except subprocess.CalledProcessError as e:
                 print(f"下载错误: {e.returncode}")
-                print("错误输出：")
-                print(e.output.decode())
+                if e.output:
+                    print("错误输出：", e.output.decode())
+                if e.stderr:
+                    print("标准错误输出：", e.stderr.decode())
                 print("完整命令：")
                 print(" ".join(e.cmd))
                 print("脚本结束。")
