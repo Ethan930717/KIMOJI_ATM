@@ -56,7 +56,7 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         error_output = e.stderr.decode() if e.stderr else ''
         print(" ".join(e.cmd))
         # 检查是否是地理位置限制错误
-        if "geo restriction" in error_output():
+        if "geo restriction" in error_output:
             print("检测到地理位置限制，尝试使用代理重新下载...")
             proxy = "socks5://dahu.fun:20190"
             try:
@@ -99,7 +99,7 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 error_output = e.stderr.decode() if e.stderr else ''
                 print("完整命令：")
                 print(" ".join(e.cmd))
-                if "geo restriction" in error_output():
+                if "geo restriction" in error_output:
                     print("检测到地理位置限制，尝试使用代理重新下载...")
                     proxy = "socks5://dahu.fun:20190"
                     try:
