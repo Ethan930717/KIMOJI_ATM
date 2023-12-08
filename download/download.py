@@ -52,8 +52,14 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
             try:
                 list_formats(video_url, cookies_path, proxy)
                 format_id = input("请输入要下载的视频格式编码: ")
+
+                # 在这里确保 output_folder 已经定义
+                output_folder = "/home/media/" + (book_title or platform)
+                os.makedirs(output_folder, exist_ok=True)
+
                 download_command = ["yt-dlp", "-f", f"{format_id}+bestaudio", "-o",
-                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
+                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                                    video_url]
                 if proxy:
                     download_command.extend(["--proxy", proxy])
                 subprocess.run(download_command, check=True)
@@ -62,6 +68,8 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
             except subprocess.CalledProcessError as e:
                 print(f"下载失败: {e}")
                 print("脚本结束。")
+    except Exception as e:
+        print(f"发生未知错误: {e}")
 
 def list_formats(video_url, cookies_path, proxy=None):
     yt_dlp_command = ["yt-dlp", "--list-formats", "--cookies", cookies_path, video_url]
