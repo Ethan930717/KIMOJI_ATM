@@ -4,127 +4,97 @@ import os
 import re
 import requests
 
+
+# 发送通知函数
 def send_notification(site, video_title):
-    # 这里替换成您的Server酱的URL和密钥
     server_url = "https://sctapi.ftqq.com/SCT149255TZvd5PvMXbLkYuPd0dGvSKefr.send"
     message = f"{site} {video_title} 下载完毕"
     requests.post(server_url, data={"title": "下载通知", "desp": message})
+
+
 # URL 编码函数
 def urlencode(str):
     return urllib.parse.quote(str, safe='')
 
-# YouTube 下载函数
-def download_youtube(video_url):
-    output_folder = "/home/media"
-    cookies_path = "/home/cookies/youtubecookies.txt"
 
+# 从文件中读取链接并过滤特定平台的链接
+def read_links_from_file(platform_pattern):
+    with open("/home/videourl.txt", "r") as file:
+        links = file.readlines()
+    return [link.strip() for link in links if re.search(platform_pattern, link)]
+
+
+# 删除已下载的链接
+def remove_downloaded_link(downloaded_link):
+    with open("videourl.txt", "r") as file:
+        links = file.readlines()
+    links.remove(downloaded_link + "\n")
+    with open("videourl.txt", "w") as file:
+        file.writelines(links)
+
+
+# 通用下载函数
+def download_video(video_url, cookies_path, proxy=None):
     # 获取视频标题
-    video_title = subprocess.check_output(
-        ["yt-dlp", "--get-title", "--cookies", cookies_path, video_url]).decode().split('\n')[0]
+    yt_dlp_command = ["yt-dlp", "--get-title", "--cookies", cookies_path, video_url]
+    if proxy:
+        yt_dlp_command.extend(["--proxy", proxy])
+    video_title = subprocess.check_output(yt_dlp_command).decode().split('\n')[0]
 
     # 尝试提取书名号中的内容
     book_title_search = re.search(r'《([^《》]*)》', video_title)
     book_title = book_title_search.group(1) if book_title_search else None
 
-    # 检查书名号是否存在
-    if not book_title:
-        series_id = re.search(r'ss\d+', video_url).group()
-        output_folder = f"{output_folder}/{series_id}"
-    else:
+    # 输出文件夹
+    output_folder = "/home/media"
+    if book_title:
         output_folder = f"{output_folder}/{book_title}"
-
-    # 创建输出文件夹
-    os.makedirs(output_folder, exist_ok=True)
-
-    # 使用 yt-dlp 下载视频到对应的文件夹
-    subprocess.run(["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url])
-
-
-# Bilibili 下载函数
-def download_bilibili(video_url):
-    output_folder = "/home/media"
-    cookies_path = "/home/cookies/bilicookies.txt"
-    proxy = "socks5://dahu.fun:20190"
-
-    # 获取视频标题
-    video_title = subprocess.check_output(
-        ["yt-dlp", "--get-title", "--cookies", cookies_path, "--proxy", proxy, video_url]).decode().split('\n')[0]
-
-    # 对视频标题进行 URL 编码
-    encoded_video_title = urlencode(video_title)
-
-    # 使用播放列表 ID 或视频标题作为文件夹名称
-    series_id_search = re.search(r'ss\d+', video_url)
-    if series_id_search:
-        output_folder = f"{output_folder}/{series_id_search.group()}"
     else:
-        output_folder = f"{output_folder}/{encoded_video_title}"
-
-    # 创建输出文件夹
-    os.makedirs(output_folder, exist_ok=True)
-
-    # 使用 yt-dlp 下载视频到对应的文件夹
-    subprocess.run(["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, "--proxy", proxy, video_url])
-
-
-# Youku 下载函数
-def download_youku(video_url):
-    output_folder = "/home/media"
-    cookies_path = "/home/cookies/youkucookies.txt"
-    proxy = "socks5://dahu.fun:20190"
-
-    # 获取视频标题
-    video_title = subprocess.check_output(
-        ["yt-dlp", "--get-title", "--cookies", cookies_path, "--proxy", proxy, video_url]).decode().split('\n')[0]
-
-    # 尝试提取书名号中的内容
-    book_title_search = re.search(r'《([^《》]*)》', video_title)
-    book_title = book_title_search.group(1) if book_title_search else None
-
-    # 检查书名号是否存在
-    if not book_title:
-        series_id = re.search(r'ss\d+', video_url).group()
+        series_id_search = re.search(r'ss\d+', video_url)
+        series_id = series_id_search.group() if series_id_search else "unknown"
         output_folder = f"{output_folder}/{series_id}"
-    else:
-        output_folder = f"{output_folder}/{book_title}"
 
     # 创建输出文件夹
     os.makedirs(output_folder, exist_ok=True)
 
-    # 使用 yt-dlp 下载视频到对应的文件夹
-    subprocess.run(["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, "--proxy", proxy, video_url])
+    # 下载命令
+    download_command = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
+                        f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url]
+    if proxy:
+        download_command.extend(["--proxy", proxy])
 
-# IQIYI 下载函数
-def download_iqiyi(video_url):
-    output_folder = "/home/media"
-    cookies_path = "/home/cookies/qiyicookies.txt"
+    subprocess.run(download_command)
 
-    # 创建一个以系列 ID 命名的文件夹
-    series_id = re.search(r'ss\d+', video_url).group()
-    output_folder = f"{output_folder}/{series_id}"
-    os.makedirs(output_folder, exist_ok=True)
-
-    # 使用 yt-dlp 下载视频到对应的文件夹
-    subprocess.run(["yt-dlp", "-f", "bestvideo+bestaudio", "-o",
-                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path, video_url])
+    # 发送下载完成通知
+    send_notification("下载完成", video_title)
 
 
 # 用户选择下载平台
 platform_choice = input("请选择下载平台：\n1 - YouTube\n2 - Bilibili\n3 - Youku\n4 - IQIYI\n选择 1, 2, 3 或 4: ")
 
 # 根据用户选择下载视频
-if platform_choice == '1':
-    download_youtube("这里填入YouTube的视频链接")
-elif platform_choice == '2':
-    download_bilibili("这里填入Bilibili的视频链接")
-elif platform_choice == '3':
-    download_youku("这里填入Youku的视频链接")
-elif platform_choice == '4':
-    download_iqiyi("这里填入IQIYI的视频链接")
+platform_patterns = {
+    '1': r'youtube\.com|youtubekids\.com|youtu\.be',
+    '2': r'bilibili\.com',
+    '3': r'youku\.com',
+    '4': r'iqiyi\.com'
+}
+
+cookies_paths = {
+    '1': "/home/cookies/youtubecookies.txt",
+    '2': "/home/cookies/bilicookies.txt",
+    '3': "/home/cookies/youkucookies.txt",
+    '4': "/home/cookies/qiyicookies.txt"
+}
+
+if platform_choice in platform_patterns:
+    pattern = platform_patterns[platform_choice]
+    proxy = "socks5://dahu.fun:20190" if platform_choice in ['2', '3', '4'] else None
+    cookies_path = cookies_paths[platform_choice]
+    links = read_links_from_file(pattern)
+
+    for link in links:
+        download_video(link, cookies_path, proxy)
+        remove_downloaded_link(link)
 else:
     print("无效的选项。请输入 1, 2, 3 或 4。")
-
-
