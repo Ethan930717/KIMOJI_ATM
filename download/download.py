@@ -46,6 +46,11 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         # 移动文件夹
         encoded_folder = "/home/encoded/" + (book_title or platform)
         os.rename(output_folder, encoded_folder)
+        # 更新文件：移除成功下载的链接
+        lines.remove(video_url + '\n')
+        with open('/home/videourl.txt', 'w') as file:
+            file.writelines(lines)
+
         return True
     except subprocess.CalledProcessError as e:
         print(f"下载错误: {e.returncode}")
@@ -85,6 +90,11 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 subprocess.run(download_command, check=True)
                 send_notification(video_title)
                 os.rename(output_folder, encoded_folder)
+                # 更新文件：移除成功下载的链接
+                lines.remove(video_url + '\n')
+                with open('/home/videourl.txt', 'w') as file:
+                    file.writelines(lines)
+
                 return True
 
             except subprocess.CalledProcessError as e:
@@ -180,10 +190,5 @@ else:
     # 下载过滤出的视频并更新文件
     successful_urls = []
     for video_url in filtered_urls:
-        if download_and_move(video_url, platform_choice, platform_cookies[platform_choice],
-                             platform_proxy.get(platform_choice)):
-            successful_urls.append(video_url)
-
-    # 仅更新成功下载的视频链接
-    with open('/home/videourl.txt', 'w') as file:
-        file.writelines([line for line in lines if line.strip() not in successful_urls])
+        download_and_move(video_url, platform_choice, platform_cookies[platform_choice], lines,
+                          platform_proxy.get(platform_choice))
