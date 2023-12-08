@@ -44,6 +44,12 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
     encoded_folder = "/home/encoded/" + (book_title or platform)
     os.rename(output_folder, encoded_folder)
 
+def list_formats(video_url, cookies_path, proxy=None):
+    yt_dlp_command = ["yt-dlp", "--list-formats", "--cookies", cookies_path, video_url]
+    if proxy:
+        yt_dlp_command.extend(["--proxy", proxy])
+    subprocess.run(yt_dlp_command)
+
 # 主程序
 platform_patterns = {
     '1': r'youtube\.com|youtubekids\.com|youtu\.be',
@@ -78,10 +84,26 @@ platform_choice = input("请选择下载平台：\n1 - YouTube\n2 - Bilibili\n3 
 pattern = platform_patterns.get(platform_choice, '')
 filtered_urls = [line.strip() for line in lines if re.search(pattern, line)]
 
-# 下载过滤出的视频
-for video_url in filtered_urls:
-    download_and_move(video_url, platform_choice, platform_cookies[platform_choice], platform_proxy.get(platform_choice))
+if platform_choice == '0':
+    # 显示所有链接并编号
+    for index, video_url in enumerate(filtered_urls, start=1):
+        print(f"{index} - {video_url}")
 
-    # 更新 videourl.txt 文件
-    with open('videourl.txt', 'w') as file:
-        file.writelines([line for line in lines if line.strip() != video_url])
+    # 让用户选择一个编号
+    index_choice = int(input("选择要查看格式的视频编号：")) - 1
+
+    # 获取对应视频的URL
+    selected_video_url = filtered_urls[index_choice]
+
+    # 调用yt-dlp的format-list功能
+    list_formats(selected_video_url, platform_cookies[platform_choice], platform_proxy.get(platform_choice))
+    
+else:
+
+    # 下载过滤出的视频
+    for video_url in filtered_urls:
+        download_and_move(video_url, platform_choice, platform_cookies[platform_choice], platform_proxy.get(platform_choice))
+
+        # 更新 videourl.txt 文件
+        with open('videourl.txt', 'w') as file:
+            file.writelines([line for line in lines if line.strip() != video_url])
