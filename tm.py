@@ -1,7 +1,6 @@
 import os
 from tmdbv3api import TMDb, Movie, TV
 
-# 初始化 TMDB
 tmdb = TMDb()
 tmdb.api_key = '107492d808d58cb5f5fae5005c7d764d'
 tmdb.language = 'zh-CN'
@@ -13,6 +12,9 @@ def contains_chinese(text):
     return any('\u4e00' <= char <= '\u9fff' for char in text)
 
 def extract_details(result):
+    # 确保 result 是一个对象而不是字符串
+    if isinstance(result, str):
+        return '未知', '未知', ''
     title = result.title if hasattr(result, 'title') else result.name if hasattr(result, 'name') else '找不到中文名'
     original_title = result.original_title if hasattr(result, 'original_title') else result.original_name if hasattr(result, 'original_name') else '找不到英文名'
     release_date = result.release_date[:4] if hasattr(result, 'release_date') else result.first_air_date[:4] if hasattr(result, 'first_air_date') else ''
@@ -43,5 +45,9 @@ def rename_folder(folder_path):
         print(f"文件夹重命名为: {new_name}")
     else:
         print("没有找到匹配的 TMDB 资源。")
+
+# 示例
+rename_folder("/Users/Ethan/Desktop/河西走廊")
+
 # 示例
 rename_folder("/Users/Ethan/Desktop/河西走廊")
