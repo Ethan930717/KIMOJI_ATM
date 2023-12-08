@@ -49,14 +49,17 @@ platform_patterns = {
     '1': r'youtube\.com|youtubekids\.com|youtu\.be',
     '2': r'bilibili\.com',
     '3': r'youku\.com',
-    '4': r'iqiyi\.com'
+    '4': r'iqiyi\.com',
+    '5': r'mgtv\.com'
 }
 
 platform_cookies = {
     '1': "/home/cookies/youtubecookies.txt",
     '2': "/home/cookies/bilicookies.txt",
     '3': "/home/cookies/youkucookies.txt",
-    '4': "/home/cookies/qiyicookies.txt"
+    '4': "/home/cookies/qiyicookies.txt",
+    '5': "/home/cookies/mangocookies.txt"
+
 }
 
 platform_proxy = {
@@ -69,7 +72,7 @@ with open('/home/videourl.txt', 'r') as file:
     lines = file.readlines()
 
 # 用户选择下载平台
-platform_choice = input("请选择下载平台：\n1 - YouTube\n2 - Bilibili\n3 - Youku\n4 - IQIYI\n选择 1, 2, 3 或 4: ")
+platform_choice = input("请选择下载平台：\n1 - YouTube\n2 - Bilibili\n3 - Youku\n4 - IQIYI\n5 - Mango\n选择 1, 2, 3, 4 或 5: ")
 
 # 过滤出对应平台的 URL
 pattern = platform_patterns.get(platform_choice, '')
