@@ -49,11 +49,8 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         return True
     except subprocess.CalledProcessError as e:
         print(f"下载错误: {e.returncode}")
-        if e.output:
-            print("错误输出：", e.output.decode())
-        if e.stderr:
-            print("标准错误输出：", e.stderr.decode())
         error_output = e.stderr.decode() if e.stderr else ''
+        print("错误输出：", error_output)
         print(" ".join(e.cmd))
         # 检查是否是地理位置限制错误
         if "geo restriction" in error_output:
@@ -92,12 +89,8 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
 
             except subprocess.CalledProcessError as e:
                 print(f"下载错误: {e.returncode}")
-                if e.output:
-                    print("错误输出：", e.output.decode())
-                if e.stderr:
-                    print("标准错误输出：", e.stderr.decode())
                 error_output = e.stderr.decode() if e.stderr else ''
-                print("完整命令：")
+                print("错误输出：", error_output)
                 print(" ".join(e.cmd))
                 if "geo restriction" in error_output:
                     print("检测到地理位置限制，尝试使用代理重新下载...")
