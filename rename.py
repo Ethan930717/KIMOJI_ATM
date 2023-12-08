@@ -70,8 +70,16 @@ def rename_folders(directory):
                     new_folder_name = f"{folder}.{resolution}.WEB-DL.{video_codec}.{audio_codec}-{additional}KIMOJI"
                     new_folder_path = os.path.join(directory, new_folder_name)
                     os.rename(folder_path, new_folder_path)
+                    remove_spaces_in_filenames(new_folder_path)
 
-
+def remove_spaces_in_filenames(folder_path):
+    for file in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file)
+        if os.path.isfile(file_path):
+            new_file_name = file.replace(' ', '')
+            new_file_path = os.path.join(folder_path, new_file_name)
+            if new_file_path != file_path:
+                os.rename(file_path, new_file_path)
 # Replace 'your_directory_path' with the path of your directory
 directory_path = '/mnt/user/unraid/yt/media'
 rename_folders(directory_path)
