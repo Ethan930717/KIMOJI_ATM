@@ -46,7 +46,7 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
         # 移动文件夹
         encoded_folder = "/home/encoded/" + (book_title or platform)
         os.rename(output_folder, encoded_folder)
-
+        return True
     except subprocess.CalledProcessError as e:
         print(f"下载错误: {e.returncode}")
         print("错误输出：")
@@ -63,7 +63,7 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 output_folder = "/home/media/" + (book_title or platform)
                 os.makedirs(output_folder, exist_ok=True)
 
-                download_command = ["yt-dlp", "-f", f"{format_id}+bestaudio", "-o",
+                download_command = ["yt-dlp", "-f", f"{format_id}+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
                                     f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
                                     video_url]
                 if proxy:
@@ -71,6 +71,8 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 subprocess.run(download_command, check=True)
                 send_notification(video_title)
                 os.rename(output_folder, encoded_folder)
+                return True
+
             except subprocess.CalledProcessError as e:
                 print(f"下载错误: {e.returncode}")
                 print("错误输出：")
@@ -78,9 +80,11 @@ def download_and_move(video_url, platform, cookies_path, proxy=None):
                 print("完整命令：")
                 print(" ".join(e.cmd))
                 print("脚本结束。")
+                return False
     except Exception as e:
         print(f"发生未知错误: {e}")
         traceback.print_exc()  # 打印完整的堆栈跟踪
+        return False
 def list_formats(video_url, cookies_path, proxy=None):
     yt_dlp_command = ["yt-dlp", "--list-formats", "--cookies", cookies_path, video_url]
     if proxy:
@@ -142,10 +146,13 @@ else:
     pattern = platform_patterns.get(platform_choice, '')
     filtered_urls = [line.strip() for line in lines if re.search(pattern, line)]
 
-    # 下载过滤出的视频
+    # 下载过滤出的视频并更新文件
+    successful_urls = []
     for video_url in filtered_urls:
-        download_and_move(video_url, platform_choice, platform_cookies[platform_choice], platform_proxy.get(platform_choice))
+        if download_and_move(video_url, platform_choice, platform_cookies[platform_choice],
+                             platform_proxy.get(platform_choice)):
+            successful_urls.append(video_url)
 
-    # 更新 videourl.txt 文件
+    # 仅更新成功下载的视频链接
     with open('/home/videourl.txt', 'w') as file:
-        file.writelines([line for line in lines if line.strip() not in filtered_urls])
+        file.writelines([line for line in lines if line.strip() not in successful_urls])
