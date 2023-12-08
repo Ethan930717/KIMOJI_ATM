@@ -16,7 +16,7 @@ def send_notification(video_title):
     requests.post(server_url, data={"title": "下载通知", "desp": message})
 
 # 用于下载视频并移动文件夹的函数
-def download_and_move(video_url, platform, cookies_path, proxy=None):
+def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
     try:
         # 获取视频标题
         yt_dlp_command = ["yt-dlp", "--get-title", "--cookies", cookies_path, video_url]
