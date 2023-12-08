@@ -65,7 +65,7 @@ platform_proxy = {
 }
 
 # 读取视频 URL 列表
-with open('videourl.txt', 'r') as file:
+with open('/home/videourl.txt', 'r') as file:
     lines = file.readlines()
 
 # 用户选择下载平台
