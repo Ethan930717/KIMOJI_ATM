@@ -75,5 +75,5 @@ def rename_folder(folder_path):
     else:
         print("没有找到匹配的 TMDB 资源。")
 
-folder = input("请指定需要更名的文件夹路径")
+folder = input("请指定需要更名的文件夹路径:")
 rename_folder(folder)
