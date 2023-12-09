@@ -34,7 +34,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
 
         # 下载视频
         download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
-                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                            f"{output_folder}/%(playlist_title)s/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
                             video_url]
         if proxy:
             download_command.extend(["--proxy", proxy])
@@ -63,7 +63,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
             proxy = "socks5://dahu.fun:20190"
             try:
                 download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
-                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                                    f"{output_folder}/%(playlist_title)s/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
                                     "--proxy", proxy, video_url]
                 subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 return True
@@ -83,7 +83,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
                 os.makedirs(output_folder, exist_ok=True)
 
                 download_command = ["yt-dlp", "-f", f"{format_id}+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
-                                    f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                                    f"{output_folder}/%(playlist_title)s/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
                                     video_url]
                 if proxy:
                     download_command.extend(["--proxy", proxy])
@@ -108,7 +108,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
                     try:
                         download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio",
                                             "--ignore-errors", "-o",
-                                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies",
+                                            f"{output_folder}/%(playlist_title)s/%(title).20s.%(ext)s", "--embed-subs", "--cookies",
                                             cookies_path,
                                             "--proxy", proxy, video_url]
                         subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

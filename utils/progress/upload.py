@@ -139,6 +139,11 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
     else:
         keywords = ""
 
+    if maker.lower() == "kimoji":
+        internal == 1
+    else:
+        internal == 0
+
     if internal == 1:
         n = random.randint(1, 9)  # 生成一个 1 到 9 之间的随机数
         pic_urls = f"""

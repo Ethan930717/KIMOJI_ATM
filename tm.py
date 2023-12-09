@@ -3,6 +3,7 @@ from tmdbv3api import TMDb, Movie, TV
 import requests
 from bs4 import BeautifulSoup
 from pymediainfo import MediaInfo
+import re
 
 # 初始化 TMDB
 tmdb = TMDb()
@@ -49,10 +50,10 @@ def get_media_info(file_path):
     # 检测视频编码器
     video_codec = video_track.format
     is_encode = False
-    if 'x265' in video_track.format_info or 'HEVC' in video_track.format:
+    if 'x265' in video_track.format_info:
         video_codec = 'x265'
         is_encode = True
-    elif 'x264' in video_track.format_info or 'AVC' in video_track.format:
+    elif 'x264' in video_track.format_info:
         video_codec = 'x264'
         is_encode = True
     elif video_codec == 'AVC':
@@ -91,11 +92,13 @@ def get_year_from_web(id, content_type):
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
-        year_element = soup.select_one('h2 a span')
+        # Find the element with class 'tag release_date'
+        year_element = soup.find(class_="tag release_date")
         if year_element:
             year_text = year_element.text.strip()
-            # 去除括号
-            return year_text.strip('()')
+            # Extract year from the text within parentheses
+            year = re.search(r'\((\d{4})\)', year_text)
+            return year.group(1) if year else '未知'
         else:
             return '未知'
     else:
@@ -168,13 +171,16 @@ def rename_folder(folder_path):
             if seasons > 1:
                 season_num_input = input("请输入季数 (仅数字，例如: 1, 2): ")
                 season_num = f"S{season_num_input.zfill(2)}."
+            else:
+                season_num = "S01."
+
 
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
             video_codec, audio_codec, resolution, additional, is_encode = get_media_info(largest_video_file)
             # 根据是否为Encode来调整文件名
-            source_type = 'Encode' if is_encode else 'WEB-DL'
+            source_type = 'WEB-DL'
             # 构建新名称，并替换空格为点
             new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_codec}.{video_codec}-{additional}KIMOJI".replace(' ', '.').strip('.')
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
