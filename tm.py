@@ -153,7 +153,7 @@ def rename_folder(folder_path):
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
-            video_codec, audio_codec, resolution, additional = get_media_info(largest_video_file)
+            video_codec, audio_codec, resolution, additional, is_encode = get_media_info(largest_video_file)
             # 构建新名称，并替换空格为点
             new_name = f"{title}.{original_title}.{season_num}{resolution}.{audio_codec}.{video_codec}-{additional}".replace(
                 ' ', '.').strip('.')
