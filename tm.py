@@ -169,7 +169,7 @@ def list_folders(base_path):
     return folders
 
 def main():
-    base_path = '/home/media'  # 例如 '/Users/Ethan/Desktop'
+    base_path = '/home/encoded'  # 例如 '/Users/Ethan/Desktop'
     folders = list_folders(base_path)
 
     if not folders:
