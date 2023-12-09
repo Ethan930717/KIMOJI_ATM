@@ -149,7 +149,7 @@ platform_cookies = {
 }
 
 platform_proxy = {
-    '2': "socks5://dahu.fun:20190",  # 仅对 Bilibili 和 Youku 使用代理
+    #'2': "socks5://dahu.fun:20190",  # 仅对 Bilibili 和 Youku 使用代理
     '3': "socks5://dahu.fun:20190",
     '5': "socks5://dahu.fun:20190"
 
