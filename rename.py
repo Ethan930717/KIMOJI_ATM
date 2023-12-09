@@ -67,7 +67,7 @@ def rename_folders(directory):
                 info = get_media_info(largest_video_file)
                 if info:
                     video_codec, audio_codec, resolution, additional = info
-                    new_folder_name = f"{folder}.{resolution}.WEB-DL.{video_codec}.{audio_codec}-{additional}KIMOJI"
+                    new_folder_name = f"{folder}.{resolution}.WEB-DL.{audio_codec}.{video_codec}-{additional}KIMOJI"
                     new_folder_path = os.path.join(directory, new_folder_name)
                     os.rename(folder_path, new_folder_path)
                     remove_spaces_in_filenames(new_folder_path)
