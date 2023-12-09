@@ -8,7 +8,7 @@ def list_directory_contents(directory):
     return items
 
 def reencode_video(input_path, output_path):
-    command = ['ffmpeg', '-i', input_path, '-map', '0:v', '-map', '0:a', '-c:v', 'libx265', '-crf', '20', '-preset', 'medium', '-c:a', 'aac', output_path]
+    command = ['ffmpeg', '-i', input_path, '-map', '0:v', '-map', '0:a', '-c:v', 'libx265', '-crf', '20', '-preset', 'medium', '-c:a', 'ac3', output_path]
     subprocess.run(command)
 
 def handle_file(file_path):
