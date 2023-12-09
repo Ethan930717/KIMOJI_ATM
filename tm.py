@@ -155,10 +155,16 @@ def rename_folder(folder_path):
         if largest_video_file:
             video_codec, audio_codec, resolution, additional = get_media_info(largest_video_file)
             # 构建新名称，并替换空格为点
-            new_name = f"{title}.{original_title}.{season_num}{resolution}.{video_codec}.{audio_codec}-{additional}".replace(' ', '.').strip('.')
+            new_name = f"{title}.{original_title}.{season_num}{resolution}.{audio_codec}.{video_codec}-{additional}".replace(
+                ' ', '.').strip('.')
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
             print(f"文件夹重命名为: {new_name}")
+
+            # 在这里调用 rename_files_in_folder 函数
+            is_tv_show = selected_type == 'tv'
+            rename_files_in_folder(new_path, new_name, is_tv_show)
+
         else:
             print("未找到有效的视频文件。")
     else:
@@ -168,6 +174,19 @@ def list_folders(base_path):
     folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))]
     return folders
 
+def rename_files_in_folder(folder_path, new_folder_name, is_tv_show):
+    for file in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file)
+        if os.path.isfile(file_path):
+            file_extension = os.path.splitext(file_path)[1]
+            if is_tv_show:
+                # 仅替换文件名中的空格为点
+                new_file_name = file.replace(' ', '.')
+            else:
+                # 将文件名更改为与文件夹相同的名称
+                new_file_name = new_folder_name + file_extension
+            new_file_path = os.path.join(folder_path, new_file_name)
+            os.rename(file_path, new_file_path)
 def main():
     base_path = '/home/encoded'  # 例如 '/Users/Ethan/Desktop'
     folders = list_folders(base_path)
