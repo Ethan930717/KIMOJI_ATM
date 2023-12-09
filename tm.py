@@ -81,6 +81,27 @@ def get_media_info(file_path):
 def contains_chinese(text):
     return any('\u4e00' <= char <= '\u9fff' for char in text)
 
+def get_year_from_web(id, content_type):
+    base_url = "https://www.themoviedb.org"
+    url = f"{base_url}/{content_type}/{id}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        year_element = soup.select_one('h2 a span')
+        if year_element:
+            year_text = year_element.text.strip()
+            # 去除括号
+            return year_text.strip('()')
+        else:
+            return '未知'
+    else:
+        return '未知'
+
+
 def get_title_from_web(id, content_type, language):
     base_url = "https://www.themoviedb.org"
     if content_type == 'movie':
@@ -105,16 +126,14 @@ def get_title_from_web(id, content_type, language):
 
 def extract_details(result, result_type):
     if isinstance(result, str):
-        return '未知', '未知', ''
+        return '未知', '未知', '未知'
 
     id = result.id
     title = get_title_from_web(id, result_type, 'zh-CN')
     original_title = get_title_from_web(id, result_type, 'en-US')
-    release_date = result.release_date[:4] if hasattr(result, 'release_date') else result.first_air_date[:4] if hasattr(
-        result, 'first_air_date') else ''
+    release_date = get_year_from_web(id, result_type)  # 从网页获取年份
 
     return title, original_title, release_date
-
 
 def get_alternative_title(id, language):
     try:
@@ -154,9 +173,10 @@ def rename_folder(folder_path):
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
             video_codec, audio_codec, resolution, additional, is_encode = get_media_info(largest_video_file)
+            # 根据是否为Encode来调整文件名
+            source_type = 'Encode' if is_encode else 'WEB-DL'
             # 构建新名称，并替换空格为点
-            new_name = f"{title}.{original_title}.{season_num}{resolution}.{audio_codec}.{video_codec}-{additional}".replace(
-                ' ', '.').strip('.')
+            new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_codec}.{video_codec}-{additional}KIMOJI".replace(' ', '.').strip('.')
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
             print(f"文件夹重命名为: {new_name}")
