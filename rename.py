@@ -35,17 +35,25 @@ def get_media_info(file_path):
     video_track = video_tracks[0]
     audio_track = audio_tracks[0] if audio_tracks else None
 
+    # 检测视频编码器
     video_codec = video_track.format
-    if video_codec == 'AVC':
+    is_encode = False
+    if 'x265' in video_track.format_info or 'HEVC' in video_track.format:
+        video_codec = 'x265'
+        is_encode = True
+    elif 'x264' in video_track.format_info or 'AVC' in video_track.format:
+        video_codec = 'x264'
+        is_encode = True
+    elif video_codec == 'AVC':
         video_codec = 'H264'
     elif video_codec == 'HEVC':
         video_codec = 'H265'
 
     audio_codec = audio_track.format if audio_track else None
     scan_type = 'P' if video_track.scan_type == 'Progressive' else 'I'
-    resolution = format_resolution(video_track.width, video_track.height,scan_type)
+    resolution = format_resolution(video_track.width, video_track.height, scan_type)
 
-    # Additional attributes like HDR, Dolby Vision, 10bit, etc.
+    # 其他属性，如HDR等
     additional_attrs = []
     if 'HDR' in video_track.format_profile:
         additional_attrs.append('HDR')
@@ -56,7 +64,7 @@ def get_media_info(file_path):
         if bit_depth in ['10', '20']:
             additional_attrs.append(f'{bit_depth}bit')
 
-    return video_codec, audio_codec, resolution, '.'.join(additional_attrs)
+    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode
 
 def rename_folders(directory):
     for folder in os.listdir(directory):
@@ -66,8 +74,9 @@ def rename_folders(directory):
             if largest_video_file:
                 info = get_media_info(largest_video_file)
                 if info:
-                    video_codec, audio_codec, resolution, additional = info
-                    new_folder_name = f"{folder}.{resolution}.WEB-DL.{audio_codec}.{video_codec}-{additional}KIMOJI"
+                    video_codec, audio_codec, resolution, additional, is_encode = info
+                    source_type = 'Encode' if is_encode else 'WEB-DL'
+                    new_folder_name = f"{folder}.{resolution}.{source_type}.{video_codec}.{audio_codec}-{additional}KIMOJI"
                     new_folder_path = os.path.join(directory, new_folder_name)
                     os.rename(folder_path, new_folder_path)
                     remove_spaces_in_filenames(new_folder_path)

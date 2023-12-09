@@ -2,6 +2,7 @@ import os
 from tmdbv3api import TMDb, Movie, TV
 import requests
 from bs4 import BeautifulSoup
+from pymediainfo import MediaInfo
 
 # 初始化 TMDB
 tmdb = TMDb()
@@ -10,6 +11,71 @@ tmdb.language = 'zh-CN'
 
 movie = Movie()
 tv = TV()
+
+def find_largest_video_file(folder_path):
+    largest_size = 0
+    video_file = None
+    for file in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file)
+        if os.path.isfile(file_path) and file_path.endswith(('.mp4', '.mkv', '.avi', '.mov')):
+            size = os.path.getsize(file_path)
+            if size > largest_size:
+                largest_size = size
+                video_file = file_path
+    return video_file
+
+def format_resolution(width, height, scan_type):
+    if height == 1080:
+        return '1080p' if scan_type == 'P' else '1080i'
+    elif height == 720:
+        return '720p'
+    elif height == 2160:
+        return '2160p'
+    else:
+        return f"{width}x{height}"
+
+
+def get_media_info(file_path):
+    media_info = MediaInfo.parse(file_path)
+    video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
+    audio_tracks = [track for track in media_info.tracks if track.track_type == 'Audio']
+
+    if not video_tracks:
+        return None
+
+    video_track = video_tracks[0]
+    audio_track = audio_tracks[0] if audio_tracks else None
+
+    # 检测视频编码器
+    video_codec = video_track.format
+    is_encode = False
+    if 'x265' in video_track.format_info or 'HEVC' in video_track.format:
+        video_codec = 'x265'
+        is_encode = True
+    elif 'x264' in video_track.format_info or 'AVC' in video_track.format:
+        video_codec = 'x264'
+        is_encode = True
+    elif video_codec == 'AVC':
+        video_codec = 'H264'
+    elif video_codec == 'HEVC':
+        video_codec = 'H265'
+
+    audio_codec = audio_track.format if audio_track else None
+    scan_type = 'P' if video_track.scan_type == 'Progressive' else 'I'
+    resolution = format_resolution(video_track.width, video_track.height, scan_type)
+
+    # 其他属性，如HDR等
+    additional_attrs = []
+    if 'HDR' in video_track.format_profile:
+        additional_attrs.append('HDR')
+    if 'Dolby Vision' in video_track.format_profile:
+        additional_attrs.append('DV')
+    if video_track.bit_depth:
+        bit_depth = video_track.bit_depth
+        if bit_depth in ['10', '20']:
+            additional_attrs.append(f'{bit_depth}bit')
+
+    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode
 
 
 def contains_chinese(text):
@@ -64,7 +130,7 @@ def get_alternative_title(id, language):
 def rename_folder(folder_path):
     folder_name = os.path.basename(folder_path)
 
-    # 搜索电影和电视剧结果
+    # 1. 使用TMDB API获取文件夹名称对应的影片信息
     movie_results = [(result, 'movie') for result in movie.search(folder_name)]
     tv_results = [(result, 'tv') for result in tv.search(folder_name)]
     search_results = movie_results + tv_results
@@ -72,13 +138,11 @@ def rename_folder(folder_path):
     if search_results:
         for i, (result, result_type) in enumerate(search_results, start=1):
             title, original_title, release_date = extract_details(result, result_type)
-            print(
-                f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
+            print(f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
         choice = int(input("请选择一个选项: ")) - 1
         selected_result, selected_type = search_results[choice]
         title, original_title, release_date = extract_details(selected_result, selected_type)
 
-        # 根据类型确定是否需要季数
         season_num = ''
         if selected_type == 'tv':
             seasons = tv.details(selected_result.id).number_of_seasons
@@ -86,19 +150,26 @@ def rename_folder(folder_path):
                 season_num_input = input("请输入季数 (仅数字，例如: 1, 2): ")
                 season_num = f"S{season_num_input.zfill(2)}."
 
-        # 构建新名称，并替换空格为点
-        new_name = f"{title}.{original_title}.{season_num}{release_date}".replace(' ', '.').strip('.')
-        new_path = os.path.join(os.path.dirname(folder_path), new_name)
-        os.rename(folder_path, new_path)
-        print(f"文件夹重命名为: {new_name}")
+        # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
+        largest_video_file = find_largest_video_file(folder_path)
+        if largest_video_file:
+            video_codec, audio_codec, resolution, additional = get_media_info(largest_video_file)
+            # 构建新名称，并替换空格为点
+            new_name = f"{title}.{original_title}.{season_num}{resolution}.{video_codec}.{audio_codec}-{additional}".replace(' ', '.').strip('.')
+            new_path = os.path.join(os.path.dirname(folder_path), new_name)
+            os.rename(folder_path, new_path)
+            print(f"文件夹重命名为: {new_name}")
+        else:
+            print("未找到有效的视频文件。")
     else:
         print("没有找到匹配的 TMDB 资源。")
+
 def list_folders(base_path):
     folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))]
     return folders
 
 def main():
-    base_path = input("请输入文件夹的基本路径: ")  # 例如 '/Users/Ethan/Desktop'
+    base_path = '/home/media'  # 例如 '/Users/Ethan/Desktop'
     folders = list_folders(base_path)
 
     if not folders:
