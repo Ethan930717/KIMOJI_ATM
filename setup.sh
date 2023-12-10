@@ -106,11 +106,9 @@ main() {
     install_dependencies
     install_pip_dependencies
     configure
-    echo "全部配置已完成。"
+    echo "然后输入./k开启本工具"
     sudo chmod a+x k
     sudo chmod a+x update
-
-    ./k
 }
 
 main
