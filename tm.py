@@ -161,9 +161,24 @@ def rename_folder(folder_path):
         for i, (result, result_type) in enumerate(search_results, start=1):
             title, original_title, release_date = extract_details(result, result_type)
             print(f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
-        choice = int(input("请选择一个选项: ")) - 1
-        selected_result, selected_type = search_results[choice]
-        title, original_title, release_date = extract_details(selected_result, selected_type)
+        user_input = input(
+            "如果无法确定列表中对应的影片，请手动在TMDb搜索确认后，输入类型+TMDb ID（例如 'movie300212' 或 'tv12345'）。如果TMDb中没有该词条，请输入 'q'退出脚本: ")
+
+        if user_input.lower() == 'q':
+            print("退出脚本。")
+            return
+        elif user_input.startswith('movie') or user_input.startswith('tv'):
+            selected_type = user_input[:5]
+            tmdb_id = user_input[5:]
+            if selected_type == 'movie':
+                selected_result = movie.details(tmdb_id)
+            else:
+                selected_result = tv.details(tmdb_id)
+            title, original_title, release_date = extract_details(selected_result, selected_type)
+        else:
+            choice = int(user_input) - 1
+            selected_result, selected_type = search_results[choice]
+            title, original_title, release_date = extract_details(selected_result, selected_type)
 
         season_num = ''
         if selected_type == 'tv':
@@ -182,7 +197,8 @@ def rename_folder(folder_path):
             # 根据是否为Encode来调整文件名
             source_type = 'WEB-DL'
             # 构建新名称，并替换空格为点
-            new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_codec}.{video_codec}-{additional}KIMOJI".replace(' ', '.').strip('.')
+            new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_codec}.{video_codec}-{additional}KIMOJI".replace(
+                ' ', '.').replace(':', '').strip('.')
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
             print(f"文件夹重命名为: {new_name}")

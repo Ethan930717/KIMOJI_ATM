@@ -1,10 +1,10 @@
 from googleapiclient.discovery import build
 
 # 用你的API密钥替换这里的YOUR_API_KEY
-youtube = build('youtube', 'v3', developerKey='YOUR_API_KEY')
+youtube = build('youtube', 'v3', developerKey='AIzaSyDKvGQR18CSwDfjauXyt8-HmCrAthV8pT0')
 
 # 用你的播放列表ID替换这里的PLAYLIST_ID
-playlist_id = 'YOUR_PLAYLIST_ID'
+playlist_id = 'PLOrf2h5ONlwW9lFJ-68wtf7FdMG-45FNG'
 
 def get_playlist_videos(playlist_id):
     request = youtube.playlistItems().list(
