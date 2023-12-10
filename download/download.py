@@ -34,11 +34,18 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
 
         # 下载视频
         download_command = ["yt-dlp", "-f", "bestvideo+bestaudio[ext=webm]/bestaudio", "--ignore-errors", "-o",
-                            f"{output_folder}/%(playlist_title)s/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
+                            f"{output_folder}/%(title).20s.%(ext)s", "--embed-subs", "--cookies", cookies_path,
                             video_url]
         if proxy:
             download_command.extend(["--proxy", proxy])
-        subprocess.run(download_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(download_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   text=True)
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
 
         # 发送下载完成通知
         send_notification(video_title)
