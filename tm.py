@@ -186,8 +186,12 @@ def rename_folder(folder_path):
             if seasons > 1:
                 season_num_input = input("请输入季数 (仅数字，例如: 1, 2): ")
                 season_num = f"S{season_num_input.zfill(2)}."
+                # 获取特定季的年份
+                release_date = get_season_year_from_web(selected_result.id, season_num_input)
             else:
                 season_num = "S01."
+                # 如果只有一季，使用电视剧的发布年份
+                release_date = get_year_from_web(selected_result.id, 'tv')
 
 
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
@@ -247,6 +251,24 @@ def main():
         rename_folder(folder_to_rename)
     else:
         print("无效的选择。")
+
+def get_season_year_from_web(tv_id, season_num):
+    url = f"https://www.themoviedb.org/tv/{tv_id}/season/{season_num}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        year_element = soup.find('span', class_='tag release_date')
+        if year_element:
+            year_text = year_element.text.strip()
+            return year_text.strip('()')
+        else:
+            return '未知'
+    else:
+        return '未知'
 
 if __name__ == "__main__":
     main()

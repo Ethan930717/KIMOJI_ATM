@@ -48,7 +48,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
         os.rename(output_folder, encoded_folder)
         # 更新文件：移除成功下载的链接
         lines.remove(video_url + '\n')
-        with open('/home/videourl.txt', 'w') as file:
+        with open('/home/yt/urls2.txt', 'w') as file:
             file.writelines(lines)
 
         return True
@@ -92,7 +92,7 @@ def download_and_move(video_url, platform, cookies_path, lines, proxy=None):
                 os.rename(output_folder, encoded_folder)
                 # 更新文件：移除成功下载的链接
                 lines.remove(video_url + '\n')
-                with open('/home/videourl.txt', 'w') as file:
+                with open('/home/yt/urls2.txt', 'w') as file:
                     file.writelines(lines)
 
                 return True
@@ -140,11 +140,11 @@ platform_patterns = {
 }
 
 platform_cookies = {
-    '1': "/home/cookies/youtubecookies.txt",
-    '2': "/home/cookies/bilicookies.txt",
-    '3': "/home/cookies/youkucookies.txt",
-    '4': "/home/cookies/qiyicookies.txt",
-    '5': "/home/cookies/mangocookies.txt"
+    '1': "/home/yt/ytcookies.txt",
+    '2': "/home/yt/bilicookies.txt",
+    '3': "/home/yt/youkucookies.txt",
+    '4': "/home/yt/qiyicookies.txt",
+    '5': "/home/yt/mangocookies.txt"
 
 }
 
@@ -156,7 +156,7 @@ platform_proxy = {
 }
 
 # 读取视频 URL 列表
-with open('/home/videourl.txt', 'r') as file:
+with open('/home/yt/urls2.txt', 'r') as file:
     lines = file.readlines()
 
 
