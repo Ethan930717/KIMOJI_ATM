@@ -93,7 +93,7 @@ def get_year_from_web(id, content_type):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         # Find the element with class 'tag release_date'
-        year_element = soup.find(class_="tag release_date")
+        year_element = soup.find('span', class_='tag release_date')
         if year_element:
             year_text = year_element.text.strip()
             # Extract year from the text within parentheses

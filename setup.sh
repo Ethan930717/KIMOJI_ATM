@@ -92,39 +92,7 @@ install_pip_dependencies() {
 }
 
 configure() {
-    echo "环境已配置完成，请添加您的配置信息"
-
-    # 输入并更新配置
-    read_config() {
-        local prompt=$1
-        local key=$2
-        local default=$3
-        local input
-        while true; do
-            read -p "$prompt ($default): " input
-            if [[ -z "$input" ]]; then
-                input=$default
-            fi
-            if [[ "$input" == "q" ]]; then
-                return 1
-            else
-                # 更新配置文件
-                sed -i '' "s|$key:.*|$key: '$input'|" config_example.yaml
-                return 0
-            fi
-        done
-    }
-
-    # 逐个询问并更新配置
-    read_config "请输入您存放资源的主目录路径" "file_dir" "例：/root/media/movie" || return
-    read_config "请输入存放种子文件的路径" "torrent_dir" "例：/root/torrent（一般人都不会有专门的种子文件夹，可以指定任意一个已经存在的文件夹，用来存放阿K制作的种子）" || return
-    read_config "请输入KIMOJI用户名" "username" "阿K支持中文名注册哦" || return
-    read_config "请输入KIMOJI登陆密码" "password" "password" || return
-    read_config "请输入qb路径" "url" "例：192.168.1.1" || return
-    read_config "请输入qb端口" "port" "例：8080" || return
-    read_config "请输入qb登陆账号" "username" "例：admin" || return
-    read_config "请输入qb登陆密码" "password" "例：adminadmin" || return
-    read_config "请输入qb保存路径" "save_path" "例：/download" || return
+    echo "环境已配置完成，请在config.yaml中更改您的配置信息"
 
     # 重命名配置文件
     sudo mv config_example.yaml config.yaml
