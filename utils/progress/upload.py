@@ -213,7 +213,7 @@ def kimoji_upload(torrent_path, file_name, username, password, chinese_title, en
                     'personal_release': personal,
                     'mod_queue_opt_in': '0',
                     'refundable': '0',
-                    'free': '100',
+                    'free': '0',
                     'post': 'true',
                     'isPreviewEnabled': '0',
                 }
