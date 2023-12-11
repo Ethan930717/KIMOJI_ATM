@@ -170,32 +170,33 @@ with open('/home/yt/urls2.txt', 'r') as file:
 # 用户选择下载平台
 platform_choice = input("请选择下载平台或查看格式：\n0 - 查看格式\n1 - YouTube\n2 - Bilibili\n3 - Youku\n4 - IQIYI\n5 - Mango\n选择 0, 1, 2, 3, 4 或 5: ")
 
-if platform_choice == '0':
-    # 显示所有链接并编号
-    for index, video_url in enumerate(lines, start=1):
-        print(f"{index} - {video_url.strip()}")
+for video_url in lines[:2]:
+    if platform_choice == '0':
+        # 显示所有链接并编号
+        for index, video_url in enumerate(lines, start=1):
+            print(f"{index} - {video_url.strip()}")
 
-    # 让用户选择一个编号
-    index_choice = int(input("选择要查看格式的视频编号：")) - 1
+        # 让用户选择一个编号
+        index_choice = int(input("选择要查看格式的视频编号：")) - 1
 
-    # 获取对应视频的URL
-    selected_video_url = lines[index_choice].strip()
+        # 获取对应视频的URL
+        selected_video_url = lines[index_choice].strip()
 
-    # 获取平台信息
-    for key, pattern in platform_patterns.items():
-        if re.search(pattern, selected_video_url):
-            selected_platform = key
-            break
+        # 获取平台信息
+        for key, pattern in platform_patterns.items():
+            if re.search(pattern, selected_video_url):
+                selected_platform = key
+                break
 
-    # 调用yt-dlp的format-list功能
-    list_formats(selected_video_url, platform_cookies[selected_platform], platform_proxy.get(selected_platform))
-else:
-    # 过滤出对应平台的 URL
-    pattern = platform_patterns.get(platform_choice, '')
-    filtered_urls = [line.strip() for line in lines if re.search(pattern, line)]
+        # 调用yt-dlp的format-list功能
+        list_formats(selected_video_url, platform_cookies[selected_platform], platform_proxy.get(selected_platform))
+    else:
+        # 过滤出对应平台的 URL
+        pattern = platform_patterns.get(platform_choice, '')
+        filtered_urls = [line.strip() for line in lines if re.search(pattern, line)]
 
-    # 下载过滤出的视频并更新文件
-    successful_urls = []
-    for video_url in filtered_urls:
-        download_and_move(video_url, platform_choice, platform_cookies[platform_choice], lines,
-                          platform_proxy.get(platform_choice))
+        # 下载过滤出的视频并更新文件
+        successful_urls = []
+        for video_url in filtered_urls:
+            download_and_move(video_url, platform_choice, platform_cookies[platform_choice], lines,
+                              platform_proxy.get(platform_choice))
