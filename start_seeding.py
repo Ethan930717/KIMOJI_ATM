@@ -11,8 +11,12 @@ from config_loader import config
 from ffmpeg import screenshot_from_video
 import random
 import requests
-logging.basicConfig(level=logging.INFO)
+import qbittorrentapi
+import transmission_rpc
+import json
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 def get_largest_video_file(folder_path):
     largest_size = 0
     largest_file = None
@@ -97,15 +101,36 @@ def start_seeding(csv_file):
                     else:
                         logging.error("文件夹中未找到视频文件，请核查")
                         row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-                upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+                response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+                if 'data' in response_json and response_json['success']:
+                    download_link = response_json['data']
+                    seeding_success = add_torrent_based_on_agent(download_link)
+                    if seeding_success:
+                        logger.info("种子已成功添加到下载器并开始做种")
+                        update_row_status(row, seeding_success, download_link)
+                    else:
+                        logger.error("种子添加到下载器失败，请手动处理")
+                        update_row_status(row, False, None, error=True, response_json=response_json)
+                else:
+                    logger.error("无法从响应中提取种子下载地址")
+                    row[9] = '-1'  # 标记为处理失败
+                with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+                    writer = csv.writer(file)
+                    writer.writerows(reader)
 
-                updated_rows.append(row)
-            updated_rows.append(row)  # 将当前行添加到更新后的数据行列表中
-
-        with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerows(updated_rows)
-
+def update_row_status(row, seeding_success, download_link, error=False, response_json=None):
+    if error and response_json:
+        # 将 JSON 错误消息转换为中文
+        error_message = json.dumps(response_json, ensure_ascii=False)
+        row[9] = '-1'  # 标记为做种成功
+        row.append("种子发送失败，错误信息：" + error_message)
+    else:
+        if seeding_success:
+            row[9] = '3'  # 标记为做种成功
+            row.append(download_link)
+        else:
+            row[9] = '2'  # 标记为做种失败
+            row.append(download_link if download_link else "N/A")
 
 def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
@@ -189,8 +214,89 @@ def upload_torrent(torrent_file_path, upload_name, description, mediainfo, categ
     response = requests.post(url, headers=headers, files=files, data=data)
 
     if response.status_code == 200:
-        print(f"种子上传成功: {response.json()}")
+        logger.info(f"种子上传成功: {response.json()}")
         return response.json()
     else:
-        print(f"种子上传失败: {response.text}")
+        logger.error(f"种子上传失败: {response.text}")
         return None
+
+
+def add_torrent_based_on_agent(download_link, max_retries=3):
+    agent = config.agent
+    logger.info(f'检测到当前选择的下载器为{agent}')
+    success = False  # 默认设置为未成功
+    if agent == 'qb':
+        logger.info('正在尝试将种子添加到qbittorrent')
+        success = add_torrent_to_qbittorrent(download_link, max_retries=max_retries)
+    elif agent == 'tr':
+        logger.info('正在尝试将种子添加到transmission')
+        success = add_torrent_to_transmission(download_link, max_retries=max_retries)
+    else:
+        logger.error("未正确指定做种下载器，请手动做种")
+    if success:
+        logger.info("种子添加成功")
+    else:
+        logger.error("种子添加失败")
+    return success
+
+
+def add_torrent_to_qbittorrent(download_link, skip_checking=True, max_retries=3):
+    qbt_client = qbittorrentapi.Client(
+        host=config.qb_url,
+        port=config.qb_port,
+        username=config.qb_username,
+        password=config.qb_password
+    )
+    try:
+        qbt_client.auth_log_in()
+    except Exception as e:
+        logger.error(f"登录失败: {e}")
+        return False
+
+    retries = 0
+    while retries < max_retries:
+        try:
+            qbt_client.torrents_add(
+                urls=[download_link],
+                category='KIMOJI',
+                save_path=config.qb_save_path,
+                skip_checking=skip_checking
+            )
+            print("种子添加成功,小K收工啦")
+            return True
+        except Exception as e:
+            retries += 1
+            logger.warning(f"添加种子时发生错误: {e}")
+            if retries >= max_retries:
+                logger.error("达到最大重试次数，停止尝试")
+                logger.error(f"种子添加失败，种子链接 {download_link}，请尝试手动添加。")
+                return False
+            logger.warning(f"正在尝试第 {retries} 次重试")
+            time.sleep(5)
+def add_torrent_to_transmission(download_link, max_retries=3):
+    # 初始化 Transmission 客户端
+    tc = transmission_rpc.Client(
+        host=config.tr_address,
+        port=config.tr_port,
+        username=config.tr_username,
+        password=config.tr_password
+    )
+
+    retries = 0
+    while retries < max_retries:
+        try:
+            # 添加种子
+            tc.add_torrent(download_link, download_dir=config.tr_save_path)
+
+            print("种子成功添加到Transmission，小K收工啦")
+            return True
+        except Exception as e:
+            retries += 1
+            logger.warning(f"添加种子时发生错误: {e}")
+            if retries >= max_retries:
+                logger.error("达到最大重试次数，停止尝试")
+                logger.error(f"种子添加失败，种子链接 {download_link}，请尝试手动添加。")
+                return False
+
+            logger.warning(f"正在尝试第 {retries} 次重试")
+            time.sleep(5)

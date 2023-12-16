@@ -80,6 +80,8 @@ def get_media_info(file_path):
         return None
 
     video_track = video_tracks[0]
+    if video_track.height < 720:
+        return None, "Resolution too low"
     audio_track = audio_tracks[0] if audio_tracks else None
     audio_count = len(audio_tracks)  # 获取音轨数量
 
@@ -113,7 +115,7 @@ def get_media_info(file_path):
         if bit_depth in ['10', '20']:
             additional_attrs.append(f'{bit_depth}bit')
 
-    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count
+    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count, "OK"
 
 def contains_chinese(text):
     return any('\u4e00' <= char <= '\u9fff' for char in text)
@@ -129,40 +131,39 @@ def get_details_from_tmdb(id, content_type):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
 
+        # 获取类别信息
+        genre_elements = soup.find('span', class_='genres').find_all('a') if soup.find('span', class_='genres') else []
+        genres = [a['href'] for a in genre_elements]  # 提取 href 属性值
+
+        # 确定 category_id 和 child
+        category_id, child = determine_category_and_child(genres, soup, content_type)
+
         # 获取年份
         year_element = soup.find('span', class_='tag release_date')
         year = year_element.text.strip('()') if year_element else '未知'
-
-        # 获取类别信息
-        genres = soup.find('div', class_='facts').find('span', class_='genres').find_all('a') if soup.find('div', class_='facts') and soup.find('div', class_='facts').find('span', class_='genres') else []
-        certifications = soup.find('div', class_='facts').find('span', class_='certification').get_text() if soup.find('div', class_='facts') and soup.find('div', class_='facts').find('span', class_='certification') else ""
-
-        # 确定 category_id
-        if "16-" in genres:
-            category_id = 3 if content_type == 'movie' else 4
-            print('判定类别为动漫')
-        elif "99-" in genres and content_type == 'tv':
-            category_id = 6
-            print('判定类别为纪录片')
-        elif ("10764" in genres or "10767" in genres) and content_type == 'tv':
-            category_id = 5
-            print('判定类别为综艺')
-        elif content_type == 'tv':
-            category_id = 2
-            print('判定类别为电视剧')
-
-        else:
-            category_id = 1
-            print('判定类别为电影')
-
-
-        # 确定 child
-        child = 1 if any(c in certifications for c in ['Y', 'G']) or "10762" in genres else 0
 
         return year, category_id, child
     else:
         return '未知', None, None
 
+def determine_category_and_child(genres, soup, content_type):
+    # 检查 genres 中的数字是否符合特定条件
+    if any("/genre/16-" in genre for genre in genres):
+        category_id = 3 if content_type == 'movie' else 4
+    elif any("/genre/99-" in genre for genre in genres) and content_type == 'tv':
+        category_id = 6
+    elif any("/genre/10764-" in genre or "/genre/10767-" in genre for genre in genres) and content_type == 'tv':
+        category_id = 5
+    elif content_type == 'tv':
+        category_id = 2
+    else:
+        category_id = 1
+
+    # 确定 child
+    certifications = soup.find('span', class_='certification').get_text() if soup.find('span', class_='certification') else ""
+    child = 1 if any(c in certifications for c in ['Y', 'G']) or any("/genre/10762-" in genre for genre in genres) else 0
+
+    return category_id, child
 def get_title_from_web(id, content_type, language):
     base_url = "https://www.themoviedb.org"
     if content_type == 'movie':
@@ -267,7 +268,7 @@ def rename_folder(folder_path):
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
-            video_codec, audio_codec, resolution, additional, is_encode, audio_count = get_media_info(
+            video_codec, audio_codec, resolution, additional, is_encode, audio_count, status = get_media_info(
                 largest_video_file)
             if audio_count > 1:
                 audio_info = f"{audio_count}Audio {audio_codec}"
@@ -318,7 +319,7 @@ def rename_folder(folder_path):
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
             type_id = get_type_id(new_name)
-            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, type_id
+            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, type_id, status
         else:
             print("未找到有效的视频文件。")
             return None, None, None, None, None, None, None, None, None, None
@@ -416,7 +417,11 @@ def generate(folder_path):
         # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
             print(f"处理文件夹: {item_path}")
-            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name= rename_folder(item_path)
+            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
+            if status != "OK":
+                if status == "Resolution too low":
+                    print("当前视频资源分辨率过低，不符合发种要求")
+                continue  # 继续下一个循环
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, 0])
 
