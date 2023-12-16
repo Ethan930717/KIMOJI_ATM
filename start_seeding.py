@@ -83,7 +83,6 @@ def start_seeding(csv_file):
                         internal = 1 if maker.lower() == "kimoji" else 0
                         if internal:
                             fl_until =3
-                            sticky = 1
                             n = random.randint(1, 10)
                             description = f"""
                             [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
@@ -91,7 +90,6 @@ def start_seeding(csv_file):
                             """
                         else:
                             fl_until =1
-                            sticky =0
                             description = f"""
                             [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
                             [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
@@ -99,7 +97,7 @@ def start_seeding(csv_file):
                     else:
                         logging.error("文件夹中未找到视频文件，请核查")
                         row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-                upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until, sticky)
+                upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
 
                 updated_rows.append(row)
             updated_rows.append(row)  # 将当前行添加到更新后的数据行列表中
@@ -153,7 +151,7 @@ def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", 
     bar.finish()
     return None
 
-def upload_torrent(torrent_file_path, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until, sticky):
+def upload_torrent(torrent_file_path, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until):
     url = 'https://kimoji.club/api/torrents/upload'  # 更改为您的站点API端点
     headers = {
         'Authorization': f'Bearer {config.apikey}',
@@ -178,8 +176,12 @@ def upload_torrent(torrent_file_path, upload_name, description, mediainfo, categ
         'anonymous': 0,
         'sd': child,
         'free': 100,
+        'episode_number':0,
         'fl_until': fl_until,
-        'sticky': sticky,
+        'sticky': config.sticky,
+        'stream': config.stream,
+        'featured': config.stream,
+        'doubleup': config.doubleup,
         'internal': internal,
         'personal_release': 0  # 如果是个人作品可以设置为 1
     }

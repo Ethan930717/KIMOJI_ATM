@@ -13,6 +13,11 @@ class Config:
             self.torrent_dir = config['basic']['torrent_dir']
             self.apikey = config['basic']['apikey']
             self.agent = config['basic']['agent']
+            self.sticky = config['basic']['sticky']
+            self.stream = config['basic']['stream']
+            self.featured = config['basic']['featured']
+            self.doubleup = config['basic']['doubleup']
+
 
             # qbittorrent 和 transmission 的配置
             self.qb_url = config['qbittorrent']['url']

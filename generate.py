@@ -247,15 +247,19 @@ def rename_folder(folder_path):
             title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
 
         season_num = ''
+        season_onlynum = ''  # 新增变量来保存只包含数字的季数
+
         if selected_type == 'tv':
             seasons = tv.details(selected_result.id).number_of_seasons
             if seasons > 1:
                 season_num_input = input("请输入季数 (仅数字，例如: 1, 2): ")
                 season_num = f"S{season_num_input.zfill(2)}."
+                season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
                 # 获取特定季的年份
                 release_date = get_season_year_from_web(selected_result.id, season_num_input)
             else:
                 season_num = "S01."
+                season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
                 # 如果只有一季，使用电视剧的发布年份
                 release_date = release_date
 
@@ -313,13 +317,14 @@ def rename_folder(folder_path):
 
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
-            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name
+            type_id = get_type_id(new_name)
+            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, type_id
         else:
             print("未找到有效的视频文件。")
-            return None, None, None, None, None, None, None, None, None
+            return None, None, None, None, None, None, None, None, None, None
     else:
         print("没有找到匹配的 TMDB 资源。")
-        return None, None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None, None
 
 def rename_files_in_folder(folder_path, new_folder_name, is_tv_show):
     for file in os.listdir(folder_path):
@@ -376,6 +381,26 @@ def write_to_log(log_directory, data):
         # 写入数据
         writer.writerow(data)
 
+def get_type_id(new_name):
+    new_name_upper = new_name.upper()
+
+    if 'REMUX' in new_name_upper:
+        type_id = '3'
+    elif 'WEB-DL' in new_name_upper:
+        type_id = '4'
+    elif 'UHD' in new_name_upper and ('X264' in new_name_upper or 'X265' in new_name_upper):
+        type_id = '5'
+    elif 'BLURAY' in new_name_upper or 'BLU-RAY' in new_name_upper:
+        if 'X264' in new_name_upper or 'X265' in new_name_upper:
+            type_id = '5'
+        else:
+            type_id = '2'
+    elif 'HDTV' in new_name_upper:
+        type_id = '6'
+    else:
+        type_id = '未知'
+    return type_id
+
 def generate(folder_path):
     # 获取当前工作目录，即main.py所在的目录
     current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -391,9 +416,9 @@ def generate(folder_path):
         # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
             print(f"处理文件夹: {item_path}")
-            new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name = rename_folder(item_path)
+            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name= rename_folder(item_path)
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
-            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, 0])
+            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, 0])
 
         else:
             print(f"文件夹 {item_path} 不符合处理条件或不存在。")
