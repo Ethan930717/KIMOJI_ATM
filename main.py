@@ -8,14 +8,7 @@ import logging
 import os
 logging.basicConfig(level=logging.INFO)
 
-def remove_ffmpeg_containers():
-    try:
-        logging.info("开始清除冗余ffmpeg容器")
-        cmd = "docker ps -a | grep 'ffmpeg' | awk '{print $1}' | xargs -I {} docker rm {}"
-        subprocess.run(cmd, shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(f"删除 Docker 容器时出错: {e}")
-        sys.exit(1)
+
 
 def main_menu():
     current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -28,7 +21,6 @@ def main_menu():
     csv_file = os.path.join(log_directory, 'logfile.csv')
     # 显示初始界面
     print(intro)
-    remove_ffmpeg_containers()
     while True:
         print("\n请选择操作：")
         print("1 - 生成发种信息")

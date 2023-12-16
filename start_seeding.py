@@ -17,6 +17,15 @@ import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def remove_ffmpeg_containers():
+    try:
+        logging.info("开始清除冗余ffmpeg容器")
+        cmd = "docker ps -a | grep 'ffmpeg' | awk '{print $1}' | xargs -I {} docker rm {}"
+        subprocess.run(cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"删除 Docker 容器时出错: {e}")
+        sys.exit(1)
 def get_largest_video_file(folder_path):
     largest_size = 0
     largest_file = None
@@ -70,15 +79,15 @@ def start_seeding(csv_file):
         upload_name = row[8]
         status = row[9]
         resolution_id = get_resolution_id(resolution)
+        remove_ffmpeg_containers() #清除冗余ffmpeg容器
         if status == '0':  # 假设 '0' 表示未发种
             file_name = os.path.basename(file_path)  # 获取文件名
-            torrent_name = os.path.splitext(file_name)[0]  # 移除文件后缀
-            torrent_file = os.path.join(torrent_dir, f"{torrent_name}.torrent")
+            torrent_file = os.path.join(torrent_dir, f"{file_name}.torrent")
             # 检查是否存在对应的 torrent 文件
             if not os.path.exists(torrent_file):
                 # 制作种子
                 logging.info(f"正在为 {file_name} 制作种子...")
-                torrent_file = create_torrent(file_path, torrent_name, torrent_dir)
+                torrent_file = create_torrent(file_path, file_name, torrent_dir)
             if torrent_file:
                 largest_video_file = get_largest_video_file(file_path)
                 if largest_video_file:
@@ -141,9 +150,9 @@ def update_row_status(rows, index, seeding_success, download_link, error=False, 
             row.append(download_link if download_link else "N/A")
     rows[index] = row  # 更新行列表
 
-def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
+def create_torrent(directory, file_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
-    torrent_path = os.path.join(torrent_dir, f"{torrent_name}.torrent")
+    torrent_path = os.path.join(torrent_dir, f"{file_name}.torrent")
     print(f'torrent_path:{torrent_path}')
     logging.info(f'开始制作种子，种子保存路径{torrent_path}')
 

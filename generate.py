@@ -72,19 +72,25 @@ def format_resolution(height, scan_type):
         return f"{height}p"
 
 def get_media_info(file_path):
+    # 设置默认返回值
+    default_return = (None, None, None, None, False, 0, "Error")
+
     media_info = MediaInfo.parse(file_path)
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
     audio_tracks = [track for track in media_info.tracks if track.track_type == 'Audio']
 
+    # 检查是否存在视频轨道
     if not video_tracks:
-        return None
+        return default_return + ("No video track found",)
 
     video_track = video_tracks[0]
+
+    # 检查视频分辨率
     if video_track.height < 720:
-        return None, "Resolution too low"
+        return default_return + ("Resolution too low",)
+
     audio_track = audio_tracks[0] if audio_tracks else None
     audio_count = len(audio_tracks)  # 获取音轨数量
-
 
     # 检测视频编码器
     video_codec = video_track.format
@@ -254,9 +260,10 @@ def rename_folder(folder_path):
         season_onlynum = ''  # 新增变量来保存只包含数字的季数
 
         if selected_type == 'tv':
+            logger.info('正在确认剧集季数信息')
             seasons = tv.details(selected_result.id).number_of_seasons
             if seasons > 1:
-                season_num_input = input("请输入季数 (仅数字，例如: 1, 2): ")
+                season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
                 season_num = f"S{season_num_input.zfill(2)}."
                 season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
                 # 获取特定季的年份
