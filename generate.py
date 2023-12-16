@@ -8,7 +8,7 @@ import logging
 import csv
 from config_loader import config
 logging.basicConfig(level=logging.INFO)
-
+logger = logging.getLogger(__name__)
 # 初始化 TMDB
 tmdb = TMDb()
 tmdb.api_key = '107492d808d58cb5f5fae5005c7d764d'
@@ -219,16 +219,19 @@ def rename_folder(folder_path):
     if search_results:
         for i, (result, result_type) in enumerate(search_results, start=1):
             title, original_title, release_date, category_id, child = extract_details(result, result_type)
-            print(f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
+            print(
+                f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
         user_input = input(
-            "如果无法确定列表中对应的影片，请手动在TMDb搜索确认后，输入类型+TMDb ID（例如 'movie300212' 或 'tv12345'）。如果TMDb中没有该词条，请输入 'q'跳过当前文件: ")
-
-        if user_input.lower() == 'q':
-            pass_file_path = os.path.join(folder_path, "kimoji_pass")
-            with open(pass_file_path, 'w') as pass_file:
-                pass_file.write("Skipped by user\n")
-            print("已标记当前文件。")
-            return None, None, None, None, None, None, None, None, None, None
+            f"如果无法确定影片序号，请尝试手动搜索后输入'类型ID'（例如 'movie300212' 或 'tv12345'，不含引号），\n"
+            f"手动搜索链接：\n"
+            f"电影类：https://www.themoviedb.org/search/movie?query={search_name}\n"
+            f"剧集类：https://www.themoviedb.org/search/tv?query={search_name}\n"
+            "如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': ")
+        if user_input.lower() in ['m', 't']:
+            selected_type = 'movie' if user_input.lower() == 'm' else 'tv'
+            tmdb_id = '1218677' if selected_type == 'movie' else '241652'
+            selected_result = movie.details(tmdb_id) if selected_type == 'movie' else tv.details(tmdb_id)
+            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
         elif user_input.startswith('movie') or user_input.startswith('tv'):
             if user_input.startswith('movie'):
                 selected_type = 'movie'
@@ -264,12 +267,10 @@ def rename_folder(folder_path):
                 # 如果只有一季，使用电视剧的发布年份
                 release_date = release_date
 
-
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
-            video_codec, audio_codec, resolution, additional, is_encode, audio_count, status = get_media_info(
-                largest_video_file)
+            video_codec, audio_codec, resolution, additional, is_encode, audio_count, status = get_media_info(largest_video_file)
             if audio_count > 1:
                 audio_info = f"{audio_count}Audio {audio_codec}"
             else:
@@ -314,17 +315,17 @@ def rename_folder(folder_path):
             tmdb_id = selected_result.id
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
-            print(f"文件夹重命名为: {new_name}")
+            logger.info(f"文件夹重命名为: {new_name}")
 
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
             type_id = get_type_id(new_name)
             return new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
         else:
-            print("未找到有效的视频文件。")
+            logger.error("未找到有效的视频文件。")
             return None, None, None, None, None, None, None, None, None, None
     else:
-        print("没有找到匹配的 TMDB 资源。")
+        logger.warning("没有找到匹配的 TMDB 资源。")
         return None, None, None, None, None, None, None, None, None, None
 
 def rename_files_in_folder(folder_path, new_folder_name, is_tv_show):
@@ -416,14 +417,14 @@ def generate(folder_path):
         item_path = os.path.join(folder_path, item)
         # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
-            print(f"处理文件夹: {item_path}")
+            logger.info(f"处理文件夹: {item_path}")
             new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
             if status != "OK":
                 if status == "Resolution too low":
-                    print("当前视频资源分辨率过低，不符合发种要求")
+                    logger.warning("当前视频资源分辨率过低，不符合发种要求")
                 continue  # 继续下一个循环
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, 0])
 
         else:
-            print(f"文件夹 {item_path} 不符合处理条件或不存在。")
+            logger.error(f"文件夹 {item_path} 不符合处理条件或不存在。")

@@ -49,80 +49,88 @@ def generate_mediainfo(file_path):
 
 def start_seeding(csv_file):
     log_file = os.path.dirname(os.path.abspath(csv_file))
-    torrent_dir = config.torrent_dir  # 从配置文件中获取种子文件存放路径
+    torrent_dir = config.torrent_dir
 
-    updated_rows = []  # 用于存储更新后的数据行
-
-    # 读取 CSV 文件并查找未发种的条目
     with open(csv_file, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
-        headers = next(reader)  # 读取并保存标题行
-        updated_rows.append(headers)  # 将标题行添加到更新后的数据行列表中
-        for row in reader:
-            file_path = row[0]
-            tmdb_id = row[1]
-            category_id = row[2]
-            child = row[3]
-            season = row[4]
-            resolution = row[5]
-            type_id = row[6]
-            maker = row[7]
-            upload_name = row[8]
-            status = row[9]
-            resolution_id = get_resolution_id(resolution)
-            if status == '0':  # 假设 '0' 表示未发种
-                file_name = os.path.basename(file_path)  # 获取文件名
-                torrent_name = os.path.splitext(file_name)[0]  # 移除文件后缀
-                torrent_file = os.path.join(torrent_dir, f"{torrent_name}.torrent")
-                # 检查是否存在对应的 torrent 文件
-                if not os.path.exists(torrent_file):
-                    # 制作种子
-                    logging.info(f"正在为 {file_name} 制作种子...")
-                    torrent_file = create_torrent(file_path, torrent_name, torrent_dir)
-                if torrent_file:
-                    largest_video_file = get_largest_video_file(file_path)
-                    if largest_video_file:
-                        mediainfo = generate_mediainfo(largest_video_file)
-                        pic_urls = screenshot_from_video(largest_video_file,log_file)
-                        internal = 1 if maker.lower() == "kimoji" else 0
-                        if internal:
-                            fl_until =3
-                            n = random.randint(1, 10)
-                            description = f"""
-                            [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
-                            [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
-                            """
-                        else:
-                            fl_until =1
-                            description = f"""
-                            [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
-                            [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
-                            """
+        rows = list(reader)  # 读取所有行
+
+    headers = rows[0]  # 保存标题行
+    rows = rows[1:]  # 剩余的数据行
+
+    for index, row in enumerate(rows):
+        file_path = row[0]
+        tmdb_id = row[1]
+        category_id = row[2]
+        child = row[3]
+        season = row[4]
+        resolution = row[5]
+        type_id = row[6]
+        maker = row[7]
+        upload_name = row[8]
+        status = row[9]
+        resolution_id = get_resolution_id(resolution)
+        if status == '0':  # 假设 '0' 表示未发种
+            file_name = os.path.basename(file_path)  # 获取文件名
+            torrent_name = os.path.splitext(file_name)[0]  # 移除文件后缀
+            torrent_file = os.path.join(torrent_dir, f"{torrent_name}.torrent")
+            # 检查是否存在对应的 torrent 文件
+            if not os.path.exists(torrent_file):
+                # 制作种子
+                logging.info(f"正在为 {file_name} 制作种子...")
+                torrent_file = create_torrent(file_path, torrent_name, torrent_dir)
+            if torrent_file:
+                largest_video_file = get_largest_video_file(file_path)
+                if largest_video_file:
+                    mediainfo = generate_mediainfo(largest_video_file)
+                    pic_urls = screenshot_from_video(largest_video_file,log_file)
+                    internal = 1 if maker.lower() == "kimoji" else 0
+                    if internal:
+                        fl_until =3
+                        n = random.randint(1, 10)
+                        description = f"""
+                        [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
+                        [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
+                        """
                     else:
-                        logging.error("文件夹中未找到视频文件，请核查")
-                        row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-                response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
-                if 'data' in response_json and response_json['success']:
-                    download_link = response_json['data']
-                    seeding_success = add_torrent_based_on_agent(download_link)
-                    if seeding_success:
-                        logger.info("种子已成功添加到下载器并开始做种")
-                        update_row_status(row, seeding_success, download_link)
-                    else:
-                        logger.error("种子添加到下载器失败，请手动处理")
-                        update_row_status(row, False, None, error=True, response_json=response_json)
+                        fl_until =1
+                        description = f"""
+                        [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
+                        [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
+                        """
                 else:
-                    logger.error("无法从响应中提取种子下载地址")
-                    row[9] = '-1'  # 标记为处理失败
+                    logging.error("文件夹中未找到视频文件，请核查")
+                    row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
+            response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+            if 'data' in response_json and response_json['success']:
+                download_link = response_json['data']
+                seeding_success = add_torrent_based_on_agent(download_link)
+                if seeding_success:
+                    logger.info("种子已成功添加到下载器并开始做种")
+                    update_row_status(rows, index, seeding_success, download_link)
+                else:
+                    logger.error("种子添加到下载器失败，请手动处理")
+                    update_row_status(rows, index, False, None, error=True, response_json=response_json)
+            else:
+                logger.error("无法从响应中提取种子下载地址")
+                row[9] = '-1'  # 标记为处理失败
+                rows[index] = row  # 更新行列表
+                # 将更新后的数据写回 CSV 文件
                 with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
                     writer = csv.writer(file)
-                    writer.writerows(reader)
+                    writer.writerow(headers)  # 写入标题行
+                    writer.writerows(rows)  # 写入更新后的数据行
+    # 检查是否还有未处理的种子
+    remaining = any(row[9] == '0' for row in rows)
+    if not remaining:
+        print("没有可以发送的种子，请先生成信息")
 
-def update_row_status(row, seeding_success, download_link, error=False, response_json=None):
+def update_row_status(rows, index, seeding_success, download_link, error=False, response_json=None):
+    row = rows[index]
     if error and response_json:
         # 将 JSON 错误消息转换为中文
         error_message = json.dumps(response_json, ensure_ascii=False)
-        row[9] = '-1'  # 标记为做种成功
+        row[9] = '-1'  # 标记为处理失败
         row.append("种子发送失败，错误信息：" + error_message)
     else:
         if seeding_success:
@@ -131,6 +139,7 @@ def update_row_status(row, seeding_success, download_link, error=False, response
         else:
             row[9] = '2'  # 标记为做种失败
             row.append(download_link if download_link else "N/A")
+    rows[index] = row  # 更新行列表
 
 def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
