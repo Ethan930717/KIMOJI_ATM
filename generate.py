@@ -228,7 +228,7 @@ def rename_folder(folder_path):
             with open(pass_file_path, 'w') as pass_file:
                 pass_file.write("Skipped by user\n")
             print("已标记当前文件。")
-            return None, None, None, None, None
+            return None, None, None, None, None, None, None, None, None, None
         elif user_input.startswith('movie') or user_input.startswith('tv'):
             if user_input.startswith('movie'):
                 selected_type = 'movie'
@@ -319,7 +319,7 @@ def rename_folder(folder_path):
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
             type_id = get_type_id(new_name)
-            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, type_id, status
+            return new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
         else:
             print("未找到有效的视频文件。")
             return None, None, None, None, None, None, None, None, None, None
