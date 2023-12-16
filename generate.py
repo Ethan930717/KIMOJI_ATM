@@ -393,7 +393,7 @@ def generate(folder_path):
             print(f"处理文件夹: {item_path}")
             new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name = rename_folder(item_path)
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
-            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name])
+            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name, 0])
 
         else:
             print(f"文件夹 {item_path} 不符合处理条件或不存在。")
