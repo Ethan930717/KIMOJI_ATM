@@ -274,6 +274,7 @@ def rename_folder(folder_path):
             # 构建新名称，并替换空格为点
             new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_info}.{video_codec}-{additional}KIMOJI"
             new_name = new_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
+            new_name = re.sub(r'\.{2,}', '.', new_name) #处理两个点的情况
             # 处理upload_name
             upload_name = new_name.replace('.', ' ')
 
