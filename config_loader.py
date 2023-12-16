@@ -13,9 +13,6 @@ class Config:
             self.torrent_dir = config['basic']['torrent_dir']
             self.apikey = config['basic']['apikey']
             self.agent = config['basic']['agent']
-            self.pic_num = config['basic']['pic_num']
-            self.internal = config['basic']['internal']
-            self.personal = config['basic']['personal']
 
             # qbittorrent 和 transmission 的配置
             self.qb_url = config['qbittorrent']['url']

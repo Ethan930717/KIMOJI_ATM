@@ -3,11 +3,8 @@ import subprocess
 import requests
 import logging
 import glob
-import argparse
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
-
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -17,12 +14,12 @@ def get_largest_m2ts_file(directory):
     largest_file = max(m2ts_files, key=os.path.getsize, default=None)
     return largest_file
 
-def screenshot_from_bd(directory, pic_num, file_dir ,image_format='png'):
+def screenshot_from_bd(directory, file_dir):
     logger.info('开始处理原盘')
     # 检查是否有 ISO 文件
     iso_file = find_iso_in_directory(directory)
     if iso_file:
-        logger.info(f"找到 ISO 文件：{iso_file}，正在挂载...")
+        logger.info(f"找到 ISO 文件：{iso_file}")
         mount_point = '/mnt/iso_mount'  # 指定挂载点
         largest_file = get_largest_m2ts_file(mount_point)
     else:
@@ -32,15 +29,14 @@ def screenshot_from_bd(directory, pic_num, file_dir ,image_format='png'):
         logger.error("未找到有效的 .m2ts 文件")
         return
     logger.info(f"找到最大的 .m2ts 文件: {largest_file}")
-    return screenshot_from_video(largest_file, pic_num, file_dir, image_format='png')
-
+    return screenshot_from_video(largest_file, file_dir, image_format='png')
 def get_video_duration(file_path):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
     video_dir = video_dir.replace("'", "'\\''")
     try:
         command = [
-            "docker", "run",
+            "docker", "run","--rm","--name","kimoji-ffmpeg",
             "-v", f"{video_dir}:/workspace",
             "jrottenberg/ffmpeg:ubuntu",
             "-i", f"/workspace/{video_file}",
@@ -77,21 +73,21 @@ def upload_to_chevereto(image_path,i):
                 logger.info(f"第{i}张图片上传成功: {image_url}")
                 return f"[img]{image_url}[/img]"
             else:
-                logger.warning(f"第{i}张图片上传失败，无返回链接")
+                logger.warning(f"第{i}张图片上传失败，无返回链接，正在重试")
                 try_num += 1
 
         except requests.RequestException as e:
-            logger.warning(f"第{i}张图片上传失败: {e}")
+            logger.warning(f"第{i}张图片上传失败: {e}，正在重试")
             try_num += 1
 
     logger.error(f"第{i}张图片连续三次上传失败")
     return None
 
-def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
-    video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
-    video_file = os.path.basename(file_path)  # 获取视频文件名
+def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
+    video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
+    video_file = os.path.basename(largest_video_file)  # 获取视频文件名
+    duration = get_video_duration(largest_video_file)
     logger.info('开始截图')
-    duration = get_video_duration(file_path)
     if not duration:
         logger.error("无法获取视频时长")
         return
@@ -103,14 +99,16 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
         start_time = 5  # 开始时间：5分钟
         end_time = duration - 5  # 结束时间：总时长减5分钟
 
-    intervals = (end_time - start_time) / pic_num  # 计算时间间隔
+    intervals = (end_time - start_time) / 6  # 计算时间间隔
     image_paths = []
     video_dir = video_dir.replace("'", "'\\''")
-    for i in range(1, pic_num + 1):
+
+    for i in range(1, 7):
         screenshot_time = start_time + (i - 1) * intervals
         screenshot_name = f"{i}.{image_format}"
         screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
+
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
             "-v", f"{video_dir}:/workspace",
@@ -139,7 +137,6 @@ def screenshot_from_video(file_path, pic_num, file_dir,image_format='jpg'):
     pic_urls = upload_images_and_get_links(image_paths)
     logger.info(f'获取bbcode代码:\n{pic_urls}')
     return pic_urls
-
 def upload_images_and_get_links(image_paths):
     pic_urls = []
     for i, image_path in enumerate(image_paths, start=1):
@@ -161,40 +158,8 @@ def compress_image(i,image_path, quality=85):
     except Exception as e:
         logger.error(f"压缩图片时出错: {e}")
 
-
-def main():
-    parser = argparse.ArgumentParser(description='截图并上传到图床')
-    parser.add_argument('-v', '--video-path', required=True, help='视频文件或目录的路径')
-    parser.add_argument('-n', '--number-of-pics', type=int, default=3, help='截图数量，默认为3')
-    parser.add_argument('-d', '--output-dir', help='输出目录，默认为当前目录下的 log 文件夹')
-    parser.add_argument('-p', '--png-format', action='store_true', help='将截图格式设置为 PNG（默认为 JPG）')
-    args = parser.parse_args()
-
-    video_path = args.video_path
-    pic_num = args.number_of_pics
-    output_dir = args.output_dir if args.output_dir else log_dir
-    image_format = 'png' if args.png_format else 'jpg'
-
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # 检查输入路径是文件还是目录
-    if os.path.isfile(video_path):
-        # 如果是文件，直接进行截图
-        pic_urls = screenshot_from_video(video_path, pic_num, output_dir, image_format=image_format)
-    elif os.path.isdir(video_path):
-        # 如果是目录，按原有流程处理
-        pic_urls = screenshot_from_bd(video_path, pic_num, output_dir, image_format=image_format)
-    else:
-        logger.error("输入的路径既不是文件也不是目录")
-        return
-
-    if pic_urls:
-        logger.info(f'截图上传成功，BBCode链接:\n{pic_urls}')
-    else:
-        logger.error('截图上传失败')
-
-if __name__ == '__main__':
-    main()
-
-#python3 ffmpeg.py -v "/path/to/video_or_directory" -n 3 -d "/path/to/output_dir"
+# 示例调用
+#directory = '/Users/Ethan/Desktop/media/IMAX.Enhanced.Demo.Disc.Volume.1.2019.2160p.UHD.Blu-ray.HEVC.DTS-HD.MA.7.1-AdBlue'  # 视频文件路径
+#file_dir = '/Users/Ethan/PycharmProjects/KIMOJI-ATM'
+#pic_num = 3  # 截图数量
+#screenshot_from_bd(directory,pic_num ,file_dir)

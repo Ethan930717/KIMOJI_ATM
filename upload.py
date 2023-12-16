@@ -1,32 +1,51 @@
-import os
 import requests
 
-def upload_image(file_path, api_key):
-    url = "https://img.kimoji.club/api/1/upload"  # 请替换为您的 API 端点
-    payload = {
-        'source': open(file_path, 'rb'),
-        'format': 'json'
-    }
+
+def upload_torrent(torrent_data):
+    """
+    上传种子到指定的 API 端点。
+
+    :param api_token: API 令牌。
+    :param torrent_file_path: .torrent 文件的路径。
+    :param nfo_file_path: .nfo 文件的路径。
+    :param data: 包含其他参数的字典。
+    :return: 请求的响应对象。
+    """
+
+    url = 'https://your-website.com/api/torrents/upload'  # 替换成您的 API URL
+
     headers = {
-        'Authorization': 'Bearer ' + api_key,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+        'Authorization': f'Bearer {api_token}',
+        'Accept': 'application/json'
     }
 
-    response = requests.post(url, headers=headers, files=payload)
-    if response.status_code == 200:
-        return response.json()['image']['display_url']
-    else:
-        return "Error: " + str(response.status_code)
+    files = {
+        'torrent': open(torrent_file_path, 'rb'),
+        'nfo': open(nfo_file_path, 'rb')
+    }
 
-def main():
-    directory = "/Users/Ethan/Documents/GitHub/KIMOJI_ATM/log"
-    api_key = "chv_Qv3_df17c2e80aa516206778a352b3eff8b98bb80779924fa9d63acfd077c05d31fb6b0d443b7768550efc9be2cd02dcfe02ed4b0c72a0a1d32de328ae5aa8ac81c4"  # 替换为您的 API 密钥
+    response = requests.post(url, headers=headers, files=files, data=data)
 
-    for filename in os.listdir(directory):
-        if filename.endswith(".jpg"):  # 这里假设只处理 JPG 文件
-            file_path = os.path.join(directory, filename)
-            image_url = upload_image(file_path, api_key)
-            print(f"BBCode for {filename}: [url={image_url}][img]{image_url}[/img][/url]")
+    return response
 
-if __name__ == "__main__":
-    main()
+
+# 使用示例
+api_token = 'YOUR_API_TOKEN'  # 替换成您的 API 令牌
+torrent_file_path = '/path/to/your/file.torrent'  # 替换成您的 .torrent 文件路径
+nfo_file_path = '/path/to/your/file.nfo'  # 替换成您的 .nfo 文件路径
+
+# 其他参数
+data = {
+    'name': 'Torrent Name',
+    'description': 'This is a description',
+    'mediainfo': 'MediaInfo text output',
+    # 添加其他需要的参数
+}
+
+response = upload_torrent(api_token, torrent_file_path, nfo_file_path, data)
+
+# 检查响应
+if response.status_code == 200:
+    print("上传成功！")
+else:
+    print(f"上传失败：{response.text}")

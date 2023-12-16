@@ -274,6 +274,37 @@ def rename_folder(folder_path):
             # 构建新名称，并替换空格为点
             new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_info}.{video_codec}-{additional}KIMOJI"
             new_name = new_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
+            # 处理upload_name
+            upload_name = new_name.replace('.', ' ')
+
+            # 处理特殊情况，例如 "5.1" 和 "7.1"
+            placeholder_map = {
+                "5 10": "PLACEHOLDER_5_10",
+                "7 10": "PLACEHOLDER_7_10"
+            }
+            for original, placeholder in placeholder_map.items():
+                upload_name = upload_name.replace(original, placeholder)
+
+            upload_name = re.sub(r'(?<=5) 1', '.1', upload_name)
+            upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
+
+            # 将占位符转换回来
+            for placeholder, original in placeholder_map.items():
+                upload_name = upload_name.replace(placeholder, original)
+
+            if "-" in new_name:
+                maker_candidate = new_name.split('-')[-1]
+                if "@" in maker_candidate:
+                    maker = maker_candidate.split('@')[-1]
+                elif re.match(r'^[A-Za-z0-9_]+$', maker_candidate):
+                    maker = maker_candidate
+                else:
+                    maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                    maker = maker_input.strip() if maker_input.strip() != '' else None
+            else:
+                maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                maker = maker_input.strip() if maker_input.strip() != '' else None
+
             tmdb_id = selected_result.id
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
@@ -281,13 +312,13 @@ def rename_folder(folder_path):
 
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
-            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type
+            return new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name
         else:
             print("未找到有效的视频文件。")
-            return None, None, None, None, None, None, None
+            return None, None, None, None, None, None, None, None, None
     else:
         print("没有找到匹配的 TMDB 资源。")
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None
 
 def rename_files_in_folder(folder_path, new_folder_name, is_tv_show):
     for file in os.listdir(folder_path):
@@ -338,7 +369,7 @@ def write_to_log(log_directory, data):
 
         # 如果文件不存在，写入标题
         if not file_exists:
-            headers = ["标题", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介"]
+            headers = ["路径", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介", "制作组", "上传名", "状态"]
             writer.writerow(headers)
 
         # 写入数据
@@ -359,8 +390,9 @@ def generate(folder_path):
         # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
             print(f"处理文件夹: {item_path}")
-            new_name, tmdb_id, category_id, child, season_num, resolution, source_type = rename_folder(item_path)
-            write_to_log(log_directory, [new_name, tmdb_id, category_id, child, season_num, resolution, source_type])
+            new_name, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name = rename_folder(item_path)
+            file_url = os.path.join(folder_path, new_name)  # 构造file_url
+            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_num, resolution, source_type, maker, upload_name])
 
         else:
             print(f"文件夹 {item_path} 不符合处理条件或不存在。")
