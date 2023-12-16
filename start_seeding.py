@@ -99,7 +99,7 @@ def start_seeding(csv_file):
                     else:
                         logging.error("文件夹中未找到视频文件，请核查")
                         row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-                upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal)
+                upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until, sticky)
 
                 updated_rows.append(row)
             updated_rows.append(row)  # 将当前行添加到更新后的数据行列表中
