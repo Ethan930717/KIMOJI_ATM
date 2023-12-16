@@ -1,12 +1,11 @@
-from utils.progress.config_loader import load_config
-from utils.progress.process import process_media_directory, create_torrent_if_needed
-import logging
-from utils.progress.intro import intro
+from generate import generate as generate_info
+from config_loader import config
+import intro
 import sys
 import subprocess
-
-
+import logging
 logging.basicConfig(level=logging.INFO)
+
 def remove_ffmpeg_containers():
     try:
         logging.info("开始清除冗余ffmpeg容器")
@@ -15,32 +14,32 @@ def remove_ffmpeg_containers():
     except subprocess.CalledProcessError as e:
         logging.error(f"删除 Docker 容器时出错: {e}")
         sys.exit(1)
-def main():
-    print(intro)
-    print("您正在使用的是KIMOJI专用发种机，使用前请确认您在KIMOJI有上传权限。")
-    remove_ffmpeg_containers()
-    config = load_config()
-    if config:
-        logging.info("配置文件读取成功，正在寻找媒体目录")
-        file_dir = config['basic']['file_dir']
-        torrent_dir = config['basic']['torrent_dir']
-        pic_num  = config['basic']['pic_num']
-        username = config['basic']['username']
-        password = config['basic']['password']
-        internal = config['basic']['internal']
-        personal = config['basic']['personal']
-        #print(f'torrent_dir:{torrent_dir}')
-        torrent_path, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, keywords, upload_title ,chinese_name,item_type = create_torrent_if_needed(file_dir, torrent_dir)
 
-        if torrent_path:
-            logging.info(f"当前资源类型{item_type}")
-            process_media_directory(torrent_path, file_dir,pic_num,username, password, chinese_title, english_title, year, season, media, codec, audiocodec, maker, tmdb_id, imdb_id, item_type, child, internal, personal, keywords, upload_title, chinese_name, item_type)
+def start_seeding():
+    # 这里填入发种的逻辑
+    print("开始发种...")
+
+def main_menu():
+    print(intro)
+    remove_ffmpeg_containers()
+
+    while True:
+        print("\n请选择操作：")
+        print("1 - 生成发种信息")
+        print("2 - 开始发种")
+        print("0 - 退出")
+        choice = input("输入选项：")
+
+        if choice == '1':
+            folder_path = config.file_dir
+            generate_info(folder_path)
+        elif choice == '2':
+            start_seeding()
+        elif choice == '0':
+            print("退出程序")
+            break
         else:
-            logging.error('未配置种子存放目录，请检查config.yaml')
-            sys.exit()
-    else:
-        logging.error('未找到配置文件，请检查config.yaml')
-        sys.exit()
+            print("无效选项，请重新输入！")
 
 if __name__ == "__main__":
-    main()
+    main_menu()
