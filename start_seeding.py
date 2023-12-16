@@ -156,7 +156,7 @@ def create_torrent(directory, torrent_name, torrent_dir, comment="KIMOJI PARK", 
 def upload_torrent(torrent_file_path, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until, sticky):
     url = 'https://kimoji.club/api/torrents/upload'  # 更改为您的站点API端点
     headers = {
-        'Authorization': f'Bearer {config.api_key}',
+        'Authorization': f'Bearer {config.apikey}',
         'Accept': 'application/json',
     }
     files = {

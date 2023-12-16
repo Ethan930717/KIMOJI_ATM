@@ -46,6 +46,6 @@ response = upload_torrent(api_token, torrent_file_path, nfo_file_path, data)
 
 # 检查响应
 if response.status_code == 200:
-    print("上传成功！")
+    print(f"上传成功！{response}")
 else:
     print(f"上传失败：{response.text}")
