@@ -465,9 +465,8 @@ def generate(folder_path):
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
             logger.info(f"处理文件夹: {item_path}")
             new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
-            if status != "OK":
-                if status == "分辨率异常":
-                    logger.warning("当前视频资源分辨率过低，不符合发种要求")
+            if status == "分辨率异常" or status == "视频异常":
+                logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
                 continue  # 继续下一个循环
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
