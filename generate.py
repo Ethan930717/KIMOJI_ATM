@@ -435,11 +435,11 @@ def generate(folder_path):
             logger.info(f"处理文件夹: {item_path}")
             new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
             if status != "OK":
-                if status == "Resolution too low":
+                if status == "分辨率异常":
                     logger.warning("当前视频资源分辨率过低，不符合发种要求")
                 continue  # 继续下一个循环
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
-
+            logger.info(f'\033[92m{file_url}添加完成\033[0m')
         else:
             logger.error(f"文件夹 {item_path} 不符合处理条件或不存在。")

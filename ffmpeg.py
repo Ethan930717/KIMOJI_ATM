@@ -103,7 +103,6 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
 
     intervals = (end_time - start_time) / 6  # 计算时间间隔
     image_paths = []
-    video_dir = video_dir.replace("'", "'\\''")
 
     for i in range(1, 7):
         screenshot_time = start_time + (i - 1) * intervals
@@ -125,7 +124,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
         ]
         #command = f"ffmpeg -y -ss {screenshot_time} -i '{file_path}' -ss '{screenshot_keep}' -frames:v 1 '{screenshot_path}' -loglevel error"
         try:
-            subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(command, check=True)
             logger.info(f"第{i}张图片截图成功: {screenshot_name}")
             image_paths.append(screenshot_path)
             if image_format == 'png':
