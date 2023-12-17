@@ -36,6 +36,7 @@ def get_largest_video_file(folder_path):
             if size > largest_size:
                 largest_size = size
                 largest_file = file_path
+    logger.info(f'提取体积最大的视频文件路径{largest_file}')
     return largest_file
 
 def get_resolution_id(resolution):
@@ -81,17 +82,17 @@ def start_seeding(csv_file):
         resolution_id = get_resolution_id(resolution)
         remove_ffmpeg_containers() #清除冗余ffmpeg容器
         if status == '0':
+            logger.info(f'开始对文件夹{file_path}进行发种操作')
             print(f'对{upload_name}进行查重')
             url = f"https://kimoji.club/api/torrents/filter?name={upload_name}&api_token={config.apikey}"
             response = requests.get(url)
-            logger.info(f'查重结果{response}')
+            logger.info(f'查重结果{response.json()}')
             if response.status_code == 200:
                 response_data = response.json()
-                # 检查响应中是否有 'id' 字段
-                if 'id' in response_data:
+                # 检查响应中的每个种子是否包含 'id' 字段
+                if any('id' in torrent_data for torrent_data in response_data.get('data', [])):
                     logger.warning(f"种子 '{upload_name}' 已存在。跳过当前文件")
-                    # 更新CSV文件中的状态为 '3'
-                    row[9] = '3'
+                    row[9] = '3'  # 更新CSV文件中的状态为 '3'
                     continue  # 跳过当前循环
                 else:
                     # 如果种子不存在，继续进行发种
@@ -125,14 +126,13 @@ def start_seeding(csv_file):
                         else:
                             logging.error("文件夹中未找到视频文件，请核查")
                             row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-                    response_dict = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
-                    response_json = json.loads(response_dict)
-                    if 'message' in response_json and (
-                            response_json['message'] == "该名称已经被使用过了" or response_json[
-                        'message'] == "该 info hash 已经被使用过了"):
-                        print(f"种子 '{upload_name}' 上传失败，原因：{response_json['message']}")
-                        row[9] = '3'  # 更新状态为 '3'
-                        continue  # 跳过当前循环
+                    response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+                    if 'data' in response_json:
+                        data = response_json['data']
+                        if 'name' in data and "该名称已经被使用过了" in data['name'] or 'info_hash' in data and "该 info hash 已经被使用过了" in data['info_hash']:
+                            logger.warning("种子已存在,跳过当前资源")
+                            row[9] = '3'  # 更新状态为 '3'
+                            continue  # 跳过当前循环
                     if 'data' in response_json and response_json['success']:
                         download_link = response_json['data']
                         seeding_success = add_torrent_based_on_agent(download_link)
