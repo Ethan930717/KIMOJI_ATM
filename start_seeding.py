@@ -110,7 +110,8 @@ def start_seeding(csv_file):
                 else:
                     logging.error("文件夹中未找到视频文件，请核查")
                     row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-            response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+            response_dict = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+            response_json = json.loads(response_dict)
             if 'data' in response_json and response_json['success']:
                 download_link = response_json['data']
                 seeding_success = add_torrent_based_on_agent(download_link)

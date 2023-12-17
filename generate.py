@@ -121,7 +121,7 @@ def get_media_info(file_path):
         if bit_depth in ['10', '20']:
             additional_attrs.append(f'{bit_depth}bit')
 
-    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count, "OK"
+    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count, "0"
 
 def contains_chinese(text):
     return any('\u4e00' <= char <= '\u9fff' for char in text)
@@ -226,13 +226,13 @@ def rename_folder(folder_path):
         for i, (result, result_type) in enumerate(search_results, start=1):
             title, original_title, release_date, category_id, child = extract_details(result, result_type)
             print(
-                f"{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}")
+                f"\033[94m{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}\033[0m")
         user_input = input(
             f"如果无法确定影片序号，请尝试手动搜索后输入'类型ID'（例如 'movie300212' 或 'tv12345'，不含引号），\n"
             f"手动搜索链接：\n"
-            f"电影类：https://www.themoviedb.org/search/movie?query={search_name}\n"
-            f"剧集类：https://www.themoviedb.org/search/tv?query={search_name}\n"
-            "如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': ")
+            f"\033[93m电影类：https://www.themoviedb.org/search/movie?query={search_name}\033[0m\n"
+            f"\033[93m剧集类：https://www.themoviedb.org/search/tv?query={search_name}\033[0m\n"
+            "\033[91m如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': \033[0m")
         if user_input.lower() in ['m', 't']:
             selected_type = 'movie' if user_input.lower() == 'm' else 'tv'
             tmdb_id = '1218677' if selected_type == 'movie' else '241652'
