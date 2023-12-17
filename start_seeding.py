@@ -80,60 +80,79 @@ def start_seeding(csv_file):
         status = row[9]
         resolution_id = get_resolution_id(resolution)
         remove_ffmpeg_containers() #清除冗余ffmpeg容器
-        if status == '0':  # 假设 '0' 表示未发种
-            file_name = os.path.basename(file_path)  # 获取文件名
-            torrent_file = os.path.join(torrent_dir, f"{file_name}.torrent")
-            # 检查是否存在对应的 torrent 文件
-            if not os.path.exists(torrent_file):
-                # 制作种子
-                logging.info(f"正在为 {file_name} 制作种子...")
-                torrent_file = create_torrent(file_path, file_name, torrent_dir)
-            if torrent_file:
-                largest_video_file = get_largest_video_file(file_path)
-                if largest_video_file:
-                    mediainfo = generate_mediainfo(largest_video_file)
-                    pic_urls = screenshot_from_video(largest_video_file,log_file)
-                    internal = 1 if maker.lower() == "kimoji" else 0
-                    if internal:
-                        fl_until =3
-                        n = random.randint(1, 10)
-                        description = f"""
-                        [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
-                        [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
-                        """
+        if status == '0':
+            # 检查种子是否已存在
+            url = f"https://kimoji.club/api/torrents/filter?name={upload_name}&api_token={config.apikey}"
+            response = requests.get(url)
+            if response.status_code == 200:
+                response_data = response.json()
+                # 检查响应中是否有 'id' 字段
+                if 'id' in response_data:
+                    print(f"种子 '{upload_name}' 已存在。跳过...")
+                    # 更新CSV文件中的状态为 '3'
+                    row[9] = '3'
+                    continue  # 跳过当前循环
+                else:
+                    # 如果种子不存在，继续进行发种
+                    file_name = os.path.basename(file_path)  # 获取文件名
+                    torrent_file = os.path.join(torrent_dir, f"{file_name}.torrent")
+                    # 检查是否存在对应的 torrent 文件
+                    if not os.path.exists(torrent_file):
+                        # 制作种子
+                        logging.info(f"正在为 {file_name} 制作种子...")
+                        torrent_file = create_torrent(file_path, file_name, torrent_dir)
+                    if torrent_file:
+                        largest_video_file = get_largest_video_file(file_path)
+                        if largest_video_file:
+                            mediainfo = generate_mediainfo(largest_video_file)
+                            pic_urls = screenshot_from_video(largest_video_file,log_file)
+                            internal = 1 if maker.lower() == "kimoji" else 0
+                            if internal:
+                                fl_until =3
+                                n = random.randint(1, 10)
+                                description = f"""
+                                [center][color=#bbff88][size=24][b][spoiler=Made By Kimoji][img]https://kimoji.club/img/friendsite/kimoji{n}.webp[/img][/spoiler][/b][/size][/color]
+                                [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
+                                """
+                            else:
+                                fl_until =1
+                                description = f"""
+                                [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
+                                [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
+                                """
+                        else:
+                            logging.error("文件夹中未找到视频文件，请核查")
+                            row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
+                    response_dict = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
+                    response_json = json.loads(response_dict)
+                    if 'message' in response_json and (
+                            response_json['message'] == "该名称已经被使用过了" or response_json[
+                        'message'] == "该 info hash 已经被使用过了"):
+                        print(f"种子 '{upload_name}' 上传失败，原因：{response_json['message']}")
+                        row[9] = '3'  # 更新状态为 '3'
+                        continue  # 跳过当前循环
+                    if 'data' in response_json and response_json['success']:
+                        download_link = response_json['data']
+                        seeding_success = add_torrent_based_on_agent(download_link)
+                        if seeding_success:
+                            logger.info("种子已成功添加到下载器并开始做种")
+                            update_row_status(rows, index, seeding_success, download_link)
+                        else:
+                            logger.error("种子添加到下载器失败，请手动处理")
+                            update_row_status(rows, index, False, None, error=True, response_json=response_json)
                     else:
-                        fl_until =1
-                        description = f"""
-                        [center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/{maker}.webp[/img][/spoiler][/b][/size][/color]
-                        [color=#bbff88][size=24][b][spoiler=截图赏析]{pic_urls}[/spoiler][/b][/size][/color][/center]
-                        """
-                else:
-                    logging.error("文件夹中未找到视频文件，请核查")
-                    row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
-            response_dict = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
-            response_json = json.loads(response_dict)
-            if 'data' in response_json and response_json['success']:
-                download_link = response_json['data']
-                seeding_success = add_torrent_based_on_agent(download_link)
-                if seeding_success:
-                    logger.info("种子已成功添加到下载器并开始做种")
-                    update_row_status(rows, index, seeding_success, download_link)
-                else:
-                    logger.error("种子添加到下载器失败，请手动处理")
-                    update_row_status(rows, index, False, None, error=True, response_json=response_json)
-            else:
-                logger.error("无法从响应中提取种子下载地址")
-                row[9] = '-1'  # 标记为处理失败
-                rows[index] = row  # 更新行列表
-                # 将更新后的数据写回 CSV 文件
-                with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-                    writer = csv.writer(file)
-                    writer.writerow(headers)  # 写入标题行
-                    writer.writerows(rows)  # 写入更新后的数据行
-    # 检查是否还有未处理的种子
-    remaining = any(row[9] == '0' for row in rows)
-    if not remaining:
-        print("没有可以发送的种子，请先生成信息")
+                        logger.error("无法从响应中提取种子下载地址")
+                        row[9] = '-1'  # 标记为处理失败
+                        rows[index] = row  # 更新行列表
+                        # 将更新后的数据写回 CSV 文件
+                        with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+                            writer = csv.writer(file)
+                            writer.writerow(headers)  # 写入标题行
+                            writer.writerows(rows)  # 写入更新后的数据行
+            # 检查是否还有未处理的种子
+            remaining = any(row[9] == '0' for row in rows)
+            if not remaining:
+                print("没有可以发送的种子，请先生成信息")
 
 def update_row_status(rows, index, seeding_success, download_link, error=False, response_json=None):
     row = rows[index]
