@@ -200,20 +200,6 @@ def extract_details(result, result_type):
     original_title = get_title_from_web(id, result_type, 'en-US')
     year, category_id, child = get_details_from_tmdb(id, result_type)
 
-    # 如果标题不包含中文，提示用户手动输入
-    if not contains_chinese(title):
-        print("当前资源似乎没有中文词条，请手动输入中文名，如需跳过请输入q：")
-        user_input = input()
-        if user_input.lower() != 'q':
-            title = user_input
-
-    # 如果原始标题包含中文，提示用户手动输入
-    if contains_chinese(original_title):
-        print("当前资源似乎没有英文词条，请手动输入英文名，如需跳过请输入q：")
-        user_input = input()
-        if user_input.lower() != 'q':
-            original_title = user_input
-
     # 如果年份未知，提示用户手动输入
     if year == '未知':
         print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
@@ -294,6 +280,19 @@ def rename_folder(folder_path):
                 season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
                 # 如果只有一季，使用电视剧的发布年份
                 release_date = release_date
+
+        # 如果标题不包含中文，提示用户手动输入
+        if not contains_chinese(title):
+            print("当前资源似乎没有中文词条，请手动输入中文名，如需跳过请输入q：")
+            user_input = input()
+            if user_input.lower() != 'q':
+                title = user_input
+        # 如果原始标题包含中文，提示用户手动输入
+        if contains_chinese(original_title):
+            print("当前资源似乎没有英文词条，请手动输入英文名，如需跳过请输入q：")
+            user_input = input()
+            if user_input.lower() != 'q':
+                original_title = user_input
 
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
@@ -463,7 +462,7 @@ def generate(folder_path):
         item_path = os.path.join(folder_path, item)
         # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
-            logger.info(f"处理文件夹: {item_path}")
+            logger.info(f"\033[91m处理文件夹: {item_path}\033[0m")
             new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
             if status == "分辨率异常" or status == "视频异常":
                 logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
