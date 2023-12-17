@@ -5,6 +5,8 @@ import logging
 import glob
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
+import shlex
+
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -31,9 +33,8 @@ def screenshot_from_bd(directory, file_dir):
     logger.info(f"找到最大的 .m2ts 文件: {largest_file}")
     return screenshot_from_video(largest_file, file_dir, image_format='png')
 def get_video_duration(file_path):
-    video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
-    video_file = os.path.basename(file_path)  # 获取视频文件名
-    video_dir = video_dir.replace("'", "'\\''")
+    video_dir = shlex.quote(os.path.dirname(file_path))  # 获取视频文件所在的目录
+    video_file = shlex.quote(os.path.basename(file_path))  # 获取视频文件名
     try:
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
@@ -84,9 +85,10 @@ def upload_to_chevereto(image_path,i):
     return None
 
 def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
-    video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
-    video_file = os.path.basename(largest_video_file)  # 获取视频文件名
+    video_dir = shlex.quote(os.path.dirname(largest_video_file))  # 获取视频文件所在的目录
+    video_file = shlex.quote(os.path.basename(largest_video_file))  # 获取视频文件名
     duration = get_video_duration(largest_video_file)
+
     logger.info('开始截图')
     if not duration:
         logger.error("无法获取视频时长")
