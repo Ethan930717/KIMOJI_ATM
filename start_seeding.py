@@ -82,11 +82,10 @@ def start_seeding(csv_file):
         resolution_id = get_resolution_id(resolution)
         remove_ffmpeg_containers() #清除冗余ffmpeg容器
         if status == '0':
-            logger.info(f'开始对文件夹{file_path}进行发种操作')
-            print(f'对{upload_name}进行查重')
+            logger.info(f'开始对文件夹"{file_path}"进行发种操作')
+            logger.info(f'开始对"{upload_name}"进行查重')
             url = f"https://kimoji.club/api/torrents/filter?name={upload_name}&api_token={config.apikey}"
             response = requests.get(url)
-            logger.info(f'查重结果{response.json()}')
             if response.status_code == 200:
                 response_data = response.json()
                 # 检查响应中的每个种子是否包含 'id' 字段

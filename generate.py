@@ -73,7 +73,7 @@ def format_resolution(height, scan_type):
 
 def get_media_info(file_path):
     # 设置默认返回值
-    default_return = (None, None, None, None, False, 1 , 0, None, None, None)
+    default_return = (None, None, None, None, False, 1 , 0)
 
     media_info = MediaInfo.parse(file_path)
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
@@ -121,7 +121,7 @@ def get_media_info(file_path):
         if bit_depth in ['10', '20']:
             additional_attrs.append(f'{bit_depth}bit')
 
-    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count, "0", None, None, None
+    return video_codec, audio_codec, resolution, '.'.join(additional_attrs), is_encode, audio_count, 0
 
 def contains_chinese(text):
     return any('\u4e00' <= char <= '\u9fff' for char in text)
