@@ -93,6 +93,7 @@ def start_seeding(csv_file):
                     logger.warning(f"种子 '{upload_name}' 已存在。跳过当前文件")
                     row[9] = '3'  # 更新CSV文件中的状态为 '3'
                     rows[index] = row
+                    write_to_csv(csv_file, headers, rows)
                     continue  # 跳过当前循环
                 else:
                     # 如果种子不存在，继续进行发种
@@ -126,6 +127,7 @@ def start_seeding(csv_file):
                         else:
                             logging.error("文件夹中未找到视频文件，请核查")
                             row[9] = '1'  # 更新 status 为 '1'，表示处理失败或跳过
+
                     response_json = upload_torrent(torrent_file, upload_name, description, mediainfo, category_id, type_id, resolution_id, season, tmdb_id, child, internal, fl_until)
                     if 'data' in response_json:
                         data = response_json['data']
@@ -133,6 +135,7 @@ def start_seeding(csv_file):
                             logger.warning("种子已存在,跳过当前资源")
                             row[9] = '3'  # 更新状态为 '3'
                             rows[index] = row
+                            write_to_csv(csv_file, headers, rows)
                             continue  # 跳过当前循环
                     if 'data' in response_json and response_json['success']:
                         download_link = response_json['data']
@@ -140,18 +143,19 @@ def start_seeding(csv_file):
                         if seeding_success:
                             logger.info("种子已成功添加到下载器并开始做种")
                             update_row_status(rows, index, seeding_success, download_link)
+                            write_to_csv(csv_file, headers, rows)
                         else:
                             logger.error("种子添加到下载器失败，请手动处理")
                             update_row_status(rows, index, False, None, error=True, response_json=response_json)
+                            write_to_csv(csv_file, headers, rows)
+
                     else:
                         logger.error("无法从响应中提取种子下载地址")
                         row[9] = '-1'  # 标记为处理失败
                         rows[index] = row  # 更新行列表
                         # 将更新后的数据写回 CSV 文件
-                        with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-                            writer = csv.writer(file)
-                            writer.writerow(headers)  # 写入标题行
-                            writer.writerows(rows)  # 写入更新后的数据行
+                        write_to_csv(csv_file, headers, rows)
+
             # 检查是否还有未处理的种子
             remaining = any(row[9] == '0' for row in rows)
             if not remaining:
@@ -173,6 +177,12 @@ def update_row_status(rows, index, seeding_success, download_link, error=False, 
             row.append(download_link if download_link else "N/A")
     rows[index] = row  # 更新行列表
 
+
+def write_to_csv(csv_file, headers, rows):
+    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)  # 写入标题行
+        writer.writerows(rows)  # 写入数据行
 def create_torrent(directory, file_name, torrent_dir, comment="KIMOJI PARK", tracker="https://kimoji.club/announce"):
     content_path = os.path.join(directory)
     torrent_path = os.path.join(torrent_dir, f"{file_name}.torrent")
