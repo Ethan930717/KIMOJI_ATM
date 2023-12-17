@@ -167,7 +167,8 @@ def determine_category_and_child(genres, soup, content_type):
 
     # 确定 child
     certifications = soup.find('span', class_='certification').get_text() if soup.find('span', class_='certification') else ""
-    child = 1 if any(c in certifications for c in ['Y', 'G']) or any("/genre/10762-" in genre for genre in genres) else 0
+    child = 1 if any(c in certifications for c in ['TV-Y', 'TV-G']) or any(c == 'G' for c in certifications) or any(
+        "/genre/10762-" in genre for genre in genres) else 0
 
     return category_id, child
 def get_title_from_web(id, content_type, language):
@@ -200,12 +201,6 @@ def extract_details(result, result_type):
     original_title = get_title_from_web(id, result_type, 'en-US')
     year, category_id, child = get_details_from_tmdb(id, result_type)
 
-    # 如果年份未知，提示用户手动输入
-    if year == '未知':
-        print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
-        user_input = input()
-        if user_input.lower() != 'q':
-            year = user_input
 
     return title, original_title, year, category_id, child
 
@@ -293,6 +288,12 @@ def rename_folder(folder_path):
             user_input = input()
             if user_input.lower() != 'q':
                 original_title = user_input
+        # 如果年份未知，提示用户手动输入
+        if release_date == '未知':
+            print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
+            user_input = input()
+            if user_input.lower() != 'q':
+                release_date = user_input
 
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)

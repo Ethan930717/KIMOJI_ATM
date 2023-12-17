@@ -262,7 +262,7 @@ def upload_torrent(torrent_file_path, upload_name, description, mediainfo, categ
         'internal': internal,
         'personal_release': 0  # 如果是个人作品可以设置为 1
     }
-
+    logger.info('正在发布资源，请稍后')
     response = requests.post(url, headers=headers, files=files, data=data)
 
     if response.status_code == 200:
