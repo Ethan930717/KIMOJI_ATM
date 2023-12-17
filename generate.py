@@ -280,10 +280,8 @@ def rename_folder(folder_path):
             video_codec, audio_codec, resolution, additional, is_encode, audio_count, error = get_media_info(largest_video_file)
             if error == "视频异常":
                 status = -3
-                return None, None, None, None, None, None, None, None, None, status
             elif error == "分辨率异常":
                 status = -2
-                return None, None, None, None, None, None, None, None, None, status
             else:
                 status = 0
             if audio_count > 1:
@@ -330,7 +328,7 @@ def rename_folder(folder_path):
             tmdb_id = selected_result.id
             new_path = os.path.join(os.path.dirname(folder_path), new_name)
             os.rename(folder_path, new_path)
-            logger.info(f"文件夹重命名为: {new_name}")
+            logger.info(f'\033[92m文件夹重命名为: {new_name}\033[0m')
 
             is_tv_show = selected_type == 'tv'
             rename_files_in_folder(new_path, new_name, is_tv_show)
@@ -382,22 +380,19 @@ def get_season_year_from_web(tv_id, season_num):
         return '未知'
 
 def write_to_log(log_directory, data):
-    os.makedirs(log_directory, exist_ok=True)
-    log_path = os.path.join(log_directory, 'logfile.csv')
+    try:
+        os.makedirs(log_directory, exist_ok=True)
+        log_path = os.path.join(log_directory, 'logfile.csv')
 
-    # 检查文件是否存在，如果不存在，则创建并写入标题
-    file_exists = os.path.isfile(log_path)
-    with open(log_path, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-
-        # 如果文件不存在，写入标题
-        if not file_exists:
-            headers = ["路径", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介", "制作组", "上传名", "状态"]
-            writer.writerow(headers)
-
-        # 写入数据
-        writer.writerow(data)
-
+        file_exists = os.path.isfile(log_path)
+        with open(log_path, mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            if not file_exists:
+                headers = ["路径", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介", "制作组", "上传名", "状态"]
+                writer.writerow(headers)
+            writer.writerow(data)
+    except Exception as e:
+        logger.error(f"写入日志文件时出错: {e}")
 def get_type_id(new_name):
     new_name_upper = new_name.upper()
 
