@@ -5,8 +5,6 @@ import logging
 import glob
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
-import shlex
-
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -33,8 +31,9 @@ def screenshot_from_bd(directory, file_dir):
     logger.info(f"找到最大的 .m2ts 文件: {largest_file}")
     return screenshot_from_video(largest_file, file_dir, image_format='png')
 def get_video_duration(file_path):
-    video_dir = shlex.quote(os.path.dirname(file_path))  # 获取视频文件所在的目录
-    video_file = shlex.quote(os.path.basename(file_path))  # 获取视频文件名
+    video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
+    video_file = os.path.basename(file_path)  # 获取视频文件名
+    video_dir = video_dir.replace("'", "'\\''")
     try:
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
@@ -85,12 +84,9 @@ def upload_to_chevereto(image_path,i):
     return None
 
 def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
-    video_dir = shlex.quote(os.path.dirname(largest_video_file))  # 获取视频文件所在的目录
-    video_file = shlex.quote(os.path.basename(largest_video_file))  # 获取视频文件名
-    print(video_dir)
-    print(video_file)
+    video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
+    video_file = os.path.basename(largest_video_file)  # 获取视频文件名
     duration = get_video_duration(largest_video_file)
-    logger.info(f'当前视频时长{duration}')
     logger.info('开始截图')
     if not duration:
         logger.error("无法获取视频时长")
@@ -105,11 +101,12 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
 
     intervals = (end_time - start_time) / 6  # 计算时间间隔
     image_paths = []
+    video_dir = video_dir.replace("'", "'\\''")
 
     for i in range(1, 7):
         screenshot_time = start_time + (i - 1) * intervals
         screenshot_name = f"{i}.{image_format}"
-        screenshot_path = shlex.quote(os.path.join(log_dir, screenshot_name))
+        screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
 
         command = [
@@ -126,7 +123,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
         ]
         #command = f"ffmpeg -y -ss {screenshot_time} -i '{file_path}' -ss '{screenshot_keep}' -frames:v 1 '{screenshot_path}' -loglevel error"
         try:
-            subprocess.run(command, check=True)
+            subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             logger.info(f"第{i}张图片截图成功: {screenshot_name}")
             image_paths.append(screenshot_path)
             if image_format == 'png':
