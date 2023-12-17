@@ -86,6 +86,9 @@ def upload_to_chevereto(image_path,i):
 def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
     video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
     video_file = os.path.basename(largest_video_file)  # 获取视频文件名
+    video_dir = video_dir.replace(' ', '\\ ').replace('&', '\\&')
+    video_file = video_file.replace(' ', '\\ ').replace('&', '\\&')
+
     duration = get_video_duration(largest_video_file)
     logger.info('开始截图')
     if not duration:
@@ -101,7 +104,6 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
 
     intervals = (end_time - start_time) / 6  # 计算时间间隔
     image_paths = []
-    video_dir = video_dir.replace("'", "'\\''")
 
     for i in range(1, 7):
         screenshot_time = start_time + (i - 1) * intervals
