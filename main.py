@@ -41,8 +41,9 @@ def main_menu():
                 reader = csv.reader(file)
                 rows = list(reader)
 
+            # 只输出每行的第一个单元格
             for index, row in enumerate(rows[1:], start=1):
-                print(f"{index} - {row}")
+                print(f"{index} - {row[0]}")  # row[0] 是每行的第一个单元格
 
             try:
                 selected_index = int(input("选择要处理的行号：")) - 1
@@ -52,6 +53,7 @@ def main_menu():
 
                     largest_video_file = get_largest_video_file(folder_path)
                     if largest_video_file:
+                        print(f"提取到的视频文件路径：{largest_video_file}")
                         pic_urls = ffmpeg.screenshot_from_video(largest_video_file, log_directory)
                         print(f"截图链接：\n{pic_urls}")
                     else:
