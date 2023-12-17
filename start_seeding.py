@@ -80,8 +80,8 @@ def start_seeding(csv_file):
         upload_name = row[8]
         status = row[9]
         resolution_id = get_resolution_id(resolution)
-        remove_ffmpeg_containers() #清除冗余ffmpeg容器
         if status == '0':
+            remove_ffmpeg_containers()  # 清除冗余ffmpeg容器
             logger.info(f'开始对文件夹"{file_path}"进行发种操作')
             logger.info(f'开始对"{upload_name}"进行查重')
             url = f"https://kimoji.club/api/torrents/filter?name={upload_name}&api_token={config.apikey}"

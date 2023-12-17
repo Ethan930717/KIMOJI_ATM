@@ -198,7 +198,28 @@ def extract_details(result, result_type):
     id = result.id
     title = get_title_from_web(id, result_type, 'zh-CN')
     original_title = get_title_from_web(id, result_type, 'en-US')
-    year, category_id, child = get_details_from_tmdb(id, result_type)  # 从网页获取年份
+    year, category_id, child = get_details_from_tmdb(id, result_type)
+
+    # 如果标题不包含中文，提示用户手动输入
+    if not contains_chinese(title):
+        print("当前资源似乎没有中文词条，请手动输入中文名，如需跳过请输入q：")
+        user_input = input()
+        if user_input.lower() != 'q':
+            title = user_input
+
+    # 如果原始标题包含中文，提示用户手动输入
+    if contains_chinese(original_title):
+        print("当前资源似乎没有英文词条，请手动输入英文名，如需跳过请输入q：")
+        user_input = input()
+        if user_input.lower() != 'q':
+            original_title = user_input
+
+    # 如果年份未知，提示用户手动输入
+    if year == '未知':
+        print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
+        user_input = input()
+        if user_input.lower() != 'q':
+            year = user_input
 
     return title, original_title, year, category_id, child
 
@@ -384,13 +405,28 @@ def write_to_log(log_directory, data):
         os.makedirs(log_directory, exist_ok=True)
         log_path = os.path.join(log_directory, 'logfile.csv')
 
-        file_exists = os.path.isfile(log_path)
-        with open(log_path, mode='a', newline='', encoding='utf-8') as file:
+        # 检查并读取现有文件内容
+        if os.path.isfile(log_path):
+            with open(log_path, mode='r', encoding='utf-8') as file:
+                reader = csv.reader(file)
+                existing_rows = list(reader)
+        else:
+            existing_rows = []
+
+        # 检查是否已有标题行，如果没有则添加
+        headers = ["路径", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介", "制作组", "上传名", "状态"]
+        if not existing_rows or existing_rows[0] != headers:
+            existing_rows.insert(0, headers)
+
+        # 将新数据添加到文件内容中
+        existing_rows.append(data)
+
+        # 将更新后的内容写回文件
+        with open(log_path, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            if not file_exists:
-                headers = ["路径", "TMDb", "类型", "儿童资源", "季数", "分辨率", "媒介", "制作组", "上传名", "状态"]
-                writer.writerow(headers)
-            writer.writerow(data)
+            writer.writerows(existing_rows)
+            logger.info('信息写入成功')
+
     except Exception as e:
         logger.error(f"写入日志文件时出错: {e}")
 def get_type_id(new_name):
