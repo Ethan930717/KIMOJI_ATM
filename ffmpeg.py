@@ -88,7 +88,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
     video_dir = shlex.quote(os.path.dirname(largest_video_file))  # 获取视频文件所在的目录
     video_file = shlex.quote(os.path.basename(largest_video_file))  # 获取视频文件名
     duration = get_video_duration(largest_video_file)
-
+    logger.info(f'当前视频时长{duration}')
     logger.info('开始截图')
     if not duration:
         logger.error("无法获取视频时长")
@@ -108,7 +108,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
     for i in range(1, 7):
         screenshot_time = start_time + (i - 1) * intervals
         screenshot_name = f"{i}.{image_format}"
-        screenshot_path = os.path.join(log_dir, screenshot_name)
+        screenshot_path = shlex.quote(os.path.join(log_dir, screenshot_name))
         screenshot_keep = "00:00:01"
 
         command = [

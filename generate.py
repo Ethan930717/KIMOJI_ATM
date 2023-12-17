@@ -73,7 +73,7 @@ def format_resolution(height, scan_type):
 
 def get_media_info(file_path):
     # 设置默认返回值
-    default_return = (None, None, None, None, False, 1 , 0)
+    default_return = (None, None, None, None, False, 1 )
 
     media_info = MediaInfo.parse(file_path)
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
@@ -81,13 +81,13 @@ def get_media_info(file_path):
 
     # 检查是否存在视频轨道
     if not video_tracks:
-        return default_return + ("No video track found",)
+        return default_return + ("视频异常",)
 
     video_track = video_tracks[0]
 
     # 检查视频分辨率
     if video_track.height < 720:
-        return default_return + ("Resolution too low",)
+        return default_return + ("分辨率异常",)
 
     audio_track = audio_tracks[0] if audio_tracks else None
     audio_count = len(audio_tracks)  # 获取音轨数量
@@ -277,7 +277,15 @@ def rename_folder(folder_path):
         # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
         largest_video_file = find_largest_video_file(folder_path)
         if largest_video_file:
-            video_codec, audio_codec, resolution, additional, is_encode, audio_count, status = get_media_info(largest_video_file)
+            video_codec, audio_codec, resolution, additional, is_encode, audio_count, error = get_media_info(largest_video_file)
+            if error == "视频异常":
+                status = -3
+                return None, None, None, None, None, None, None, None, None, status
+            elif error == "分辨率异常":
+                status = -2
+                return None, None, None, None, None, None, None, None, None, status
+            else:
+                status = 0
             if audio_count > 1:
                 audio_info = f"{audio_count}Audio {audio_codec}"
             else:
@@ -431,7 +439,7 @@ def generate(folder_path):
                     logger.warning("当前视频资源分辨率过低，不符合发种要求")
                 continue  # 继续下一个循环
             file_url = os.path.join(folder_path, new_name)  # 构造file_url
-            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, 0])
+            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
 
         else:
             logger.error(f"文件夹 {item_path} 不符合处理条件或不存在。")
