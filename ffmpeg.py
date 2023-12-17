@@ -33,7 +33,9 @@ def screenshot_from_bd(directory, file_dir):
 def get_video_duration(file_path):
     video_dir = os.path.dirname(file_path)  # 获取视频文件所在的目录
     video_file = os.path.basename(file_path)  # 获取视频文件名
-    video_dir = video_dir.replace("'", "'\\''")
+    video_dir = video_dir.replace(' ', '\\ ').replace('&', '\\&')
+    video_file = video_file.replace(' ', '\\ ').replace('&', '\\&')
+
     try:
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
