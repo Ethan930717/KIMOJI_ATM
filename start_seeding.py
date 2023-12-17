@@ -81,19 +81,21 @@ def start_seeding(csv_file):
         resolution_id = get_resolution_id(resolution)
         remove_ffmpeg_containers() #清除冗余ffmpeg容器
         if status == '0':
-            # 检查种子是否已存在
+            print(f'对{upload_name}进行查重')
             url = f"https://kimoji.club/api/torrents/filter?name={upload_name}&api_token={config.apikey}"
             response = requests.get(url)
+            logger.info(f'查重结果{response}')
             if response.status_code == 200:
                 response_data = response.json()
                 # 检查响应中是否有 'id' 字段
                 if 'id' in response_data:
-                    print(f"种子 '{upload_name}' 已存在。跳过...")
+                    logger.warning(f"种子 '{upload_name}' 已存在。跳过当前文件")
                     # 更新CSV文件中的状态为 '3'
                     row[9] = '3'
                     continue  # 跳过当前循环
                 else:
                     # 如果种子不存在，继续进行发种
+                    logger.info(f"查重通过，继续发种")
                     file_name = os.path.basename(file_path)  # 获取文件名
                     torrent_file = os.path.join(torrent_dir, f"{file_name}.torrent")
                     # 检查是否存在对应的 torrent 文件
