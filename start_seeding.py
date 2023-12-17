@@ -92,6 +92,7 @@ def start_seeding(csv_file):
                 if any('id' in torrent_data for torrent_data in response_data.get('data', [])):
                     logger.warning(f"种子 '{upload_name}' 已存在。跳过当前文件")
                     row[9] = '3'  # 更新CSV文件中的状态为 '3'
+                    rows[index] = row
                     continue  # 跳过当前循环
                 else:
                     # 如果种子不存在，继续进行发种
@@ -131,6 +132,7 @@ def start_seeding(csv_file):
                         if 'name' in data and "该名称已经被使用过了" in data['name'] or 'info_hash' in data and "该 info hash 已经被使用过了" in data['info_hash']:
                             logger.warning("种子已存在,跳过当前资源")
                             row[9] = '3'  # 更新状态为 '3'
+                            rows[index] = row
                             continue  # 跳过当前循环
                     if 'data' in response_json and response_json['success']:
                         download_link = response_json['data']
