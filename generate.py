@@ -264,9 +264,20 @@ def rename_folder(folder_path):
             title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
 
         if user_input.lower() == "t":
-            print("您选择的是默认具体词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
+            print("您选择的是默认剧集词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
             user_input = input()
-            release_date = user_input
+            seasons = user_input
+            if seasons > 1:
+                season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
+                season_num = f"S{season_num_input.zfill(2)}."
+                season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
+                # 获取特定季的年份
+                release_date = get_season_year_from_web(selected_result.id, season_num_input)
+            else:
+                season_num = "S01."
+                season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
+                # 如果只有一季，使用电视剧的发布年份
+                release_date = release_date
 
         elif selected_type == 'tv':
             logger.info('正在确认剧集季数信息')

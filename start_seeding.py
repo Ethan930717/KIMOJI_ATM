@@ -48,10 +48,9 @@ def get_resolution_id(resolution):
         "1080i": 4,
         "720p": 5
     }
-    resolution_id = resolution_map.get(resolution)
-    if resolution_id is None:
-        logging.error("分辨率判定有误，请检查")
-        sys.exit(1)
+    resolution_id = resolution_map.get(resolution, 6)  # 使用 get 方法的默认值
+    if resolution_id == 6:
+        logging.warning("当前资源分辨率不支持发布")
     return resolution_id
 
 def generate_mediainfo(file_path):
@@ -81,6 +80,11 @@ def start_seeding(csv_file):
         upload_name = row[8]
         status = row[9]
         resolution_id = get_resolution_id(resolution)
+        if resolution_id == 6:
+            row[9] = '-1'  # 更新CSV文件中的状态为 '3'
+            rows[index] = row
+            write_to_csv(csv_file, headers, rows)
+            continue  # 跳过当前循环
         if status == '0':
             remove_ffmpeg_containers()  # 清除冗余ffmpeg容器
             logger.info(f'开始对文件夹"{file_path}"进行发种操作')
