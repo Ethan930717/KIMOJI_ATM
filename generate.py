@@ -266,7 +266,7 @@ def rename_folder(folder_path):
         if user_input.lower() == "t":
             print("您选择的是默认剧集词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
             user_input = input()
-            seasons = user_input
+            seasons = int(user_input)
             if seasons > 1:
                 season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
                 season_num = f"S{season_num_input.zfill(2)}."
