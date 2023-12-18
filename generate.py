@@ -235,11 +235,16 @@ def rename_folder(folder_path):
             f"\033[93m电影类：https://www.themoviedb.org/search/movie?query={search_name}\033[0m\n"
             f"\033[93m剧集类：https://www.themoviedb.org/search/tv?query={search_name}\033[0m\n"
             "\033[91m如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': \033[0m")
+        season_num = ''
+        season_onlynum = ''
         if user_input.lower() in ['m', 't']:
             selected_type = 'movie' if user_input.lower() == 'm' else 'tv'
             tmdb_id = '1218677' if selected_type == 'movie' else '241652'
             selected_result = movie.details(tmdb_id) if selected_type == 'movie' else tv.details(tmdb_id)
+
             title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
+
+
         elif user_input.startswith('movie') or user_input.startswith('tv'):
             if user_input.startswith('movie'):
                 selected_type = 'movie'
@@ -258,10 +263,12 @@ def rename_folder(folder_path):
             selected_result, selected_type = search_results[choice]
             title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
 
-        season_num = ''
-        season_onlynum = ''  # 新增变量来保存只包含数字的季数
+        if user_input.lower() == "t":
+            print("您选择的是默认具体词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
+            user_input = input()
+            release_date = user_input
 
-        if selected_type == 'tv':
+        elif selected_type == 'tv':
             logger.info('正在确认剧集季数信息')
             seasons = tv.details(selected_result.id).number_of_seasons
             if seasons > 1:
@@ -276,20 +283,32 @@ def rename_folder(folder_path):
                 # 如果只有一季，使用电视剧的发布年份
                 release_date = release_date
 
+        if user_input.lower() in ['m', 't']:
+            print("您选择的是默认词条，需要手动输入中文名、英文名与年份，请您首先输入中文标题：")
+            user_input = input()
+            title = user_input
         # 如果标题不包含中文，提示用户手动输入
-        if not contains_chinese(title):
+        elif not contains_chinese(title):
             print("当前资源似乎没有中文词条，请手动输入中文名，如需跳过请输入q：")
             user_input = input()
             if user_input.lower() != 'q':
                 title = user_input
         # 如果原始标题包含中文，提示用户手动输入
-        if contains_chinese(original_title):
+        if user_input.lower() in ['m', 't']:
+            print("请输入英文标题：")
+            user_input = input()
+            original_title = user_input
+        elif contains_chinese(original_title):
             print("当前资源似乎没有英文词条，请手动输入英文名，如需跳过请输入q：")
             user_input = input()
             if user_input.lower() != 'q':
                 original_title = user_input
         # 如果年份未知，提示用户手动输入
-        if release_date == '未知':
+        if user_input.lower() in ['m', 't']:
+            print("请输入年份：")
+            user_input = input()
+            release_date = user_input
+        elif release_date == '未知':
             print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
             user_input = input()
             if user_input.lower() != 'q':
@@ -472,4 +491,4 @@ def generate(folder_path):
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
             logger.info(f'\033[92m{file_url}添加完成\033[0m')
         else:
-            logger.error(f"文件夹 {item_path} 不符合处理条件或不存在。")
+            logger.error(f"文件夹 {item_path} 不符合处理条件")
