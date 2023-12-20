@@ -21,7 +21,7 @@ check_and_install_python() {
     case $OS in
         Linux)
             sudo apt-get update
-            sudo apt-get install -y python3 python3-pip
+            sudo apt-get install -y python3 python3-pip pip
             ;;
         Darwin)
             brew install python3

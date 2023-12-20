@@ -20,16 +20,30 @@ tv = TV()
 #模糊搜索逻辑
 def preprocess_name_for_search(folder_name):
     # 移除一些常见的无关词汇或符号
-    remove_words = ['4k','2160p','1080p','1080i', '720p', 'x264', 'x265', 'HDTV', 'BluRay', 'WEB-DL']
+    remove_words = ['4k', '2160p', '1080p', '1080i', '720p', 'x264', 'x265', 'HDTV', 'BluRay', 'WEB-DL']
     for word in remove_words:
         folder_name = folder_name.replace(word, '')
+
     # 替换一些常见符号
     folder_name = folder_name.replace('.', ' ').replace('-', ' ').replace('_', ' ').replace('·', ' ')
-    # 如果名称中有空格，只保留空格前的部分
-    if ' ' in folder_name:
-        folder_name = folder_name.split(' ')[0]
-    # 可以在这里加入其他预处理逻辑
+
+    # 检查中文名称
+    match_chinese = re.search(r'([\u4e00-\u9fff]+)', folder_name)
+    if match_chinese:
+        chinese_title = match_chinese.group(1)
+        # 如果中文名称后有数字，去除数字
+        chinese_title = re.sub(r'\d+$', '', chinese_title)
+        return chinese_title.strip()
+
+    # 检查英文名称
+    match_year = re.search(r'\b(19|20)\d{2}\b', folder_name)
+    if match_year:
+        year_index = match_year.start()
+        english_title = folder_name[:year_index].replace('.', ' ').strip()
+        return english_title
+
     return folder_name.strip()
+
 
 def is_video_file(filename):
     return filename.endswith(('.mp4', '.mkv', '.avi', '.mov'))
@@ -214,203 +228,7 @@ def get_alternative_title(id, language):
     except:
         return '未知'
 
-def rename_folder(folder_path):
-    folder_name = os.path.basename(folder_path)
 
-    search_name = preprocess_name_for_search(folder_name)
-
-    # 1. 使用TMDB API获取文件夹名称对应的影片信息
-    movie_results = [(result, 'movie') for result in movie.search(search_name)]
-    tv_results = [(result, 'tv') for result in tv.search(search_name)]
-    search_results = movie_results + tv_results
-
-    if search_results:
-        for i, (result, result_type) in enumerate(search_results, start=1):
-            title, original_title, release_date, category_id, child = extract_details(result, result_type)
-            print(
-                f"\033[94m{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}\033[0m")
-        user_input = input(
-            f"如果无法确定影片序号，请尝试手动搜索后输入'类型ID'（例如 'movie300212' 或 'tv12345'，不含引号），\n"
-            f"手动搜索链接：\n"
-            f"\033[93m电影类：https://www.themoviedb.org/search/movie?query={search_name}\033[0m\n"
-            f"\033[93m剧集类：https://www.themoviedb.org/search/tv?query={search_name}\033[0m\n"
-            "\033[91m如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': \033[0m")
-        season_num = ''
-        season_onlynum = ''
-        if user_input.lower() in ['m', 't']:
-            selected_type = 'movie' if user_input.lower() == 'm' else 'tv'
-            tmdb_id = '1218677' if selected_type == 'movie' else '241652'
-            selected_result = movie.details(tmdb_id) if selected_type == 'movie' else tv.details(tmdb_id)
-
-            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
-
-
-        elif user_input.startswith('movie') or user_input.startswith('tv'):
-            if user_input.startswith('movie'):
-                selected_type = 'movie'
-                tmdb_id = user_input[len('movie'):]  # 从字符串 "movie" 后开始截取
-            else:
-                selected_type = 'tv'
-                tmdb_id = user_input[len('tv'):]  # 从字符串 "tv" 后开始截取
-
-            if selected_type == 'movie':
-                selected_result = movie.details(tmdb_id)
-            else:
-                selected_result = tv.details(tmdb_id)
-            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
-        else:
-            choice = int(user_input) - 1
-            selected_result, selected_type = search_results[choice]
-            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
-
-        if user_input.lower() == "t":
-            print("您选择的是默认剧集词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
-            user_input = input()
-            seasons = int(user_input)
-            if seasons > 1:
-                season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
-                season_num = f"S{season_num_input.zfill(2)}."
-                season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
-                # 获取特定季的年份
-                release_date = get_season_year_from_web(selected_result.id, season_num_input)
-            else:
-                season_num = "S01."
-                season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
-                # 如果只有一季，使用电视剧的发布年份
-                release_date = release_date
-
-        elif selected_type == 'tv':
-            logger.info('正在确认剧集季数信息')
-            seasons = tv.details(selected_result.id).number_of_seasons
-            if seasons > 1:
-                season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
-                season_num = f"S{season_num_input.zfill(2)}."
-                season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
-                # 获取特定季的年份
-                release_date = get_season_year_from_web(selected_result.id, season_num_input)
-            else:
-                season_num = "S01."
-                season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
-                # 如果只有一季，使用电视剧的发布年份
-                release_date = release_date
-
-        if user_input.lower() in ['m', 't']:
-            print("您选择的是默认词条，需要手动输入中文名、英文名与年份，请您首先输入中文标题：")
-            user_input = input()
-            title = user_input
-        # 如果标题不包含中文，提示用户手动输入
-        elif not contains_chinese(title):
-            print("当前资源似乎没有中文词条，请手动输入中文名，如需跳过请输入q：")
-            user_input = input()
-            if user_input.lower() != 'q':
-                title = user_input
-        # 如果原始标题包含中文，提示用户手动输入
-        if user_input.lower() in ['m', 't']:
-            print("请输入英文标题：")
-            user_input = input()
-            original_title = user_input
-        elif contains_chinese(original_title):
-            print("当前资源似乎没有英文词条，请手动输入英文名，如需跳过请输入q：")
-            user_input = input()
-            if user_input.lower() != 'q':
-                original_title = user_input
-        # 如果年份未知，提示用户手动输入
-        if user_input.lower() in ['m', 't']:
-            print("请输入年份：")
-            user_input = input()
-            release_date = user_input
-        elif release_date == '未知':
-            print("当前资源在TMDb词条中没有年份，请确认年份信息后手动输入，跳过请按q：")
-            user_input = input()
-            if user_input.lower() != 'q':
-                release_date = user_input
-
-        # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
-        largest_video_file = find_largest_video_file(folder_path)
-        if largest_video_file:
-            video_codec, audio_codec, resolution, additional, is_encode, audio_count, error = get_media_info(largest_video_file)
-            if error == "视频异常":
-                status = -3
-            elif error == "分辨率异常":
-                status = -2
-            else:
-                status = 0
-            if audio_count > 1:
-                audio_info = f"{audio_count}Audio {audio_codec}"
-            else:
-                audio_info = audio_codec
-            # 根据是否为Encode来调整文件名
-            source_type = 'Encode' if is_encode else 'WEB-DL'
-            # 构建新名称，并替换空格为点
-            new_name = f"{title}.{original_title}.{season_num}{release_date}.{resolution}.{source_type}.{audio_info}.{video_codec}-{additional}KIMOJI"
-            new_name = new_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
-            new_name = re.sub(r'\.{2,}', '.', new_name) #处理两个点的情况
-            # 处理upload_name
-            upload_name = new_name.replace('.', ' ')
-
-            # 处理特殊情况，例如 "5.1" 和 "7.1"
-            placeholder_map = {
-                "5 10": "PLACEHOLDER_5_10",
-                "7 10": "PLACEHOLDER_7_10"
-            }
-            for original, placeholder in placeholder_map.items():
-                upload_name = upload_name.replace(original, placeholder)
-
-            upload_name = re.sub(r'(?<=5) 1', '.1', upload_name)
-            upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
-
-            # 将占位符转换回来
-            for placeholder, original in placeholder_map.items():
-                upload_name = upload_name.replace(placeholder, original)
-
-            if "-" in new_name:
-                maker_candidate = new_name.split('-')[-1]
-                if "@" in maker_candidate:
-                    maker = maker_candidate.split('@')[-1]
-                elif re.match(r'^[A-Za-z0-9_]+$', maker_candidate):
-                    maker = maker_candidate
-                else:
-                    maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
-                    maker = maker_input.strip() if maker_input.strip() != '' else None
-            else:
-                maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
-                maker = maker_input.strip() if maker_input.strip() != '' else None
-
-            tmdb_id = selected_result.id
-            new_path = os.path.join(os.path.dirname(folder_path), new_name)
-            os.rename(folder_path, new_path)
-            logger.info(f'\033[92m文件夹重命名为: {new_name}\033[0m')
-
-            is_tv_show = selected_type == 'tv'
-            rename_files_in_folder(new_path, new_name, is_tv_show)
-            type_id = get_type_id(new_name)
-            return new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
-        else:
-            logger.error("未找到有效的视频文件。")
-            return None, None, None, None, None, None, None, None, None, None
-    else:
-        logger.warning("没有找到匹配的 TMDB 资源。")
-        return None, None, None, None, None, None, None, None, None, None
-
-def rename_files_in_folder(folder_path, new_folder_name, is_tv_show):
-    for file in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file)
-        if os.path.isfile(file_path):
-            file_extension = os.path.splitext(file_path)[1]
-            if is_tv_show:
-                # 仅替换文件名中的空格为点
-                new_file_name = file.replace(' ', '.')
-            else:
-                # 将文件名更改为与文件夹相同的名称
-                new_file_name = new_folder_name + file_extension
-            new_file_path = os.path.join(folder_path, new_file_name)
-            os.rename(file_path, new_file_path)
-
-def list_folders(base_path):
-    folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f)) and "KIMOJI" not in f]
-    if not folders:
-        print("目前没有未更名的文件")
-    return folders
 
 def get_season_year_from_web(tv_id, season_num):
     url = f"https://www.themoviedb.org/tv/{tv_id}/season/{season_num}"
@@ -480,26 +298,164 @@ def get_type_id(new_name):
     return type_id
 
 def generate(folder_path):
-    # 获取当前工作目录，即main.py所在的目录
     current_directory = os.path.dirname(os.path.realpath(__file__))
     log_directory = os.path.join(current_directory, 'log')
-
-    # 确保日志目录存在
     if not os.path.isdir(log_directory):
         os.mkdir(log_directory)
-
-    # 遍历folder_path下的每个条目
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
-        # 检查这个条目是否是一个文件夹，并且符合处理条件
         if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
             logger.info(f"\033[91m处理文件夹: {item_path}\033[0m")
-            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status= rename_folder(item_path)
+            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status = extract_info_from_folder(item_path)
             if status == "分辨率异常" or status == "视频异常":
                 logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
-                continue  # 继续下一个循环
-            file_url = os.path.join(folder_path, new_name)  # 构造file_url
+                continue
+            file_url = os.path.join(folder_path, new_name)
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
             logger.info(f'\033[92m{file_url}添加完成\033[0m')
+            # 在处理完的文件夹中创建"kimoji"文件
+            kimoji_path = os.path.join(item_path, "kimoji")
+            open(kimoji_path, 'w').close()
         else:
             logger.error(f"文件夹 {item_path} 不符合处理条件")
+    # 更新folders列表，排除包含"kimoji"的文件夹
+    folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f)) and not os.path.exists(os.path.join(folder_path, f, "kimoji"))]
+    if not folders:
+        print("目前没有未处理的文件夹")
+    return folders
+
+def extract_info_from_folder(folder_path):
+    folder_name = os.path.basename(folder_path)
+    search_name = preprocess_name_for_search(folder_name)
+    # 1. 使用TMDB API获取文件夹名称对应的影片信息
+    movie_results = [(result, 'movie') for result in movie.search(search_name)]
+    tv_results = [(result, 'tv') for result in tv.search(search_name)]
+    search_results = movie_results + tv_results
+    if search_results:
+        for i, (result, result_type) in enumerate(search_results, start=1):
+            title, original_title, release_date, category_id, child = extract_details(result, result_type)
+            print(
+                f"\033[94m{i}. 类型: {'电影' if result_type == 'movie' else '电视剧'}, 中文名: {title}, 英文名: {original_title}, 年份: {release_date}\033[0m")
+        user_input = input(
+            f"如果无法确定影片序号，请尝试手动搜索后输入'类型ID'（例如 'movie300212' 或 'tv12345'，不含引号），\n"
+            f"手动搜索链接：\n"
+            f"\033[93m电影类：https://www.themoviedb.org/search/movie?query={search_name}\033[0m\n"
+            f"\033[93m剧集类：https://www.themoviedb.org/search/tv?query={search_name}\033[0m\n"
+            "\033[91m如果TMDb中没有该词条，请根据当前影片类别输入对应值，电影资源输入'm',剧集资源输入't': \033[0m")
+        season_num = ''
+        season_onlynum = ''
+        if user_input.lower() in ['m', 't']:
+            selected_type = 'movie' if user_input.lower() == 'm' else 'tv'
+            tmdb_id = '1218677' if selected_type == 'movie' else '241652'
+            selected_result = movie.details(tmdb_id) if selected_type == 'movie' else tv.details(tmdb_id)
+            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
+        elif user_input.startswith('movie') or user_input.startswith('tv'):
+            if user_input.startswith('movie'):
+                selected_type = 'movie'
+                tmdb_id = user_input[len('movie'):]  # 从字符串 "movie" 后开始截取
+            else:
+                selected_type = 'tv'
+                tmdb_id = user_input[len('tv'):]  # 从字符串 "tv" 后开始截取
+            if selected_type == 'movie':
+                selected_result = movie.details(tmdb_id)
+            else:
+                selected_result = tv.details(tmdb_id)
+            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
+        else:
+            choice = int(user_input) - 1
+            selected_result, selected_type = search_results[choice]
+            title, original_title, release_date, category_id, child = extract_details(selected_result, selected_type)
+
+
+        if user_input.lower() == "t":
+            match_season = re.search(r'S(\d{2})\.', folder_name)
+            season = match_season.group(1)
+            if not season:
+                print("您选择的是默认剧集词条，需手动输入季数，请直接输入数字，如: 1, 2, 3")
+                user_input = input()
+                seasons = int(user_input)
+                if seasons > 1:
+                    season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
+                    season_num = f"S{season_num_input.zfill(2)}."
+                    season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
+                    # 获取特定季的年份
+                    release_date = get_season_year_from_web(selected_result.id, season_num_input)
+                else:
+                    season_num = "S01."
+                    season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
+                    # 如果只有一季，使用电视剧的发布年份
+                    release_date = release_date
+            else:
+                season_onlynum = season
+        elif selected_type == 'tv':
+            match_season = re.search(r'S(\d{2})\.', folder_name)
+            season = match_season.group(1)
+            if not season:
+                logger.info('正在确认剧集季数信息')
+                seasons = tv.details(selected_result.id).number_of_seasons
+                if seasons > 1:
+                    season_num_input = input("该剧集有多季，请手动输入季数 (仅数字，例如: 1, 2, 3): ")
+                    season_num = f"S{season_num_input.zfill(2)}."
+                    season_onlynum = str(int(season_num_input))  # 将季数转换为整数，然后转换回字符串
+                    # 获取特定季的年份
+                    release_date = get_season_year_from_web(selected_result.id, season_num_input)
+                else:
+                    season_num = "S01."
+                    season_onlynum = "1"  # 如果只有一季，season_onlynum 为 "1"
+                    # 如果只有一季，使用电视剧的发布年份
+                    release_date = release_date
+            else:
+                season_onlynum = season
+
+        # 2. 查找并分析最大的视频文件以获取编码和分辨率信息
+        largest_video_file = find_largest_video_file(folder_path)
+        if largest_video_file:
+            video_codec, audio_codec, resolution, additional, is_encode, audio_count, error = get_media_info(largest_video_file)
+            if error == "视频异常":
+                status = -3
+            elif error == "分辨率异常":
+                status = -2
+            else:
+                status = 0
+            # 构建新名称，并替换空格为点
+            new_name = folder_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
+            new_name = re.sub(r'\.{2,}', '.', new_name) #处理两个点的情况
+            # 处理upload_name
+            upload_name = new_name.replace('.', ' ')
+            # 处理特殊情况，例如 "5.1" 和 "7.1"
+            placeholder_map = {
+                "5 10": "PLACEHOLDER_5_10",
+                "7 10": "PLACEHOLDER_7_10"
+            }
+            for original, placeholder in placeholder_map.items():
+                upload_name = upload_name.replace(original, placeholder)
+
+            upload_name = re.sub(r'(?<=5) 1', '.1', upload_name)
+            upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
+
+            # 将占位符转换回来
+            for placeholder, original in placeholder_map.items():
+                upload_name = upload_name.replace(placeholder, original)
+
+            if "-" in new_name:
+                maker_candidate = new_name.split('-')[-1]
+                if "@" in maker_candidate:
+                    maker = maker_candidate.split('@')[-1]
+                elif re.match(r'^[A-Za-z0-9_]+$', maker_candidate):
+                    maker = maker_candidate
+                else:
+                    maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                    maker = maker_input.strip() if maker_input.strip() != '' else None
+            else:
+                maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                maker = maker_input.strip() if maker_input.strip() != '' else None
+            tmdb_id = selected_result.id
+            is_tv_show = selected_type == 'tv'
+            type_id = get_type_id(new_name)
+            return new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
+        else:
+            logger.error("未找到有效的视频文件。")
+            return None, None, None, None, None, None, None, None, None, None
+    else:
+        logger.warning("没有找到匹配的 TMDB 资源。")
+        return None, None, None, None, None, None, None, None, None, None
