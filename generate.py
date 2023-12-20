@@ -310,11 +310,11 @@ def generate(folder_path):
             if status == "分辨率异常" or status == "视频异常":
                 logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
                 continue
-            file_url = os.path.join(folder_path, new_name)
+            file_url = item_path
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
             logger.info(f'\033[92m{file_url}添加完成\033[0m')
             # 在处理完的文件夹中创建"kimoji"文件
-            kimoji_path = os.path.join(item_path, "kimoji")
+            kimoji_path = os.path.join(item_path, "KIMOJI")
             open(kimoji_path, 'w').close()
         else:
             logger.error(f"文件夹 {item_path} 不符合处理条件")
@@ -429,14 +429,11 @@ def extract_info_from_folder(folder_path):
                 "x.265": "PLACEHOLDER_X_265",
                 "x.264": "PLACEHOLDER_X_264"
             }
-
             # 首先处理特定的音频编码字符
             for encoding, placeholder in encoding_placeholder_map.items():
                 new_name = new_name.replace(encoding, placeholder)
-
             # 处理upload_name
             upload_name = new_name.replace('.', ' ')
-
             # 处理特殊情况，例如 "5.1" 和 "7.1"
             placeholder_map = {
                 "5 10": "PLACEHOLDER_5_10",
@@ -444,14 +441,11 @@ def extract_info_from_folder(folder_path):
             }
             for original, placeholder in placeholder_map.items():
                 upload_name = upload_name.replace(original, placeholder)
-
             upload_name = re.sub(r'(?<=5) 1', '.1', upload_name)
             upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
-
             # 将占位符转换回来
             for placeholder, original in placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, original)
-
             # 将音频编码占位符转换回来
             for placeholder, encoding in encoding_placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, encoding)
