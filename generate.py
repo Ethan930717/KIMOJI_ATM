@@ -419,9 +419,24 @@ def extract_info_from_folder(folder_path):
                 status = 0
             # 构建新名称，并替换空格为点
             new_name = folder_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
-            new_name = re.sub(r'\.{2,}', '.', new_name) #处理两个点的情况
+            new_name = re.sub(r'\.{2,}', '.', new_name)  # 处理两个点的情况
+
+            # 添加音频编码占位符映射
+            encoding_placeholder_map = {
+                "H.265": "PLACEHOLDER_H_265",
+                "H.264": "PLACEHOLDER_H_264",
+                "H.266": "PLACEHOLDER_H_266",
+                "x.265": "PLACEHOLDER_X_265",
+                "x.264": "PLACEHOLDER_X_264"
+            }
+
+            # 首先处理特定的音频编码字符
+            for encoding, placeholder in encoding_placeholder_map.items():
+                new_name = new_name.replace(encoding, placeholder)
+
             # 处理upload_name
             upload_name = new_name.replace('.', ' ')
+
             # 处理特殊情况，例如 "5.1" 和 "7.1"
             placeholder_map = {
                 "5 10": "PLACEHOLDER_5_10",
@@ -437,6 +452,9 @@ def extract_info_from_folder(folder_path):
             for placeholder, original in placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, original)
 
+            # 将音频编码占位符转换回来
+            for placeholder, encoding in encoding_placeholder_map.items():
+                upload_name = upload_name.replace(placeholder, encoding)
             if "-" in new_name:
                 maker_candidate = new_name.split('-')[-1]
                 if "@" in maker_candidate:
