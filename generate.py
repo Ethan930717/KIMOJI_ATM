@@ -314,7 +314,7 @@ def generate(folder_path):
             write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
             logger.info(f'\033[92m{file_url}添加完成\033[0m')
             # 在处理完的文件夹中创建"kimoji"文件
-            kimoji_path = os.path.join(item_path, "KIMOJI")
+            kimoji_path = os.path.join(item_path, "kimoji_pass")
             open(kimoji_path, 'w').close()
         else:
             logger.error(f"文件夹 {item_path} 不符合处理条件")
