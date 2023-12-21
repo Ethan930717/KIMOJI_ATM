@@ -15,6 +15,8 @@ import requests
 import qbittorrentapi
 import transmission_rpc
 import json
+import shlex
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

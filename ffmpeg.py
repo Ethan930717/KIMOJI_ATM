@@ -5,6 +5,7 @@ import logging
 import glob
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
+import shlex
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -86,10 +87,8 @@ def upload_to_chevereto(image_path,i):
     return None
 
 def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
-    video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
-    video_file = os.path.basename(largest_video_file)  # 获取视频文件名
-    video_dir = video_dir.replace(' ', '\\ ').replace('&', '\\&')
-    video_file = video_file.replace(' ', '\\ ').replace('&', '\\&')
+    video_dir = shlex.quote(os.path.dirname(largest_video_file))
+    video_file = shlex.quote(os.path.basename(largest_video_file))
 
     duration = get_video_duration(largest_video_file)
     logger.info('开始截图')
