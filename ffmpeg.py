@@ -111,7 +111,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
         screenshot_name = f"{i}.{image_format}"
         screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
-
+        logger.info(f"开始截图，视频目录{video_dir}{video_file}")
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
             "-v", f"{video_dir}:/workspace",
