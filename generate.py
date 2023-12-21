@@ -192,6 +192,8 @@ def determine_category_and_child(genres, soup, content_type):
     certifications = soup.find('span', class_='certification').get_text() if soup.find('span', class_='certification') else ""
     child = 1 if any(c in certifications for c in ['TV-Y', 'TV-G']) or any(c == 'G' for c in certifications) or any(
         "/genre/10762-" in genre for genre in genres) else 0
+    if "PG13" in certifications:
+        child = 0
 
     return category_id, child
 def get_title_from_web(id, content_type, language):
@@ -434,31 +436,29 @@ def extract_info_from_folder(folder_path):
                 status = -2
             else:
                 status = 0
-            # 预定义的占位符映射
-            combined_placeholder_map = {
-                "H.265": "PLACEHOLDER_H_265",
+            # 添加 H.264 和 H.265 的处理
+            encoding_placeholder_map = {
                 "H.264": "PLACEHOLDER_H_264",
-                "H.266": "PLACEHOLDER_H_266",
-                "x.265": "PLACEHOLDER_X_265",
-                "x.264": "PLACEHOLDER_X_264",
-                "5.1": "PLACEHOLDER_5_1",
-                "7.1": "PLACEHOLDER_7_1"
+                "H.265": "PLACEHOLDER_H_265",
             }
+            # 首先处理 H.264 和 H.265
+            for encoding, placeholder in encoding_placeholder_map.items():
+                new_name = folder_name.replace(encoding, placeholder)
+            new_name_no_dots = new_name.replace('.', ' ')
+            placeholder_map = {
+                "5 10": "PLACEHOLDER_5_10",
+                "7 10": "PLACEHOLDER_7_10",
 
-            # 替换特殊字符并处理重复的点
-            new_name = folder_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
-            new_name = re.sub(r'\.{2,}', '.', new_name)
-
-            # 应用占位符
-            for original, placeholder in combined_placeholder_map.items():
-                new_name = new_name.replace(original, placeholder)
-
-            # 处理 upload_name
-            upload_name = new_name.replace('.', ' ')
-
-            # 将占位符转换回原始字符串
-            for placeholder, original in combined_placeholder_map.items():
+            }
+            for original, placeholder in placeholder_map.items():
+                folder_name_no_dots = folder_name_no_dots.replace(original, placeholder)
+            upload_name = re.sub(r'(?<=5) 1', '.1', new_name_no_dots)
+            upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
+            # 还原占位符
+            for original, placeholder in placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, original)
+            for encoding, placeholder in encoding_placeholder_map.items():
+                upload_name = upload_name.replace(placeholder, encoding)
 
             if "-" in new_name:
                 maker_candidate = new_name.split('-')[-1]
