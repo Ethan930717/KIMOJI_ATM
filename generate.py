@@ -408,7 +408,10 @@ def extract_info_from_folder(folder_path):
                 season_onlynum = season
         elif selected_type == 'tv':
             match_season = re.search(r'S(\d{2})\.', folder_name)
-            season = match_season.group(1)
+            if match_season is not None:
+                season = match_season.group(1)
+            else:
+                season = 1 
             if not season:
                 logger.info('正在确认剧集季数信息')
                 seasons = tv.details(selected_result.id).number_of_seasons
