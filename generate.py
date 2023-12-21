@@ -55,6 +55,10 @@ def is_video_file(filename):
     return filename.endswith(('.mp4', '.mkv', '.avi', '.mov'))
 
 def find_largest_video_file(folder_path):
+    # 检查是否传入的路径实际上是一个文件
+    if os.path.isfile(folder_path) and is_video_file(folder_path):
+        return folder_path
+
     largest_size = 0
     video_file = None
     for file in os.listdir(folder_path):
@@ -65,7 +69,6 @@ def find_largest_video_file(folder_path):
                 largest_size = size
                 video_file = file_path
     return video_file
-
 def should_skip_folder(folder_path):
     return any(os.path.exists(os.path.join(folder_path, skip_file)) for skip_file in ["kimoji_pass", "kimoji_enclude"])
 
