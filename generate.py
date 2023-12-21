@@ -18,6 +18,8 @@ movie = Movie()
 tv = TV()
 
 #模糊搜索逻辑
+import re
+
 def preprocess_name_for_search(folder_name):
     # 移除一些常见的无关词汇或符号
     remove_words = ['4k', '2160p', '1080p', '1080i', '720p', 'x264', 'x265', 'HDTV', 'BluRay', 'WEB-DL']
@@ -27,10 +29,14 @@ def preprocess_name_for_search(folder_name):
     # 替换一些常见符号
     folder_name = folder_name.replace('.', ' ').replace('-', ' ').replace('_', ' ').replace('·', ' ')
 
-    # 检查中文名称
+    # 提取中文名称
     match_chinese = re.search(r'([\u4e00-\u9fff]+)', folder_name)
     if match_chinese:
         chinese_title = match_chinese.group(1)
+
+        # 忽略含有“第X季”的部分
+        chinese_title = re.sub(r'第[一二三四五六七八九1-9]季', '', chinese_title)
+
         # 如果中文名称后有数字，去除数字
         chinese_title = re.sub(r'\d+$', '', chinese_title)
         return chinese_title.strip()
@@ -297,27 +303,35 @@ def get_type_id(new_name):
         type_id = '未知'
     return type_id
 
+def read_first_column_from_csv(csv_file):
+    with open(csv_file, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        return [row[0] for row in reader]
+
 def generate(folder_path):
     current_directory = os.path.dirname(os.path.realpath(__file__))
     log_directory = os.path.join(current_directory, 'log')
+    log_file = os.path.join(log_directory, 'logfile.csv')
+    processed_folders = set()
+    if os.path.isfile(log_file):
+        processed_folders = set(read_first_column_from_csv(log_file))
     if not os.path.isdir(log_directory):
         os.mkdir(log_directory)
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
-        if os.path.isdir(item_path) and not should_skip_folder(item_path) and "KIMOJI" not in item:
-            logger.info(f"\033[91m处理文件夹: {item_path}\033[0m")
-            new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status = extract_info_from_folder(item_path)
-            if status == "分辨率异常" or status == "视频异常":
-                logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
-                continue
-            file_url = item_path
-            write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
-            logger.info(f'\033[92m{file_url}添加完成\033[0m')
-            # 在处理完的文件夹中创建"kimoji"文件
-            kimoji_path = os.path.join(item_path, "kimoji_pass")
-            open(kimoji_path, 'w').close()
-        else:
-            logger.error(f"文件夹 {item_path} 不符合处理条件")
+        if item_path in processed_folders:
+            continue
+        logger.info(f"\033[91m处理文件夹: {item_path}\033[0m")
+        new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status = extract_info_from_folder(item_path)
+        if status == "分辨率异常" or status == "视频异常":
+            logger.warning("当前视频资源分辨率过低或视频异常，不符合发种要求")
+            continue
+        file_url = item_path
+        write_to_log(log_directory, [file_url, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status])
+        logger.info(f'\033[92m{file_url}添加完成\033[0m')
+
+    else:
+        logger.error(f"文件夹 {item_path} 不符合处理条件")
     # 更新folders列表，排除包含"kimoji"的文件夹
     folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f)) and not os.path.exists(os.path.join(folder_path, f, "kimoji"))]
     if not folders:
@@ -417,9 +431,7 @@ def extract_info_from_folder(folder_path):
                 status = -2
             else:
                 status = 0
-            # 构建新名称，并替换空格为点
-            new_name = folder_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
-            new_name = re.sub(r'\.{2,}', '.', new_name)  # 处理两个点的情况
+            # 预定义的占位符映射
             combined_placeholder_map = {
                 "H.265": "PLACEHOLDER_H_265",
                 "H.264": "PLACEHOLDER_H_264",
@@ -430,12 +442,18 @@ def extract_info_from_folder(folder_path):
                 "7.1": "PLACEHOLDER_7_1"
             }
 
-            # 首先处理所有特殊字符
+            # 替换特殊字符并处理重复的点
+            new_name = folder_name.replace(' ', '.').replace(':', '').replace('/', '.').strip('.')
+            new_name = re.sub(r'\.{2,}', '.', new_name)
+
+            # 应用占位符
             for original, placeholder in combined_placeholder_map.items():
                 new_name = new_name.replace(original, placeholder)
-            # 处理upload_name
+
+            # 处理 upload_name
             upload_name = new_name.replace('.', ' ')
-            # 将占位符转换回来
+
+            # 将占位符转换回原始字符串
             for placeholder, original in combined_placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, original)
 
