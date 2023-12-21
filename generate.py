@@ -82,18 +82,18 @@ def find_video_folders(base_path):
                 folders.append(folder_path)
     return folders
 
-def format_resolution(height, scan_type):
-    if height == 1080:
-        return '1080p' if scan_type == 'P' else '1080i'
-    elif height == 720:
+def format_resolution(height, scan_type='P'):
+    # 判断分辨率
+    if height <= 900 and height >= 720:
         return '720p'
-    elif height == 2160:
+    elif height <= 1620:
+        return '1080p' if scan_type == 'P' else '1080i'
+    elif height <= 3240:
         return '2160p'
-    elif height == 4320:
+    elif height >= 3240:
         return '4320p'
     else:
-        return f"{height}p"
-
+        return 'None'
 def get_media_info(file_path):
     # 设置默认返回值
     default_return = (None, None, None, None, False, 1 )
