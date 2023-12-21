@@ -300,7 +300,7 @@ def get_type_id(new_name):
     elif 'HDTV' in new_name_upper:
         type_id = '6'
     else:
-        type_id = '未知'
+        type_id = '4'
     return type_id
 
 def read_first_column_from_csv(csv_file):
