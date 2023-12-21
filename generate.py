@@ -436,23 +436,22 @@ def extract_info_from_folder(folder_path):
                 status = -2
             else:
                 status = 0
-            # 添加 H.264 和 H.265 的处理
+
             encoding_placeholder_map = {
                 "H.264": "PLACEHOLDER_H_264",
                 "H.265": "PLACEHOLDER_H_265",
             }
             # 首先处理 H.264 和 H.265
             for encoding, placeholder in encoding_placeholder_map.items():
-                new_name = folder_name.replace(encoding, placeholder)
-            new_name_no_dots = new_name.replace('.', ' ')
+                folder_name = folder_name.replace(encoding, placeholder)
+            folder_name_no_dots = folder_name.replace('.', ' ')
             placeholder_map = {
                 "5 10": "PLACEHOLDER_5_10",
                 "7 10": "PLACEHOLDER_7_10",
-
             }
             for original, placeholder in placeholder_map.items():
                 folder_name_no_dots = folder_name_no_dots.replace(original, placeholder)
-            upload_name = re.sub(r'(?<=5) 1', '.1', new_name_no_dots)
+            upload_name = re.sub(r'(?<=5) 1', '.1', folder_name_no_dots)
             upload_name = re.sub(r'(?<=7) 1', '.1', upload_name)
             # 还原占位符
             for original, placeholder in placeholder_map.items():
@@ -460,22 +459,22 @@ def extract_info_from_folder(folder_path):
             for encoding, placeholder in encoding_placeholder_map.items():
                 upload_name = upload_name.replace(placeholder, encoding)
 
-            if "-" in new_name:
-                maker_candidate = new_name.split('-')[-1]
+            if "-" in folder_name:
+                maker_candidate = folder_name.split('-')[-1]
                 if "@" in maker_candidate:
                     maker = maker_candidate.split('@')[-1]
                 elif re.match(r'^[A-Za-z0-9_]+$', maker_candidate):
                     maker = maker_candidate
                 else:
-                    maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                    maker_input = input(f'{folder_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
                     maker = maker_input.strip() if maker_input.strip() != '' else None
             else:
-                maker_input = input(f'{new_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
+                maker_input = input(f'{folder_name}\n在文件名中无法获取到制作组信息，请手动输入，确认留空请回车: ')
                 maker = maker_input.strip() if maker_input.strip() != '' else None
             tmdb_id = selected_result.id
             is_tv_show = selected_type == 'tv'
-            type_id = get_type_id(new_name)
-            return new_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
+            type_id = get_type_id(folder_name)
+            return folder_name, tmdb_id, category_id, child, season_onlynum, resolution, type_id, maker, upload_name, status
         else:
             logger.error("未找到有效的视频文件。")
             return None, None, None, None, None, None, None, None, None, None
