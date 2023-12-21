@@ -5,7 +5,6 @@ import logging
 import glob
 from PIL import Image
 from utils.tools.bdinfo import find_iso_in_directory
-import shlex
 logger = logging.getLogger(__name__)
 current_file_path = os.path.abspath(__file__)
 project_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
@@ -87,8 +86,10 @@ def upload_to_chevereto(image_path,i):
     return None
 
 def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
-    video_dir = shlex.quote(os.path.dirname(largest_video_file))
-    video_file = shlex.quote(os.path.basename(largest_video_file))
+    video_dir = os.path.dirname(largest_video_file)  # 获取视频文件所在的目录
+    video_file = os.path.basename(largest_video_file)  # 获取视频文件名
+    video_dir = video_dir.replace(' ', '\\ ').replace('&', '\\&')
+    video_file = video_file.replace(' ', '\\ ').replace('&', '\\&')
 
     duration = get_video_duration(largest_video_file)
     logger.info('开始截图')
@@ -111,7 +112,7 @@ def screenshot_from_video(largest_video_file,log_dir,image_format='jpg'):
         screenshot_name = f"{i}.{image_format}"
         screenshot_path = os.path.join(log_dir, screenshot_name)
         screenshot_keep = "00:00:01"
-        logger.info(f"开始截图，视频目录{video_dir}{video_file}")
+
         command = [
             "docker", "run","--rm","--name","kimoji-ffmpeg",
             "-v", f"{video_dir}:/workspace",
