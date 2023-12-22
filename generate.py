@@ -176,18 +176,10 @@ def get_details_from_tmdb(id, content_type):
         return '未知', None, None
 
 def determine_category_and_child(genres, soup, content_type):
-    # 检查 genres 中的数字是否符合特定条件
-    if any("/genre/16-" in genre for genre in genres):
-        category_id = 3 if content_type == 'movie' else 4
-    elif any("/genre/99-" in genre for genre in genres) and content_type == 'tv':
-        category_id = 6
-    elif any("/genre/10764-" in genre or "/genre/10767-" in genre for genre in genres) and content_type == 'tv':
-        category_id = 5
-    elif content_type == 'tv':
+    if content_type == 'tv':
         category_id = 2
     else:
         category_id = 1
-
     # 确定 child
     certifications = soup.find('span', class_='certification').get_text() if soup.find('span', class_='certification') else ""
     child = 1 if any(c in certifications for c in ['TV-Y', 'TV-G']) or any(c == 'G' for c in certifications) or any(
