@@ -26,11 +26,11 @@ def preprocess_name_for_search(folder_name):
     for word in remove_words:
         folder_name = folder_name.replace(word, '')
 
-    # 替换一些常见符号
-    folder_name = folder_name.replace('.', ' ').replace('-', ' ').replace('_', ' ').replace('·', ' ')
+    # 替换一些常见符号，但保留冒号和中点
+    folder_name = folder_name.replace('.', ' ').replace('-', ' ').replace('_', ' ')
 
-    # 提取中文名称
-    match_chinese = re.search(r'([\u4e00-\u9fff]+)', folder_name)
+    # 提取中文名称，保留冒号和中点
+    match_chinese = re.search(r'([\u4e00-\u9fff:·]+)', folder_name)
     if match_chinese:
         chinese_title = match_chinese.group(1)
 
