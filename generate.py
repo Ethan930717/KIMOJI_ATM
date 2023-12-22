@@ -96,7 +96,7 @@ def format_resolution(height, scan_type='P'):
         return 'None'
 def get_media_info(file_path):
     # 设置默认返回值
-    default_return = (None, None, None, None, False, 1 )
+    default_return = (None, None, None, None, False, 1)
 
     media_info = MediaInfo.parse(file_path)
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
@@ -109,7 +109,7 @@ def get_media_info(file_path):
     video_track = video_tracks[0]
 
     # 检查视频分辨率
-    if video_track.height < 720:
+    if not video_track.height or video_track.height < 720:
         return default_return + ("分辨率异常",)
 
     audio_track = audio_tracks[0] if audio_tracks else None
@@ -118,10 +118,10 @@ def get_media_info(file_path):
     # 检测视频编码器
     video_codec = video_track.format
     is_encode = False
-    if 'x265' in video_track.format_info:
+    if video_track.format_info and 'x265' in video_track.format_info:
         video_codec = 'x265'
         is_encode = True
-    elif 'x264' in video_track.format_info:
+    elif video_track.format_info and 'x264' in video_track.format_info:
         video_codec = 'x264'
         is_encode = True
     elif video_codec == 'AVC':
@@ -135,9 +135,9 @@ def get_media_info(file_path):
 
     # 其他属性，如HDR等
     additional_attrs = []
-    if 'HDR' in video_track.format_profile:
+    if video_track.format_profile and 'HDR' in video_track.format_profile:
         additional_attrs.append('HDR')
-    if 'Dolby Vision' in video_track.format_profile:
+    if video_track.format_profile and 'Dolby Vision' in video_track.format_profile:
         additional_attrs.append('DV')
     if video_track.bit_depth:
         bit_depth = video_track.bit_depth
