@@ -155,11 +155,11 @@ def get_details_from_tmdb(id, content_type):
 def determine_category_and_child(genres, soup, content_type):
     # 检查 genres 中的数字是否符合特定条件
     if any("/genre/16-" in genre for genre in genres):
-        category_id = 3 if content_type == 'movie' else 4
+        category_id = 1 if content_type == 'movie' else 2
     elif any("/genre/99-" in genre for genre in genres) and content_type == 'tv':
-        category_id = 6
+        category_id = 2
     elif any("/genre/10764-" in genre or "/genre/10767-" in genre for genre in genres) and content_type == 'tv':
-        category_id = 5
+        category_id = 2
     elif content_type == 'tv':
         category_id = 2
     else:
