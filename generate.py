@@ -316,6 +316,9 @@ def generate(folder_path):
         os.mkdir(log_directory)
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
+        # 检查当前项是否为目录，如果不是，则跳过
+        if not os.path.isdir(item_path):
+            continue
         if item_path in processed_folders:
             continue
         logger.info(f"\033[91m处理文件夹: {item_path}\033[0m")
