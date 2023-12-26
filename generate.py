@@ -475,10 +475,12 @@ def get_type_id(new_name):
             type_id = '5'
         else:
             type_id = '2'
+    elif  'X264' in new_name_upper or 'X265' in new_name_upper:
+        type_id = '5'
     elif 'HDTV' in new_name_upper:
         type_id = '6'
     else:
-        type_id = '未知'
+        type_id = '4'
     return type_id
 
 def generate(folder_path):
