@@ -96,10 +96,11 @@ def get_media_info(file_path):
     # 检测视频编码器
     video_codec = video_track.format
     is_encode = False
-    if 'x265' in video_track.format_info:
+    writing_library = getattr(video_track, 'writing_library', '').lower()
+    if 'x265' in writing_library:
         video_codec = 'x265'
         is_encode = True
-    elif 'x264' in video_track.format_info:
+    elif 'x264' in writing_library:
         video_codec = 'x264'
         is_encode = True
     elif video_codec == 'AVC':
