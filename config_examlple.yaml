@@ -1,23 +1,23 @@
-basic: 
-  file_dir: '/media' #本地存放资源的路径
-  torrent_dir: '/torrent' #指定一个存放种子的路径，需保证路径存在该文件夹
-  username: 'admin' #kimoji账号
-  password: 'password' #kimoji密码
-  agent: 'qb' #选择做种下载器，qb或tr，只能选择一个
-  pic_num: 6 #选择发种时的截图数量
-  internal: 0 #KIMOJI官组专用，请保持0
-  personal: 0 #是否为个人作品，即自己抓流、压制、剪辑的作品，不属于任何工作组
+basic:
+  file_dir: '/Users/Ethan/Desktop/media' #存放资源的主目录路径
+  torrent_dir: '/Users/Ethan/Desktop/media' #存放种子文件的路径
+  apikey: ''
+  agent: 'qb'  #选择做种下载器，qb或tr，只能选择一个
+  sticky: 0  #是否置顶，转载请默认0
+  stream: 0  #是否不当，转载请默认0
+  featured: 0 #是否精选，转载请默认0
+  doubleup: 0 #是否双倍上传，转载请默认0
 
-####qb和tr选择性配置一个即可，记得在agent做好指定###
+
 qbittorrent:
   url: '192.168.5.1' #qb路径
-  port: '8080'      #qb端口
-  username: 'admin'   #登陆账号
-  password: 'adminadmin'  #登陆密码
-  save_path: '/download'  #qb保存路径
+  port: '48081'      #qb端口
+  username: 'hudan717' #登陆账号
+  password: '453040'   #密码
+  save_path: '/downlaod'   #qb保存路径
 transmission:
-  address: '192.168.5.1' #tr路径
-  port: '9091'      #tr端口
-  username: 'admin' #登陆账号
-  password: 'password'   #密码
-  save_path: '/download'   #tr保存路径
+  address: '192.168.5.1' #qb路径
+  port: '39091'      #qb端口
+  username: 'hudan717' #登陆账号
+  password: '453040'   #密码
+  save_path: '/downlaod/movie'   #qb保存路径

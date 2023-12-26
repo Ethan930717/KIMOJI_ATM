@@ -10,5 +10,3 @@ torf
 progress
 qbittorrent-api
 transmission-rpc
-lxml
-selenium

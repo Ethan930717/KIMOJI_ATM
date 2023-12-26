@@ -76,6 +76,7 @@ def get_media_info(file_path):
     default_return = (None, None, None, None, False, 1 )
 
     media_info = MediaInfo.parse(file_path)
+    print(f'mediainfo解析结果：{media_info}')
     video_tracks = [track for track in media_info.tracks if track.track_type == 'Video']
     audio_tracks = [track for track in media_info.tracks if track.track_type == 'Audio']
 
